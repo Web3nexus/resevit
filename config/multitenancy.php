@@ -1,17 +1,11 @@
 <?php
 
-use Spatie\Multitenancy\Jobs\TenantAware;
-use Illuminate\Broadcasting\BroadcastEvent;
-use Illuminate\Events\CallQueuedListener;
-use Illuminate\Mail\SendQueuedMailable;
-use Spatie\Multitenancy\Jobs\NotTenantAware;
-use Illuminate\Notifications\SendQueuedNotifications;
-use Illuminate\Queue\CallQueuedClosure;
+use App\Models\Tenant;
 use Spatie\Multitenancy\Actions\ForgetCurrentTenantAction;
 use Spatie\Multitenancy\Actions\MakeQueueTenantAwareAction;
 use Spatie\Multitenancy\Actions\MakeTenantCurrentAction;
 use Spatie\Multitenancy\Actions\MigrateTenantAction;
-use Spatie\Multitenancy\Models\Tenant;
+use Spatie\Multitenancy\TenantFinder\DomainTenantFinder;
 
 return [
     /*
@@ -21,13 +15,14 @@ return [
      * This class should extend `Spatie\Multitenancy\TenantFinder\TenantFinder`
      *
      */
-    'tenant_finder' => null,
+    'tenant_finder' => DomainTenantFinder::class,
 
     /*
      * These fields are used by tenant:artisan command to match one or more tenant.
      */
     'tenant_artisan_search_fields' => [
         'id',
+        'slug',
     ],
 
     /*
@@ -36,16 +31,13 @@ return [
      * A valid task is any class that implements Spatie\Multitenancy\Tasks\SwitchTenantTask
      */
     'switch_tenant_tasks' => [
-        // \Spatie\Multitenancy\Tasks\PrefixCacheTask::class,
-        // \Spatie\Multitenancy\Tasks\SwitchTenantDatabaseTask::class,
-        // \Spatie\Multitenancy\Tasks\SwitchRouteCacheTask::class,
+        \Spatie\Multitenancy\Tasks\SwitchTenantDatabaseTask::class,
     ],
 
     /*
      * This class is the model used for storing configuration on tenants.
      *
-     * It must  extend `Spatie\Multitenancy\Models\Tenant::class` or
-     * implement `Spatie\Multitenancy\Contracts\IsTenant::class` interface
+     * It must extend `Spatie\Multitenancy\Models\Tenant`.
      */
     'tenant_model' => Tenant::class,
 
@@ -61,12 +53,12 @@ return [
      *
      * Set to `null` to use the default connection.
      */
-    'tenant_database_connection_name' => null,
+    'tenant_database_connection_name' => 'tenant',
 
     /*
      * The connection name to reach the landlord database.
      */
-    'landlord_database_connection_name' => null,
+    'landlord_database_connection_name' => 'landlord',
 
     /*
      * This key will be used to associate the current tenant in the context
@@ -102,34 +94,10 @@ return [
      * resolve JobDecorator to getAction() like so: JobDecorator::class => 'getAction'
      */
     'queueable_to_job' => [
-        SendQueuedMailable::class => 'mailable',
-        SendQueuedNotifications::class => 'notification',
-        CallQueuedClosure::class => 'closure',
-        CallQueuedListener::class => 'class',
-        BroadcastEvent::class => 'event',
-    ],
-
-    /*
-    * Interface that once implemented, will make the job tenant aware
-    */
-    'tenant_aware_interface' => TenantAware::class,
-
-    /*
-     * Interface that once implemented, will make the job not tenant aware
-     */
-    'not_tenant_aware_interface' => NotTenantAware::class,
-
-    /*
-     * Jobs tenant aware even if these don't implement the TenantAware interface.
-     */
-    'tenant_aware_jobs' => [
-        // ...
-    ],
-
-    /*
-     * Jobs not tenant aware even if these don't implement the NotTenantAware interface.
-     */
-    'not_tenant_aware_jobs' => [
-        // ...
+        'Illuminate\Queue\CallQueuedClosure' => 'closure',
+        'Illuminate\Mail\SendQueuedMailable' => 'mailable',
+        'Illuminate\Events\CallQueuedListener' => 'class',
+        'Illuminate\Broadcasting\BroadcastEvent' => 'event',
+        'Illuminate\Notifications\SendQueuedNotifications' => 'notification',
     ],
 ];
