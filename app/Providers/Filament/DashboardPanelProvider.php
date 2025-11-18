@@ -51,11 +51,13 @@ class DashboardPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                NeedsTenant::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->tenant(\App\Models\Tenant::class);
+            ->tenant(\App\Models\Tenant::class)
+            ->tenantMiddleware([
+                NeedsTenant::class,
+            ]);
     }
 }

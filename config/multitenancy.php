@@ -17,6 +17,10 @@ return [
      */
     'tenant_finder' => DomainTenantFinder::class,
 
+    'central_domains' => [
+        'resevit.test',
+    ],
+
     /*
      * These fields are used by tenant:artisan command to match one or more tenant.
      */
