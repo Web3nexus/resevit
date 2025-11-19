@@ -19,4 +19,9 @@ class Tenant extends SpatieTenant
     {
         return $this->belongsTo(User::class, 'owner_user_id');
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }
