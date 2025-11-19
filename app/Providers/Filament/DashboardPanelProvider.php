@@ -56,8 +56,8 @@ class DashboardPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->tenant(\App\Models\Tenant::class)
-            ->tenantMiddleware([
-                NeedsTenant::class,
-            ]);
+            ->middleware([
+                'tenant'
+            ], isGlobal: false);
     }
 }
