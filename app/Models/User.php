@@ -6,11 +6,15 @@ namespace App\Models;
 use Filament\Panel;
 use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasTenants;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Collection;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, HasTenants
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
@@ -53,5 +57,20 @@ class User extends Authenticatable implements FilamentUser
     {
         // return str_ends_with($this->email, '@yourdomain.com') && $this->hasVerifiedEmail();
         return true;
+    }
+
+    public function getTenants(Panel $panel): Collection
+    {
+        return $this->tenants;
+    }
+
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(Tenant::class);
+    }
+
+    public function canAccessTenant(Model $tenant): bool
+    {
+        return $this->tenants->contains($tenant);
     }
 }

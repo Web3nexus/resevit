@@ -57,7 +57,8 @@ class DashboardPanelProvider extends PanelProvider
             ])
             ->tenant(\App\Models\Tenant::class)
             ->tenantMiddleware([
-                NeedsTenant::class,
+                \Spatie\Multitenancy\Http\Middleware\NeedsTenant::class,
+                \Spatie\Multitenancy\Http\Middleware\EnsureValidTenantSession::class,
             ]);
     }
 }

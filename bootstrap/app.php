@@ -11,13 +11,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [
-            \Spatie\Multitenancy\Http\Middleware\PreventAccessFromCentralDomains::class,
-        ]);
-
-        $middleware->alias([
-            'tenant' => \Spatie\Multitenancy\Http\Middleware\NeedsTenant::class,
-        ]);
+        //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
