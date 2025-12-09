@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="px-6 py-6 sm:px-8">
         <h2 class="mb-1 text-2xl font-bold text-gray-900">Create Account</h2>
-        <p class="mb-6 text-sm text-gray-600">Register your business to get started</p>
+        <p class="mb-6 text-sm text-gray-600">Register to get started</p>
 
         @if($errors->any())
             <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -11,13 +11,13 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('register') }}" class="space-y-4">
+        <form method="POST" action="{{ route('register') }}" class="space-y-4" x-data="{ role: '{{ old('role', 'business_owner') }}' }">
             @csrf
 
             <!-- Personal Information -->
             <div class="border-b pb-4 mb-4">
                 <h3 class="text-sm font-semibold text-gray-900 mb-4">Personal Information</h3>
-                
+
                 <div>
                     <x-input-label for="name">Full Name</x-input-label>
                     <x-text-input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus autocomplete="name" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
@@ -29,42 +29,39 @@
                     <x-text-input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="email" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
                     <x-input-error :messages="$errors->get('email')" />
                 </div>
-
-                <div class="mt-4">
-                    <x-input-label for="phone">Phone Number</x-input-label>
-                    <x-text-input id="phone" name="phone" type="tel" value="{{ old('phone') }}" autocomplete="tel" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
-                    <x-input-error :messages="$errors->get('phone')" />
-                </div>
             </div>
 
-            <!-- Business Information -->
+            <!-- Role Selection -->
             <div class="border-b pb-4 mb-4">
-                <h3 class="text-sm font-semibold text-gray-900 mb-4">Business Information</h3>
-                
+                 <h3 class="text-sm font-semibold text-gray-900 mb-4">Account Type</h3>
                 <div>
-                    <x-input-label for="business_name">Business Name</x-input-label>
-                    <x-text-input id="business_name" name="business_name" type="text" value="{{ old('business_name') }}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
-                    <x-input-error :messages="$errors->get('business_name')" />
-                </div>
-
-                <div class="mt-4">
-                    <x-input-label for="business_slug">Business Slug (URL-friendly name)</x-input-label>
-                    <x-text-input id="business_slug" name="business_slug" type="text" value="{{ old('business_slug') }}" required placeholder="e.g., my-restaurant" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
-                    <x-input-error :messages="$errors->get('business_slug')" />
-                    <p class="mt-1 text-xs text-gray-500">Use lowercase letters, numbers, and hyphens only</p>
-                </div>
-
-                <div class="mt-4">
-                    <x-input-label for="domain">Domain</x-input-label>
-                    <x-text-input id="domain" name="domain" type="text" value="{{ old('domain') }}" required placeholder="e.g., mybusiness.local" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
-                    <x-input-error :messages="$errors->get('domain')" />
+                    <x-input-label for="role">Register as</x-input-label>
+                    <select id="role" name="role" x-model="role" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md bg-white focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="business_owner">Business Owner</option>
+                        <option value="investor">Investor</option>
+                        <option value="customer">Customer</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                    <x-input-error :messages="$errors->get('role')" />
                 </div>
             </div>
+
+
+            <!-- Business Information (Conditional) -->
+            <div class="border-b pb-4 mb-4" x-show="role === 'business_owner'" style="display: none;">
+                <h3 class="text-sm font-semibold text-gray-900 mb-4">Business Information</h3>
+                <div>
+                    <x-input-label for="restaurant_name">Restaurant Name</x-input-label>
+                    <x-text-input id="restaurant_name" name="restaurant_name" type="text" :value="old('restaurant_name')" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
+                    <x-input-error :messages="$errors->get('restaurant_name')" />
+                </div>
+            </div>
+
 
             <!-- Security -->
             <div>
                 <h3 class="text-sm font-semibold text-gray-900 mb-4">Security</h3>
-                
+
                 <div>
                     <x-input-label for="password">Password</x-input-label>
                     <x-text-input id="password" name="password" type="password" required autocomplete="new-password" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />

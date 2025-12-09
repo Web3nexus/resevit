@@ -12,40 +12,12 @@ class TenantRolesSeeder extends Seeder
      */
     public function run(): void
     {
-        // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-
-        $this->createTenantRoles([
-            'business_owner',
-            'manager',
-            'accountant',
-            'staff',
-            'waiter',
-            'cashier',
-        ]);
-    }
-
-    /**
-     * Create a single tenant role.
-     */
-    private function createTenantRole(string $name): void
-    {
-        Role::firstOrCreate(
-            ['name' => $name, 'guard_name' => 'web']
-        );
-
-        $this->command->info("Tenant role '{$name}' created or already exists.");
-    }
-
-    /**
-     * Create multiple tenant roles at once.
-     *
-     * @param array<string> $roles
-     */
-    private function createTenantRoles(array $roles): void
-    {
-        foreach ($roles as $role) {
-            $this->createTenantRole($role);
-        }
+        // Tenant roles
+        Role::create(['name' => 'business_owner', 'guard_name' => 'web']);
+        Role::create(['name' => 'manager', 'guard_name' => 'web']);
+        Role::create(['name' => 'accountant', 'guard_name' => 'web']);
+        Role::create(['name' => 'staff', 'guard_name' => 'web']);
+        Role::create(['name' => 'waiter', 'guard_name' => 'web']);
+        Role::create(['name' => 'cashier', 'guard_name' => 'web']);
     }
 }

@@ -3,20 +3,36 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements FilamentUser, HasTenants
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
+
+    /**
+     * Relation: a user may own many tenants (business owners).
+     */
+    public function tenants()
+    {
+        return $this->hasMany(Tenant::class, 'owner_user_id');
+    }
+
+    /**
+     * Filament (and other packages) sometimes call getTenants() on the user.
+     * Provide a compatibility method that returns the tenant collection.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getTenants()
+    {
+        return $this->tenants()->get();
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -52,47 +68,9 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         ];
     }
 
-    /**
-     * Relation: a user may own many tenants (business owners).
-     */
-    public function ownedTenants()
-    {
-        return $this->hasMany(Tenant::class, 'owner_user_id');
-    }
-
-    /**
-     * Relation: a user may be a member of many tenants.
-     */
-    public function tenants()
-    {
-        return $this->belongsToMany(Tenant::class);
-    }
-
-    /**
-     * Get the tenants that the user has access to.
-     */
-    public function getTenants(Panel $panel): Collection
-    {
-        return $this->tenants;
-    }
-
-    /**
-     * Check if the user can access the given tenant.
-     */
-    public function canAccessTenant(Model $tenant): bool
-    {
-        return $this->tenants->contains($tenant);
-    }
-
-
     public function canAccessPanel(Panel $panel): bool
     {
-        return match ($panel->getId()) {
-            'securegate' => $this->hasRole('super-admin'),
-            'dashboard' => $this->hasRole('business-owner'),
-            'invest' => $this->hasRole('investor'),
-            'customer' => $this->hasRole('customer'),
-            default => false,
-        };
+        // return str_ends_with($this->email, '@yourdomain.com') && $this->hasVerifiedEmail();
+        return true;
     }
 }

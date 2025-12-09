@@ -12,12 +12,8 @@ class RolesSeeder extends Seeder
      */
     public function run(): void
     {
-        // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-
         // Global roles for Super Admin Panel (securegate)
         $this->createGlobalRoles([
-            'super-admin',
             'securegate_admin',
             'securegate_support',
             'securegate_marketing',
@@ -28,6 +24,16 @@ class RolesSeeder extends Seeder
 
         // Customer role (global)
         $this->createGlobalRole('customer');
+
+        // Tenant roles (created in each tenant's database)
+        $this->createTenantRoles([
+            'business_owner',
+            'manager',
+            'accountant',
+            'staff',
+            'waiter',
+            'cashier',
+        ]);
     }
 
     /**
@@ -51,6 +57,30 @@ class RolesSeeder extends Seeder
     {
         foreach ($roles as $role) {
             $this->createGlobalRole($role);
+        }
+    }
+
+    /**
+     * Create a single tenant role.
+     */
+    private function createTenantRole(string $name): void
+    {
+        Role::firstOrCreate(
+            ['name' => $name, 'guard_name' => 'web']
+        );
+
+        $this->command->info("Tenant role '{$name}' created or already exists.");
+    }
+
+    /**
+     * Create multiple tenant roles at once.
+     *
+     * @param array<string> $roles
+     */
+    private function createTenantRoles(array $roles): void
+    {
+        foreach ($roles as $role) {
+            $this->createTenantRole($role);
         }
     }
 }

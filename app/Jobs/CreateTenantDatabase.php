@@ -3,26 +3,30 @@
 namespace App\Jobs;
 
 use App\Models\Tenant;
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class CreateTenantDatabase implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
+     * The tenant instance.
+     *
+     * @var Tenant
+     */
+    protected $tenant;
+
+    /**
      * Create a new job instance.
      */
-    public function __construct(protected Tenant $tenant, protected string $password)
+    public function __construct(Tenant $tenant)
     {
-        //
+        $this->tenant = $tenant;
     }
 
     /**
@@ -30,33 +34,12 @@ class CreateTenantDatabase implements ShouldQueue
      */
     public function handle(): void
     {
-        $tenant = $this->tenant;
-        $owner = $tenant->owner;
-
-        $databaseName = $tenant->database_name;
-
-        DB::connection('landlord')->statement("CREATE DATABASE {$databaseName}");
-
-        $tenant->configure()->use();
-
-        Artisan::call('migrate', [
-            '--database' => 'tenant',
-            '--path' => 'database/migrations/tenant',
-            '--force' => true,
+        Artisan::call('tenants:migrate', [
+            '--tenants' => [$this->tenant->id],
         ]);
 
-        Artisan::call('db:seed', [
-            '--database' => 'tenant',
-            '--class' => 'TenantRolesSeeder',
-            '--force' => true,
+        Artisan::call('tenants:seed', [
+            '--tenants' => [$this->tenant->id],
         ]);
-
-        $user = User::create([
-            'name' => $owner->name,
-            'email' => $owner->email,
-            'password' => Hash::make($this->password),
-        ]);
-
-        $user->assignRole('business_owner');
     }
 }
