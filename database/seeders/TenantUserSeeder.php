@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
+use Stancl\Tenancy\Contracts\Tenant;
 
 class TenantUserSeeder extends Seeder
 {
@@ -14,40 +14,27 @@ class TenantUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create Owner
-        $owner = User::create([
-            'name' => 'Business Owner',
-            'email' => 'owner@local.test',
-            'password' => Hash::make('password'),
-        ]);
-        $ownerRole = Role::firstOrCreate(['name' => 'owner', 'guard_name' => 'web']);
-        $owner->assignRole($ownerRole);
+        $this->createBusinessOwner(tenant());
+    }
 
-        // Create Manager
-        $manager = User::create([
-            'name' => 'Manager',
-            'email' => 'manager@local.test',
-            'password' => Hash::make('password'),
-        ]);
-        $managerRole = Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'web']);
-        $manager->assignRole($managerRole);
+    /**
+     * Create the business owner user for the tenant.
+     */
+    private function createBusinessOwner(Tenant $tenant): void
+    {
+        $user = User::firstOrCreate(
+            ['email' => 'owner@example.com'],
+            [
+                'name' => 'Business Owner',
+                'password' => Hash::make('password'),
+            ]
+        );
 
-        // Create Staff
-        $staff = User::create([
-            'name' => 'Staff',
-            'email' => 'staff@local.test',
-            'password' => Hash::make('password'),
-        ]);
-        $staffRole = Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
-        $staff->assignRole($staffRole);
+        $user->assignRole('business_owner');
 
-        // Create Accountant
-        $accountant = User::create([
-            'name' => 'Accountant',
-            'email' => 'accountant@local.test',
-            'password' => Hash::make('password'),
-        ]);
-        $accountantRole = Role::firstOrCreate(['name' => 'accountant', 'guard_name' => 'web']);
-        $accountant->assignRole($accountantRole);
+        // Attach the user to the current tenant
+        $tenant->users()->attach($user);
+
+        $this->command->info('Business Owner user created and attached to the tenant.');
     }
 }

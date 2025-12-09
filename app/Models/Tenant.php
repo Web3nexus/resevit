@@ -48,4 +48,12 @@ class Tenant extends Model
     {
         return $this->belongsTo(User::class, 'owner_user_id');
     }
+
+    /**
+     * Relation: a tenant can have many member users.
+     */
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }
