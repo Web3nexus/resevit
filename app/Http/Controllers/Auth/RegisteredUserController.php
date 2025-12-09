@@ -81,7 +81,7 @@ class RegisteredUserController extends Controller
 
             CreateTenantDatabase::dispatch($tenant);
 
-            return redirect()->to("http://{$tenant->domain}/dashboard");
+            return redirect()->to("//{$tenant->domain}/dashboard");
         }
 
         // Redirect Investor/Customer to their respective panels
