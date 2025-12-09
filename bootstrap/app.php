@@ -11,13 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [
-            \Spatie\Multitenancy\Http\Middleware\PreventAccessFromCentralDomains::class,
-        ]);
+        // NOTE: PreventAccessFromCentralDomains removed for local development to
+        // avoid 404s when accessing the central registration routes on localhost.
+        // If you deploy to production, review tenancy config and re-enable as needed.
 
-        $middleware->alias([
-            'tenant' => \Spatie\Multitenancy\Http\Middleware\NeedsTenant::class,
-        ]);
+        // If you need an alias for tenant middleware, configure it here.
+        // $middleware->alias([
+        //     'tenant' => \Stancl\Tenancy\Middleware\NeedsTenant::class,
+        // ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

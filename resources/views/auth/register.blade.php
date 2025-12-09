@@ -1,73 +1,86 @@
 <x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
-        @csrf
+    <div class="px-6 py-6 sm:px-8">
+        <h2 class="mb-1 text-2xl font-bold text-gray-900">Create Account</h2>
+        <p class="mb-6 text-sm text-gray-600">Register your business to get started</p>
 
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
+        @if($errors->any())
+            <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                @foreach ($errors->all() as $error)
+                    <p class="text-red-700 text-sm">{{ $error }}</p>
+                @endforeach
+            </div>
+        @endif
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <form method="POST" action="{{ route('register') }}" class="space-y-4">
+            @csrf
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+            <!-- Personal Information -->
+            <div class="border-b pb-4 mb-4">
+                <h3 class="text-sm font-semibold text-gray-900 mb-4">Personal Information</h3>
+                
+                <div>
+                    <x-input-label for="name">Full Name</x-input-label>
+                    <x-text-input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus autocomplete="name" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
+                    <x-input-error :messages="$errors->get('name')" />
+                </div>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
+                <div class="mt-4">
+                    <x-input-label for="email">Email Address</x-input-label>
+                    <x-text-input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="email" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
+                    <x-input-error :messages="$errors->get('email')" />
+                </div>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+                <div class="mt-4">
+                    <x-input-label for="phone">Phone Number</x-input-label>
+                    <x-text-input id="phone" name="phone" type="tel" value="{{ old('phone') }}" autocomplete="tel" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
+                    <x-input-error :messages="$errors->get('phone')" />
+                </div>
+            </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+            <!-- Business Information -->
+            <div class="border-b pb-4 mb-4">
+                <h3 class="text-sm font-semibold text-gray-900 mb-4">Business Information</h3>
+                
+                <div>
+                    <x-input-label for="business_name">Business Name</x-input-label>
+                    <x-text-input id="business_name" name="business_name" type="text" value="{{ old('business_name') }}" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
+                    <x-input-error :messages="$errors->get('business_name')" />
+                </div>
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
+                <div class="mt-4">
+                    <x-input-label for="business_slug">Business Slug (URL-friendly name)</x-input-label>
+                    <x-text-input id="business_slug" name="business_slug" type="text" value="{{ old('business_slug') }}" required placeholder="e.g., my-restaurant" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
+                    <x-input-error :messages="$errors->get('business_slug')" />
+                    <p class="mt-1 text-xs text-gray-500">Use lowercase letters, numbers, and hyphens only</p>
+                </div>
 
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
+                <div class="mt-4">
+                    <x-input-label for="domain">Domain</x-input-label>
+                    <x-text-input id="domain" name="domain" type="text" value="{{ old('domain') }}" required placeholder="e.g., mybusiness.local" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
+                    <x-input-error :messages="$errors->get('domain')" />
+                </div>
+            </div>
 
-        <!-- Business Name -->
-        <div class="mt-4">
-            <x-input-label for="business_name" :value="__('Business Name')" />
-            <x-text-input id="business_name" class="block mt-1 w-full" type="text" name="business_name" :value="old('business_name')" required />
-            <x-input-error :messages="$errors->get('business_name')" class="mt-2" />
-        </div>
+            <!-- Security -->
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900 mb-4">Security</h3>
+                
+                <div>
+                    <x-input-label for="password">Password</x-input-label>
+                    <x-text-input id="password" name="password" type="password" required autocomplete="new-password" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
+                    <x-input-error :messages="$errors->get('password')" />
+                </div>
 
-        <!-- Business Slug -->
-        <div class="mt-4">
-            <x-input-label for="business_slug" :value="__('Business Slug')" />
-            <x-text-input id="business_slug" class="block mt-1 w-full" type="text" name="business_slug" :value="old('business_slug')" required />
-            <x-input-error :messages="$errors->get('business_slug')" class="mt-2" />
-        </div>
+                <div class="mt-4">
+                    <x-input-label for="password_confirmation">Confirm Password</x-input-label>
+                    <x-text-input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
+                </div>
+            </div>
 
-        <!-- Domain -->
-        <div class="mt-4">
-            <x-input-label for="domain" :value="__('Domain')" />
-            <x-text-input id="domain" class="block mt-1 w-full" type="text" name="domain" :value="old('domain')" required />
-            <x-input-error :messages="$errors->get('domain')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
-    </form>
+            <div class="mt-6 flex items-center justify-between">
+                <a href="{{ route('login') }}" class="text-sm text-indigo-600 hover:text-indigo-500">Already registered? Login</a>
+                <x-primary-button class="ms-4 px-6">Register</x-primary-button>
+            </div>
+        </form>
+    </div>
 </x-guest-layout>

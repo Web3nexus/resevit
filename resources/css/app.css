@@ -9,3 +9,53 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Design system variables */
+:root {
+    --color-navy: #0B132B;
+    --color-gold: #F1C40F;
+    --color-offwhite: #F9FAFB;
+    --shadow-elegant: 0 10px 30px rgba(11, 19, 43, 0.12);
+}
+
+/* Utility component classes (small, intentionally specific) */
+.card {
+    background-color: var(--color-offwhite);
+    border-radius: 12px;
+    box-shadow: var(--shadow-elegant);
+}
+
+.btn-primary {
+    background-color: var(--color-navy);
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(11, 19, 43, 0.18);
+}
+
+.btn-primary:hover {
+    background-color: #081028;
+}
+
+.input {
+    background-color: white;
+    border: 1px solid rgba(11, 19, 43, 0.06);
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(11, 19, 43, 0.04) inset;
+}
+
+.label {
+    color: var(--color-navy);
+    font-weight: 600;
+}
+
+.form-section {
+    border-bottom: 1px solid rgba(11, 19, 43, 0.04);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.oauth-btn {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(11, 19, 43, 0.06);
+}

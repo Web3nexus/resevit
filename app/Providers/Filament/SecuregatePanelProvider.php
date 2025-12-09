@@ -36,8 +36,7 @@ class SecuregatePanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Securegate/Widgets'), for: 'App\\Filament\\Securegate\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -52,6 +51,7 @@ class SecuregatePanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                \App\Http\Middleware\EnsureSuperAdmin::class,
             ]);
     }
 }

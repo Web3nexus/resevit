@@ -18,26 +18,30 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class DashboardPanelProvider extends PanelProvider
+class InvestorPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('dashboard')
-            ->path('dashboard')
+            ->id('invest')
+            ->path('invest')
+            // enable the built-in login form
             ->login()
+            // NOTE: Filament's registration page is enabled by adding the Register page
+            // (most Filament installs will provide this). We keep login + registration support.
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => Color::Amber, // gold-like accent
             ])
-            ->discoverResources(in: app_path('Filament/Dashboard/Resources'), for: 'App\\Filament\\Dashboard\\Resources')
-            ->discoverPages(in: app_path('Filament/Dashboard/Pages'), for: 'App\\Filament\\Dashboard\\Pages')
+            // discover resources/pages/widgets in the Invest namespace
+            ->discoverResources(in: app_path('Filament/Invest/Resources'), for: 'App\\Filament\\Invest\\Resources')
+            ->discoverPages(in: app_path('Filament/Invest/Pages'), for: 'App\\Filament\\Invest\\Pages')
             ->pages([
+                // default dashboard placeholder; projects can add real pages under App\Filament\Invest\Pages
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Dashboard/Widgets'), for: 'App\\Filament\\Dashboard\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Invest/Widgets'), for: 'App\\Filament\\Invest\\Widgets')
             ->widgets([
-                
+                // placeholder widgets
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -50,9 +54,13 @@ class DashboardPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            // Use Filament's Authenticate middleware and a custom EnsureInvestorRole middleware
             ->authMiddleware([
                 Authenticate::class,
+                \App\Http\Middleware\EnsureInvestorRole::class,
             ])
-            ->tenant(\App\Models\Tenant::class);
+            // Navigation is provided by discovered resources/pages. Add Filament resources/pages under
+            // app/Filament/Invest/* (for example: Investments, Portfolio, Wallet) to populate navigation.
+            ;
     }
 }

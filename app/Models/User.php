@@ -16,6 +16,25 @@ class User extends Authenticatable implements FilamentUser
     use HasFactory, Notifiable, HasRoles;
 
     /**
+     * Relation: a user may own many tenants (business owners).
+     */
+    public function tenants()
+    {
+        return $this->hasMany(Tenant::class, 'owner_user_id');
+    }
+
+    /**
+     * Filament (and other packages) sometimes call getTenants() on the user.
+     * Provide a compatibility method that returns the tenant collection.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getTenants()
+    {
+        return $this->tenants()->get();
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>

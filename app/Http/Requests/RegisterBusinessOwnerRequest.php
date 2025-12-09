@@ -26,6 +26,7 @@ class RegisterBusinessOwnerRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'phone' => ['nullable', 'string', 'max:20'],
             'business_name' => ['required', 'string', 'max:255'],
             'business_slug' => ['required', 'string', 'max:255', 'unique:tenants,slug'],
             'domain' => ['required', 'string', 'max:255', 'unique:tenants,domain'],
