@@ -34,7 +34,7 @@
             </div>
 
             <!-- Personal Information -->
-            <fieldset :disabled="role === 'staff'" class="border-b pb-4 mb-4">
+            <fieldset x-bind:disabled="role === 'staff'" class="border-b pb-4 mb-4">
                 <h3 class="text-sm font-semibold text-gray-900 mb-4">Personal Information</h3>
 
                 <div>
@@ -55,14 +55,14 @@
                 <h3 class="text-sm font-semibold text-gray-900 mb-4">Business Information</h3>
                 <div>
                     <x-input-label for="restaurant_name">Restaurant Name</x-input-label>
-                    <x-text-input id="restaurant_name" name="restaurant_name" type="text" :value="old('restaurant_name')" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
+                    <x-text-input id="restaurant_name" name="restaurant_name" type="text" x-bind:value="old('restaurant_name')" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md" />
                     <x-input-error :messages="$errors->get('restaurant_name')" />
                 </div>
             </div>
 
 
             <!-- Security -->
-            <fieldset :disabled="role === 'staff'">
+            <fieldset x-bind:disabled="role === 'staff'">
                 <h3 class="text-sm font-semibold text-gray-900 mb-4">Security</h3>
 
                 <div>
@@ -79,7 +79,7 @@
 
             <div class="mt-6 flex items-center justify-between">
                 <a href="{{ route('login') }}" class="text-sm text-indigo-600 hover:text-indigo-500">Already registered? Login</a>
-                <x-primary-button class="ms-4 px-6" :disabled="role === 'staff'">Register</x-primary-button>
+                <x-primary-button class="ms-4 px-6" x-bind:disabled="role === 'staff'">Register</x-primary-button>
             </div>
         </form>
     </div>
