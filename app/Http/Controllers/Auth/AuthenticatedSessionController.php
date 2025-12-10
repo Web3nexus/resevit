@@ -31,7 +31,17 @@ class AuthenticatedSessionController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/dashboard');
+            $user = Auth::user();
+
+            $redirectPath = match (true) {
+                $user->hasRole('super-admin') => route('filament.securegate.pages.dashboard'),
+                $user->hasRole('investor') => route('filament.invest.pages.dashboard'),
+                $user->hasRole('customer') => route('filament.customer.pages.dashboard'),
+                $user->hasRole('business-owner') => route('filament.dashboard.pages.dashboard'),
+                default => '/dashboard', // Sensible default
+            };
+
+            return redirect()->intended($redirectPath);
         }
 
         return back()->withErrors([
