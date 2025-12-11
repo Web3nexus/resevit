@@ -3,47 +3,55 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\RegistrationRequest;
+use App\Http\Requests\RegisterBusinessOwnerRequest;
+use App\Jobs\CreateTenantDatabase;
+use App\Models\Tenant;
 use App\Models\User;
-use App\Services\TenantCreatorService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
+    /**
+     * Display the registration view.
+     */
     public function create(): View
     {
         return view('auth.register');
     }
 
-    public function store(RegistrationRequest $request, TenantCreatorService $tenantCreator): RedirectResponse
+    /**
+     * Handle an incoming registration request.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function store(RegisterBusinessOwnerRequest $request): RedirectResponse
     {
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'phone' => $request->phone,
         ]);
-
-        $user->assignRole($request->role);
 
         event(new Registered($user));
 
+        $tenant = Tenant::create([
+            'name' => $request->business_name,
+            'slug' => $request->business_slug,
+            'domain' => $request->domain,
+            'database_name' => 'resevit_' . Str::slug($request->business_slug),
+            'owner_user_id' => $user->id,
+        ]);
+
+        CreateTenantDatabase::dispatch($tenant, $request->password);
+
         Auth::login($user);
 
-        if ($request->role === 'business_owner') {
-            $tenant = $tenantCreator->createTenant($user, $request->restaurant_name);
-            $domain = $tenant->domains->first()->domain;
-
-            return redirect()->to("//{$domain}/dashboard");
-        }
-
-        return match ($request->role) {
-            'investor' => redirect()->intended(route('filament.invest.pages.dashboard')),
-            'customer' => redirect()->intended(route('filament.customer.pages.dashboard')),
-            default => redirect('/'),
-        };
+        return redirect()->to("http://{$tenant->domain}/dashboard");
     }
 }

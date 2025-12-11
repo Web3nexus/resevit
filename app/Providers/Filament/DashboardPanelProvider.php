@@ -17,8 +17,6 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
-use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 class DashboardPanelProvider extends PanelProvider
 {
@@ -55,10 +53,6 @@ class DashboardPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->tenant(\App\Models\Tenant::class)
-            ->tenantMiddleware([
-                InitializeTenancyByDomain::class,
-                PreventAccessFromCentralDomains::class,
-            ]);
+            ->tenant(\App\Models\Tenant::class);
     }
 }

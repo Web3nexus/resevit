@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,33 +21,22 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $request->authenticate();
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-        $request->session()->regenerate();
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
 
-        $user = $request->user();
-
-        // Handle Business Owner redirection
-        if ($user->hasRole('business-owner')) {
-            $tenant = $user->tenants()->first();
-
-            if ($tenant) {
-                $domain = $tenant->domains->first()->domain;
-                return redirect()->to("//{$domain}/dashboard");
-            }
+            return redirect()->intended('/dashboard');
         }
 
-        // Handle other roles
-        $redirectPath = match (true) {
-            $user->hasRole('super-admin') => route('filament.securegate.pages.dashboard'),
-            $user->hasRole('investor') => route('filament.invest.pages.dashboard'),
-            $user->hasRole('customer') => route('filament.customer.pages.dashboard'),
-            default => '/dashboard', // Fallback
-        };
-
-        return redirect()->intended($redirectPath);
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
     }
 
     /**
@@ -56,7 +44,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        Auth::logout();
 
         $request->session()->invalidate();
 
