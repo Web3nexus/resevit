@@ -55,6 +55,7 @@ class DashboardPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->tenant(\App\Models\Tenant::class)
             ->tenantMiddleware([
                 InitializeTenancyByDomain::class,
                 PreventAccessFromCentralDomains::class,
