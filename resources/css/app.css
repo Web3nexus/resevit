@@ -1,20 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+@source '../../vendor/filament/**/*.blade.php';
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
-}
 
-/* Design system variables */
-:root {
     --color-navy: #0B132B;
     --color-gold: #F1C40F;
     --color-offwhite: #F9FAFB;
+
     --shadow-elegant: 0 10px 30px rgba(11, 19, 43, 0.12);
 }
 
@@ -58,4 +58,172 @@
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(11, 19, 43, 0.06);
+}
+
+@layer components {
+
+    /* FORCE input wrapper to NOT use flex - this is key for password fields */
+    .fi-input-wrp,
+    .fi-input-wrp.fi-input-wrp-has-suffix,
+    [class*="fi-input-wrp"],
+    div[class*="input-wrp"] {
+        position: relative !important;
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* FORCE prefix icons to be positioned inside the input */
+    .fi-input-wrp-prefix,
+    .fi-input-wrp>.fi-input-wrp-prefix,
+    [class*="fi-input-wrp-prefix"],
+    div[class*="prefix"] {
+        position: absolute !important;
+        left: 1rem !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        z-index: 10 !important;
+        display: flex !important;
+        align-items: center !important;
+        pointer-events: none !important;
+    }
+
+    /* FORCE suffix (password reveal) to be positioned inside the input - CRITICAL */
+    .fi-input-wrp-suffix,
+    .fi-input-wrp>.fi-input-wrp-suffix,
+    [class*="input-wrp-suffix"],
+    button[class*="suffix"] {
+        position: absolute !important;
+        right: 0.75rem !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        margin: auto !important;
+        height: fit-content !important;
+        z-index: 10 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* FORCE input styling - MULTIPLE SELECTORS FOR MAXIMUM SPECIFICITY */
+    .fi-in-text-input,
+    .fi-input-wrp>input,
+    .fi-input-wrp input[type="text"],
+    .fi-input-wrp input[type="email"],
+    .fi-input-wrp input[type="password"],
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[class*="fi-input"],
+    [class*="fi-in-text-input"],
+    .fi-input-wrp input {
+        border: 2px solid #9CA3AF !important;
+        /* gray-400 */
+        background-color: #F9FAFB !important;
+        /* gray-50 */
+        width: 100% !important;
+        display: block !important;
+        border-radius: 0.5rem !important;
+        /* rounded-lg */
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+        transition: all 0.2s !important;
+        min-height: 44px !important;
+        height: 44px !important;
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
+        padding-top: 0.625rem !important;
+        padding-bottom: 0.625rem !important;
+        font-size: 1rem !important;
+        line-height: 1.5 !important;
+    }
+
+    /* FORCE focus states */
+    .fi-in-text-input:focus,
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[class*="fi-input"]:focus,
+    .fi-input-wrp input:focus {
+        background-color: white !important;
+        border-color: #0B132B !important;
+        /* navy */
+        outline: none !important;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1), 0 0 0 3px rgba(212, 175, 55, 0.3) !important;
+    }
+
+    /* FORCE hover states */
+    .fi-in-text-input:hover,
+    input[type="text"]:hover,
+    input[type="email"]:hover,
+    input[type="password"]:hover,
+    input[class*="fi-input"]:hover,
+    .fi-input-wrp input:hover {
+        border-color: #6B7280 !important;
+        /* gray-500 */
+    }
+
+    /* HIDE labels - use placeholders instead */
+    .fi-fo-field-wrp-label,
+    label[class*="fi-fo"],
+    [class*="field-wrp-label"] {
+        display: none !important;
+    }
+
+    /* FORCE field wrapper to full width AND add spacing between fields */
+    .fi-fo-field-wrp,
+    [class*="fi-fo-field-wrp"],
+    div[class*="field-wrp"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 1rem !important;
+        /* Add space between fields */
+    }
+
+    /* FORCE icon sizing */
+    .fi-input-wrp svg,
+    .fi-input-wrp-prefix svg,
+    .fi-input-wrp-suffix svg,
+    [class*="input-wrp"] svg {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+        color: #6B7280 !important;
+        /* gray-500 */
+    }
+
+    /* FORCE text input wrapper to full width */
+    .fi-fo-text-input,
+    [class*="fi-fo-text-input"] {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* FORCE all form components to full width */
+    .fi-fo-component-ctn,
+    [class*="fi-fo-component"] {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* CRITICAL: Maximum specificity - FORCE password eye to RIGHT side */
+/* Target Filament's actual wrapper structure */
+.fi-input-wrp.relative,
+.fi-input-wrp[class*="relative"] {
+    position: relative !important;
+    display: block !important;
+}
+
+/* Force suffix to right side with maximum specificity */
+.fi-input-wrp>.fi-input-wrp-suffix,
+.fi-input-wrp.relative>.fi-input-wrp-suffix,
+div.fi-input-wrp>div.fi-input-wrp-suffix {
+    position: absolute !important;
+    right: 0.75rem !important;
+    left: unset !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 10 !important;
+}
+
+/* Ensure input takes full width */
+.fi-input-wrp>input {
+    width: 100% !important;
 }

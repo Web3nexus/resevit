@@ -28,7 +28,8 @@ class DashboardPanelProvider extends PanelProvider
             ->path('dashboard')
             ->login()
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => \Filament\Support\Colors\Color::hex('#0B132B'),
+                'gold' => \Filament\Support\Colors\Color::hex('#F1C40F'),
             ])
             ->discoverResources(in: app_path('Filament/Dashboard/Resources'), for: 'App\\Filament\\Dashboard\\Resources')
             ->discoverPages(in: app_path('Filament/Dashboard/Pages'), for: 'App\\Filament\\Dashboard\\Pages')

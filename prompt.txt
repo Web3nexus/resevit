@@ -1,0 +1,333 @@
+SYSTEM NAME: Resevit – Multi-Tenant Restaurant SaaS Platform
+TECH STACK: Laravel 12, Filament 4, Livewire 3, Stancl Tenancy v3 (Multi-DB), Spatie Permissions, MySQL, Tailwind, Alpine
+
+GLOBAL RULE:
+All features must support multi-tenancy using separate tenant databases per restaurant. 
+Super Admin, Investors, Customers operate from the main database.
+Business Owners + Staff operate inside tenant databases.
+
+---------------------------------------------------------
+SECTION 1 — GLOBAL SYSTEM ARCHITECTURE
+---------------------------------------------------------
+- Use Stancl Tenancy v3 with MULTI-DATABASE mode: each restaurant has its own database.
+- Landlord (central) DB stores:
+    • tenants
+    • domains
+    • admins
+    • investors
+    • customers
+    • subscription data
+- Tenant DB stores:
+    • menu
+    • orders
+    • reservations
+    • staff
+    • chats
+    • settings
+    • audit logs
+
+User Models:
+- Admin → App\Models\Admin (Super Admin Panel)
+- User → App\Models\User (Business Owners / Staff inside tenant DB)
+- Investor → App\Models\Investor (Investor Panel)
+- Customer → App\Models\Customer (Customer Portal)
+
+Auth Guards (auth.php):
+- securegate  → admins
+- web         → users (tenant)
+- investor    → investors
+- customer    → customers
+
+Panels:
+- /securegate → Super Admin Panel (Filament Panel 1)
+- /dashboard  → Business Owner Panel (Filament Panel 2)
+- /invest     → Investor Panel (Filament Panel 3)
+- /customer   → Customer Panel (Filament Panel 4)
+
+Roles:
+GLOBAL:
+- securegate_admin
+- securegate_support
+- securegate_marketing
+- investor
+- customer
+
+TENANT:
+- business_owner
+- manager
+- accountant
+- staff
+- cashier
+- waiter
+
+---------------------------------------------------------
+SECTION 2 — CORE FEATURE BLUEPRINTS
+---------------------------------------------------------
+Every feature below must include:
+✓ Migrations 
+✓ Models 
+✓ Filament Resources / Pages 
+✓ Services / Managers 
+✓ Policies 
+✓ API endpoints (if applicable)
+✓ Tenant-safe architecture
+
+=========================================================
+FEATURE 1 — Business Owner Registration + Tenant Auto-Creation
+=========================================================
+USE:
+- Filament custom Register page
+- TenantCreatorService
+- Spatie roles
+
+FLOW:
+1. Owner registers → create user in landlord DB
+2. Assign “business_owner” role
+3. Create tenant record
+4. Generate tenant-specific DB
+5. Run tenant migrations
+6. Assign default tenant roles
+7. Redirect to /dashboard under tenant context
+
+=========================================================
+FEATURE 2 — Staff Management
+=========================================================
+USE:
+- Tenant DB
+- Filament Resources
+- Spatie permissions
+
+INCLUDE:
+- Staff CRUD
+- Role assignment inside tenant
+- Staff Payouts (basic ledger)
+- Status + availability
+
+=========================================================
+FEATURE 3 — Reservations & Booking System
+=========================================================
+USE:
+- Tenant DB
+- Calendar-based UI
+- Notifications
+
+INCLUDE:
+- Table assignment
+- Customer information
+- Booking statuses
+- Auto-confirmation rules
+- Daily/Weekly calendar views
+- Integration with Customer Panel
+
+=========================================================
+FEATURE 4 — Floor Plan Builder
+=========================================================
+USE:
+- Vue-based canvas (or TALL alternative)
+- Tenant DB
+
+INCLUDE:
+- Drag & drop tables
+- Save layout in DB
+- Connect to reservations
+- Real-time occupancy updates
+
+=========================================================
+FEATURE 5 — Menu Management + Food Ordering Page
+=========================================================
+USE:
+- Tenant DB
+- Filament Resources
+- MediaLibrary for images
+
+INCLUDE:
+- Menu categories
+- Items, variants, addons
+- Customer-facing food ordering page
+- Order checkout → Customer Panel
+- Order injection → POS module
+
+=========================================================
+FEATURE 6 — Point of Sale (POS) System
+=========================================================
+USE:
+- Real-time updates (WebSockets)
+- Tenant DB
+
+INCLUDE:
+- Add items to cart
+- Table orders
+- Assign waiters
+- Payments
+- Receipts + invoice generation
+- Printer integration (future)
+
+=========================================================
+FEATURE 7 — Messaging System
+=========================================================
+USE:
+- Tenant DB for staff
+- Global DB for customer chats
+- WebSockets
+
+INCLUDE:
+- Customer → business chat
+- Staff → staff chat
+- AI assistant responses
+
+=========================================================
+FEATURE 8 — Marketing Module
+=========================================================
+GLOBAL FOR SUPER ADMIN + TENANT-LEVEL FOR OWNERS
+
+INCLUDE:
+- Campaign editor (email / SMS / social)
+- AI content generator
+- Template manager
+- Scheduled sends
+- Analytics per campaign
+
+=========================================================
+FEATURE 9 — Billing + Subscription
+=========================================================
+USE:
+- Laravel Cashier
+- Stripe
+
+INCLUDE:
+- Subscription plans (monthly/yearly)
+- Auto-renewals
+- Invoice PDFs
+- Tenant usage metrics
+
+=========================================================
+FEATURE 10 — Investor Module
+=========================================================
+USE:
+- Investor Panel (global DB)
+- Spatie roles
+
+INCLUDE:
+- Browse restaurants seeking investment
+- Investment wallet
+- Payout tracking
+- Contracts
+- ROI dashboard
+
+=========================================================
+FEATURE 11 — Customer Panel
+=========================================================
+USE:
+- Global DB (customer accounts)
+- Tenant DB (order, reservation)
+
+INCLUDE:
+- Order food
+- Track orders
+- Make reservations
+- Messages with restaurant
+- Profile + address
+- Order history
+
+=========================================================
+FEATURE 12 — Social Media Integration
+=========================================================
+USE:
+- Socialite
+- Tenant-level settings
+
+INCLUDE:
+- Connect Facebook / Instagram
+- Auto-post menus or campaigns
+- Receive orders from social platforms (webhook-ready)
+
+=========================================================
+FEATURE 13 — AI Integration
+=========================================================
+USE:
+- Content generator
+- Response assistant
+- Menu writer
+- Marketing automation
+- Reservation prediction & analytics
+
+=========================================================
+FEATURE 14 — Custom Website Builder / Reservation Page Builder
+=========================================================
+USE:
+- Tenant DB
+- Builder library (Tiptap / Blocks)
+- Filament page editor
+
+INCLUDE:
+- Sections (Hero, Menu, Gallery, Contact)
+- Themes
+- Publish to tenant domain
+- Custom reservation page for restaurants
+
+=========================================================
+FEATURE 15 — Audit Logs + Notifications
+=========================================================
+USE:
+- Filament Notifications
+- Audit logging package or custom
+
+INCLUDE:
+- Owner activity logs
+- Staff logs
+- Customer logs
+- Real-time system alerts
+
+=========================================================
+FEATURE 16 — Multi-language Support
+=========================================================
+USE:
+- Laravel localization
+- Tenant-level translation settings
+
+INCLUDE:
+- Switch language
+- Auto-translate AI helper
+- Frontend localization
+
+---------------------------------------------------------
+SECTION 3 — REQUIREMENTS FOR CODE GENERATION
+---------------------------------------------------------
+Whenever generating code or updating features:
+
+1. Must follow Laravel 12 conventions.
+2. Must follow Filament 4 panel architecture.
+3. Must use separate providers for each panel.
+4. MUST ensure multi-tenancy isolation:
+   - Business Owner Panel = tenant DB
+   - Super Admin / Investor / Customer = global DB
+5. Any model in tenant context must extend tenant connection.
+6. All roles MUST integrate Spatie Permissions.
+7. All migrations must be correct for multi-database operation.
+8. All routes must respect panel prefixes.
+9. All features must be modular and service-driven.
+
+---------------------------------------------------------
+SECTION 4 — OUTPUT FORMAT
+---------------------------------------------------------
+When generating a feature, always output:
+
+1. Summary of the feature
+2. Folder structure
+3. Full code files:
+   - migrations
+   - models
+   - resources
+   - pages
+   - services
+   - providers
+   - policies
+   - routes
+4. Setup commands
+5. Integration notes
+6. Testing instructions
+7. ASCII mockups if UI required
+
+---------------------------------------------------------
+END OF MASTER ANTI-GRAVITY PROMPT
+---------------------------------------------------------

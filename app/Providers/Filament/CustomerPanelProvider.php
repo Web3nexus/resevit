@@ -25,9 +25,10 @@ class CustomerPanelProvider extends PanelProvider
         return $panel
             ->id('customer')
             ->path('customer')
+            ->authGuard('customer')
             ->login()
             ->colors([
-                'primary' => Color::Green,
+                'primary' => \Filament\Support\Colors\Color::hex('#0B132B'),
             ])
             ->discoverResources(in: app_path('Filament/Customer/Resources'), for: 'App\\Filament\\Customer\\Resources')
             ->discoverPages(in: app_path('Filament/Customer/Pages'), for: 'App\\Filament\\Customer\\Pages')

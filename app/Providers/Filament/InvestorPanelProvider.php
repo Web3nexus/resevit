@@ -25,12 +25,13 @@ class InvestorPanelProvider extends PanelProvider
         return $panel
             ->id('invest')
             ->path('invest')
+            ->authGuard('investor')
             // enable the built-in login form
             ->login()
             // NOTE: Filament's registration page is enabled by adding the Register page
             // (most Filament installs will provide this). We keep login + registration support.
             ->colors([
-                'primary' => Color::Amber, // gold-like accent
+                'primary' => \Filament\Support\Colors\Color::hex('#0B132B'),
             ])
             // discover resources/pages/widgets in the Invest namespace
             ->discoverResources(in: app_path('Filament/Invest/Resources'), for: 'App\\Filament\\Invest\\Resources')

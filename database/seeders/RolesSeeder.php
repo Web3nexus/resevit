@@ -17,35 +17,15 @@ class RolesSeeder extends Seeder
             'securegate_admin',
             'securegate_support',
             'securegate_marketing',
-        ]);
+        ], 'securegate');
 
         // Investor role (global)
-        $this->createGlobalRole('investor');
+        Role::firstOrCreate(['name' => 'investor', 'guard_name' => 'investor']);
 
         // Customer role (global)
-        $this->createGlobalRole('customer');
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'customer']);
 
-        // Tenant roles (created in each tenant's database)
-        $this->createTenantRoles([
-            'business_owner',
-            'manager',
-            'accountant',
-            'staff',
-            'waiter',
-            'cashier',
-        ]);
-    }
-
-    /**
-     * Create a single global role.
-     */
-    private function createGlobalRole(string $name): void
-    {
-        Role::firstOrCreate(
-            ['name' => $name, 'guard_name' => 'web']
-        );
-
-        $this->command->info("Global role '{$name}' created or already exists.");
+        $this->command->info('Global roles created successfully!');
     }
 
     /**
@@ -53,34 +33,11 @@ class RolesSeeder extends Seeder
      *
      * @param array<string> $roles
      */
-    private function createGlobalRoles(array $roles): void
+    private function createGlobalRoles(array $roles, string $guard = 'web'): void
     {
         foreach ($roles as $role) {
-            $this->createGlobalRole($role);
-        }
-    }
-
-    /**
-     * Create a single tenant role.
-     */
-    private function createTenantRole(string $name): void
-    {
-        Role::firstOrCreate(
-            ['name' => $name, 'guard_name' => 'web']
-        );
-
-        $this->command->info("Tenant role '{$name}' created or already exists.");
-    }
-
-    /**
-     * Create multiple tenant roles at once.
-     *
-     * @param array<string> $roles
-     */
-    private function createTenantRoles(array $roles): void
-    {
-        foreach ($roles as $role) {
-            $this->createTenantRole($role);
+            Role::firstOrCreate(['name' => $role, 'guard_name' => $guard]);
+            $this->command->info("Role '{$role}' created or already exists.");
         }
     }
 }

@@ -14,14 +14,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create Super Admin
-        $superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'super_admin@local.test',
-            'password' => Hash::make('password'),
-        ]);
-
-        $superAdminRole = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
-        $superAdmin->assignRole($superAdminRole);
+        // User seeding logic here if needed for testing
+        // Currently empty to avoid creating confusing test users
     }
 }

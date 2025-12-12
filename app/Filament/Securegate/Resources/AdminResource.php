@@ -2,8 +2,8 @@
 
 namespace App\Filament\Securegate\Resources;
 
-use App\Filament\Securegate\Resources\UserResource\Pages;
-use App\Models\User;
+use App\Filament\Securegate\Resources\AdminResource\Pages;
+use App\Models\Admin;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -11,15 +11,13 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
 use Filament\Schemas\Schema;
 
-class UserResource extends Resource
+class AdminResource extends Resource
 {
-    protected static ?string $model = User::class;
+    protected static ?string $model = Admin::class;
 
-    protected static ?string $navigationLabel = 'System Users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
     
-    protected static ?string $modelLabel = 'System User';
-
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
+    protected static string|\UnitEnum|null $navigationGroup = 'System Management';
 
     public static function form(Schema $schema): Schema
     {
@@ -39,7 +37,7 @@ class UserResource extends Resource
                     ->required(fn (string $context): bool => $context === 'create'),
                 Forms\Components\Select::make('roles')
                     ->multiple()
-                    ->relationship('roles', 'name', fn ($query) => $query->where('guard_name', 'web'))
+                    ->relationship('roles', 'name', fn ($query) => $query->where('guard_name', 'securegate'))
                     ->preload(),
             ]);
     }
@@ -53,12 +51,9 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('roles.name')
-                    ->badge(),
+                    ->badge()
+                    ->color('success'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -67,10 +62,10 @@ class UserResource extends Resource
                 //
             ])
             ->actions([
-                // Actions removed - use resource pages for editing
+                // Actions handled by pages
             ])
             ->bulkActions([
-                // Bulk actions removed for now
+                // Bulk actions removed
             ]);
     }
 
@@ -84,9 +79,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => Pages\ListAdmins::route('/'),
+            'create' => Pages\CreateAdmin::route('/create'),
+            'edit' => Pages\EditAdmin::route('/{record}/edit'),
         ];
     }
 }

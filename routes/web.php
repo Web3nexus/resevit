@@ -30,17 +30,28 @@ Route::prefix('customer')->name('customer.')->middleware('guest')->group(functio
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    // Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
+    // Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::get('register', \App\Livewire\RegisterTenant::class)->name('register');
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    // Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    // Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::get('login', \App\Livewire\LoginTenant::class)->name('login');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
 
     // OAuth Routes
     Route::get('oauth/{provider}', [OAuthController::class, 'redirect'])->name('oauth.redirect');
+    
+    // Named routes for specific providers
+    Route::get('auth/google', function () {
+        return app(OAuthController::class)->redirect('google');
+    })->name('auth.google');
+    
+    Route::get('auth/apple', function () {
+        return app(OAuthController::class)->redirect('apple');
+    })->name('auth.apple');
 });
 
 Route::get('oauth/{provider}/callback', [OAuthController::class, 'callback'])->name('oauth.callback');

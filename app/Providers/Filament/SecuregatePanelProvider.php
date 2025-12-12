@@ -25,9 +25,10 @@ class SecuregatePanelProvider extends PanelProvider
         return $panel
             ->id('securegate')
             ->path('securegate')
+            ->authGuard('securegate')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => \Filament\Support\Colors\Color::hex('#0B132B'),
             ])
             ->discoverResources(in: app_path('Filament/Securegate/Resources'), for: 'App\\Filament\\Securegate\\Resources')
             ->discoverPages(in: app_path('Filament/Securegate/Pages'), for: 'App\\Filament\\Securegate\\Pages')
@@ -51,7 +52,6 @@ class SecuregatePanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                \App\Http\Middleware\EnsureSuperAdmin::class,
             ]);
     }
 }

@@ -75,14 +75,14 @@ class Admin extends Authenticatable implements FilamentUser
 
     /**
      * Determine if the user can access Filament.
-     * Only allow users with specific securegate roles.
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasAnyRole([
-            'securegate_admin',
-            'securegate_support',
-            'securegate_marketing',
-        ]);
+        // Allow access to securegate panel
+        if ($panel->getId() === 'securegate') {
+            return true;
+        }
+        
+        return false;
     }
 }
