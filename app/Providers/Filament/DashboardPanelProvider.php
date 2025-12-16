@@ -44,6 +44,7 @@ class DashboardPanelProvider extends PanelProvider
             ->navigationGroups([
                 'Calendar',
                 'Reservations',
+                'Menu Management',
                 'Staff Management',
             ])
             ->spa()

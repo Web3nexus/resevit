@@ -32,4 +32,8 @@ Route::middleware([
 
     Route::get('/impersonate/enter', [\App\Http\Controllers\ImpersonationController::class, 'enter'])->name('impersonate.enter');
     Route::get('/impersonate/leave', [\App\Http\Controllers\ImpersonationController::class, 'leave'])->name('impersonate.leave');
+
+    Route::get('/menu', \App\Livewire\RestaurantMenu::class)->name('tenant.menu');
+    Route::get('/checkout', \App\Livewire\RestaurantCheckout::class)->name('tenant.checkout');
+    Route::get('/order/{order}', \App\Livewire\OrderStatus::class)->name('tenant.order.status');
 });
