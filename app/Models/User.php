@@ -43,6 +43,10 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'terms_accepted',
+        'newsletter_subscribed',
+        'mobile',
+        'country',
     ];
 
     /**
@@ -65,13 +69,15 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'terms_accepted' => 'boolean',
+            'newsletter_subscribed' => 'boolean',
         ];
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
         if ($panel->getId() === 'dashboard') {
-             return true;
+            return true;
         }
 
         return false;

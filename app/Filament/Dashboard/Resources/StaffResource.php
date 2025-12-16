@@ -19,30 +19,32 @@ class StaffResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Staff Management';
 
+    protected static ?int $navigationSort = 0;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Staff Management');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->schema([
-                Forms\Components\Select::make('user_id')
-                    ->label('Staff Member')
-                    ->relationship('user', 'name')
-                    ->searchable()
-                    ->preload()
+                Forms\Components\TextInput::make('name')
+                    ->label('Full Name')
                     ->required()
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('email')
-                            ->email()
-                            ->required()
-                            ->maxLength(255)
-                            ->unique(User::class, 'email'),
-                        Forms\Components\TextInput::make('password')
-                            ->password()
-                            ->required()
-                            ->minLength(8),
-                    ]),
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(\App\Models\TenantUser::class, 'email', ignoreRecord: true),
+                Forms\Components\TextInput::make('password')
+                    ->password()
+                    ->required(fn(string $operation): bool => $operation === 'create')
+                    ->minLength(8)
+                    ->dehydrated(fn(?string $state) => filled($state))
+                    ->helperText('Leave blank to keep current password when editing'),
                 Forms\Components\Select::make('position')
                     ->options([
                         'manager' => 'Manager',
@@ -91,7 +93,7 @@ class StaffResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('position')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'manager' => 'success',
                         'accountant' => 'info',
                         'cashier' => 'warning',
@@ -103,7 +105,7 @@ class StaffResource extends Resource
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'active' => 'success',
                         'inactive' => 'danger',
                         'on_leave' => 'warning',
@@ -140,12 +142,12 @@ class StaffResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

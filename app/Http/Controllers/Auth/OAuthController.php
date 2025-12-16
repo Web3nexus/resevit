@@ -34,19 +34,42 @@ class OAuthController extends Controller
             return redirect('/login')->with('error', 'OAuth authentication failed');
         }
 
-        // Find or create user
-        $user = User::where('email', $oauthUser->getEmail())->first();
+        $email = $oauthUser->getEmail();
 
-        if (!$user) {
-            $user = User::create([
-                'name' => $oauthUser->getName(),
-                'email' => $oauthUser->getEmail(),
-                'password' => bcrypt(str()->random(16)), // Random password for OAuth users
-                'email_verified_at' => now(),
-            ]);
+        // 1. Check LandlordUser (Business Owner)
+        $user = \App\Models\LandlordUser::where('email', $email)->first();
+        if ($user) {
+            Auth::guard('web')->login($user);
+            return redirect()->intended('/dashboard');
         }
 
-        Auth::login($user);
+        // 2. Check Customer
+        $customer = \App\Models\Customer::where('email', $email)->first();
+        if ($customer) {
+            Auth::guard('customer')->login($customer);
+            return redirect()->route('customer.login'); // Or dashboard if exists
+        }
+
+        // 3. Check Investor
+        $investor = \App\Models\Investor::where('email', $email)->first();
+        if ($investor) {
+            Auth::guard('investor')->login($investor);
+            return redirect()->route('investor.login');
+        }
+
+        // 4. If not found, create new LandlordUser (Default)
+        // Note: This user will NOT have a tenant yet.
+        $newUser = \App\Models\LandlordUser::create([
+            'name' => $oauthUser->getName(),
+            'email' => $email,
+            'password' => bcrypt(str()->random(16)),
+            'email_verified_at' => now(),
+            // Default flags
+            'terms_accepted' => true,
+            'newsletter_subscribed' => false,
+        ]);
+
+        Auth::guard('web')->login($newUser);
 
         return redirect('/dashboard');
     }

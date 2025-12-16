@@ -13,11 +13,11 @@ class TenantRolesSeeder extends Seeder
     public function run(): void
     {
         // Tenant roles
-        Role::create(['name' => 'business_owner', 'guard_name' => 'web']);
-        Role::create(['name' => 'manager', 'guard_name' => 'web']);
-        Role::create(['name' => 'accountant', 'guard_name' => 'web']);
-        Role::create(['name' => 'staff', 'guard_name' => 'web']);
-        Role::create(['name' => 'waiter', 'guard_name' => 'web']);
-        Role::create(['name' => 'cashier', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'business_owner', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'accountant', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'waiter', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'cashier', 'guard_name' => 'web']);
     }
 }

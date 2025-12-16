@@ -3,12 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Stancl\Tenancy\Contracts\TenantWithDatabase;
+use Stancl\Tenancy\Database\Concerns\HasDatabase;
+use Stancl\Tenancy\Database\Concerns\HasDomains;
+use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
-class Tenant extends Model
+class Tenant extends BaseTenant implements TenantWithDatabase
 {
-    use HasFactory;
+    use HasFactory, HasDatabase, HasDomains;
+
 
     /**
      * The "type" of the primary key ID.
@@ -42,10 +46,31 @@ class Tenant extends Model
         'database_name',
         'owner_user_id',
         'status',
+        'mobile',
+        'country',
+        'staff_count',
+        'timezone',
     ];
 
     public function owner()
     {
         return $this->belongsTo(User::class, 'owner_user_id');
+    }
+
+    public static function getCustomColumns(): array
+    {
+        return [
+            'id',
+            'name',
+            'slug',
+            'domain',
+            'database_name',
+            'owner_user_id',
+            'status',
+            'mobile',
+            'country',
+            'staff_count',
+            'timezone',
+        ];
     }
 }

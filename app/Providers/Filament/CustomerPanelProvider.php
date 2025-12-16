@@ -35,6 +35,7 @@ class CustomerPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
+            ->spa()
             ->discoverWidgets(in: app_path('Filament/Customer/Widgets'), for: 'App\\Filament\\Customer\\Widgets')
             ->widgets([
                 // placeholder widgets
@@ -54,6 +55,6 @@ class CustomerPanelProvider extends PanelProvider
                 Authenticate::class,
                 \App\Http\Middleware\EnsureCustomerRole::class,
             ])
-            ;
+        ;
     }
 }

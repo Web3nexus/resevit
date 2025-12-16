@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Staff;
 use App\Models\StaffPayout;
-use App\Models\User;
+use App\Models\TenantUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -21,7 +21,7 @@ class StaffService
     {
         return DB::transaction(function () use ($data, $role) {
             // 1. Create user in tenant DB
-            $user = User::create([
+            $user = TenantUser::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password'] ?? 'password123'), // Default password if not provided

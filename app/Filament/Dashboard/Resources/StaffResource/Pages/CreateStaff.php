@@ -10,29 +10,11 @@ class CreateStaff extends CreateRecord
 {
     protected static string $resource = StaffResource::class;
 
-    protected function mutateFormDataBeforeCreate(array $data): array
+    protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
     {
-        // If creating a new user, handle via StaffService
-        if (isset($data['user_id']) && is_array($data['user_id'])) {
-            $userData = $data['user_id'];
-            $service = app(StaffService::class);
-            
-            $staff = $service->createStaff([
-                'name' => $userData['name'],
-                'email' => $userData['email'],
-                'password' => $userData['password'],
-                'phone' => $data['phone'] ?? null,
-                'emergency_contact' => $data['emergency_contact'] ?? null,
-                'hire_date' => $data['hire_date'],
-                'hourly_rate' => $data['hourly_rate'],
-                'status' => $data['status'],
-                'availability' => $data['availability'] ?? null,
-            ], $data['position']);
+        $service = app(StaffService::class);
 
-            // Redirect to list after creation
-            $this->redirect(StaffResource::getUrl('index'));
-        }
-
-        return $data;
+        // Position acts as the role
+        return $service->createStaff($data, $data['position']);
     }
 }

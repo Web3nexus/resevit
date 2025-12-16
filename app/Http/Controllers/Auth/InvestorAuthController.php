@@ -31,11 +31,14 @@ class InvestorAuthController extends Controller
 
         // Assign investor role if using Spatie
         if (method_exists($user, 'assignRole')) {
-            try { $user->assignRole('investor'); } catch (\Throwable $e) { /* ignore if role missing */ }
+            try {
+                $user->assignRole('investor');
+            } catch (\Throwable $e) { /* ignore if role missing */
+            }
         }
 
         Auth::login($user);
-        return redirect()->to('/invest/dashboard');
+        return redirect()->to('/invest');
     }
 
     public function showLogin()
@@ -46,13 +49,13 @@ class InvestorAuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required','email'],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/invest/dashboard');
+            return redirect()->intended('/invest');
         }
 
         return back()->withErrors(['email' => 'The provided credentials do not match our records.']);

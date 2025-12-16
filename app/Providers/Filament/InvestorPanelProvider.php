@@ -40,6 +40,7 @@ class InvestorPanelProvider extends PanelProvider
                 // default dashboard placeholder; projects can add real pages under App\Filament\Invest\Pages
                 Pages\Dashboard::class,
             ])
+            ->spa()
             ->discoverWidgets(in: app_path('Filament/Invest/Widgets'), for: 'App\\Filament\\Invest\\Widgets')
             ->widgets([
                 // placeholder widgets
@@ -62,6 +63,6 @@ class InvestorPanelProvider extends PanelProvider
             ])
             // Navigation is provided by discovered resources/pages. Add Filament resources/pages under
             // app/Filament/Invest/* (for example: Investments, Portfolio, Wallet) to populate navigation.
-            ;
+        ;
     }
 }

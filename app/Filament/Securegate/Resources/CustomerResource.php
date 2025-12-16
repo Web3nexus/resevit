@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Filament\Securegate\Resources;
+
+use App\Filament\Securegate\Resources\CustomerResource\Pages;
+use App\Models\Customer;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Hash;
+use Filament\Schemas\Schema;
+
+class CustomerResource extends Resource
+{
+    protected static ?string $model = Customer::class;
+
+    protected static ?string $navigationLabel = 'Customers';
+    
+    protected static ?string $modelLabel = 'Customer';
+
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
+    
+    protected static string|\UnitEnum|null $navigationGroup = 'External Users';
+    
+    protected static ?int $navigationSort = 1;
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255)
+                    ->label('Full Name'),
+                Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
+                Forms\Components\TextInput::make('phone')
+                    ->tel()
+                    ->maxLength(255),
+                Forms\Components\Textarea::make('address')
+                    ->maxLength(65535)
+                    ->columnSpanFull(),
+                Forms\Components\TextInput::make('password')
+                    ->password()
+                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->required(fn (string $context): bool => $context === 'create')
+                    ->maxLength(255),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Full Name')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable(),
+                Tables\Columns\TextColumn::make('user_type')
+                    ->label('User Type')
+                    ->badge()
+                    ->color('info')
+                    ->default('Customer'),
+                Tables\Columns\TextColumn::make('phone')
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(function (string $state): string {
+                        return match ($state) {
+                            'Active' => 'success',
+                            'Suspended' => 'warning',
+                            'Deleted' => 'danger',
+                            default => 'gray',
+                        };
+                    })
+                    ->default('Active')
+                    ->getStateUsing(function ($record) {
+                        // Derive status from soft deletes
+                        if ($record->trashed()) {
+                            return 'Deleted';
+                        }
+                        return 'Active';
+                    }),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Date Created')
+                    ->dateTime()
+                    ->sortable(),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                // Row click will navigate to view/edit
+            ])
+            ->bulkActions([
+                // Bulk actions can be added here
+            ])
+            ->emptyStateHeading('No customers yet')
+            ->emptyStateDescription('Customers will appear here once they register on the platform.')
+            ->emptyStateIcon('heroicon-o-user-group');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListCustomers::route('/'),
+            'create' => Pages\CreateCustomer::route('/create'),
+            'view' => Pages\ViewCustomer::route('/{record}'),
+            'edit' => Pages\EditCustomer::route('/{record}/edit'),
+        ];
+    }
+}

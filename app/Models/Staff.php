@@ -12,7 +12,7 @@ class Staff extends Model
     use SoftDeletes;
 
     protected $table = 'staff';
-    
+
     protected $fillable = [
         'user_id',
         'position',
@@ -35,7 +35,7 @@ class Staff extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(TenantUser::class);
     }
 
     /**

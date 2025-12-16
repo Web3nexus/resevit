@@ -14,10 +14,16 @@ use Filament\Schemas\Schema;
 class AdminResource extends Resource
 {
     protected static ?string $model = Admin::class;
+    
+    protected static ?string $navigationLabel = 'Admin Users';
+    
+    protected static ?string $modelLabel = 'Admin User';
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
     
-    protected static string|\UnitEnum|null $navigationGroup = 'System Management';
+    protected static string|\UnitEnum|null $navigationGroup = 'Internal Users';
+    
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {
@@ -25,11 +31,13 @@ class AdminResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->label('Full Name'),
                 Forms\Components\TextInput::make('email')
                     ->email()
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
                 Forms\Components\TextInput::make('password')
                     ->password()
                     ->dehydrateStateUsing(fn ($state) => Hash::make($state))
@@ -47,26 +55,71 @@ class AdminResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                    ->label('Full Name')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('roles.name')
-                    ->badge()
-                    ->color('success'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->searchable()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->copyable(),
+                Tables\Columns\TextColumn::make('user_type')
+                    ->label('User Type')
+                    ->badge()
+                    ->color(function ($record) {
+                        $role = $record->roles->first()?->name;
+                        return match ($role) {
+                            'securegate_admin' => 'danger',
+                            'securegate_support' => 'info',
+                            'securegate_marketing' => 'warning',
+                            default => 'gray',
+                        };
+                    })
+                    ->getStateUsing(function ($record) {
+                        $role = $record->roles->first()?->name;
+                        return match ($role) {
+                            'securegate_admin' => 'Admin',
+                            'securegate_support' => 'Support',
+                            'securegate_marketing' => 'Marketing',
+                            default => 'Admin',
+                        };
+                    }),
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Roles')
+                    ->badge()
+                    ->color('success')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(function (string $state): string {
+                        return match ($state) {
+                            'Active' => 'success',
+                            'Suspended' => 'warning',
+                            'Deleted' => 'danger',
+                            default => 'gray',
+                        };
+                    })
+                    ->default('Active')
+                    ->getStateUsing(function ($record) {
+                        // Derive status from admin state
+                        return 'Active';
+                    }),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Date Created')
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                // Actions handled by pages
+                // Row click will navigate to view/edit
             ])
             ->bulkActions([
-                // Bulk actions removed
-            ]);
+                // Bulk actions can be added here
+            ])
+            ->emptyStateHeading('No admin users yet')
+            ->emptyStateDescription('Admin users will appear here once they are created.')
+            ->emptyStateIcon('heroicon-o-shield-check');
     }
 
     public static function getRelations(): array
@@ -81,6 +134,7 @@ class AdminResource extends Resource
         return [
             'index' => Pages\ListAdmins::route('/'),
             'create' => Pages\CreateAdmin::route('/create'),
+            'view' => Pages\ViewAdmin::route('/{record}'),
             'edit' => Pages\EditAdmin::route('/{record}/edit'),
         ];
     }

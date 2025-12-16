@@ -18,14 +18,20 @@ class StaffPayoutResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Staff Management';
 
+    protected static ?int $navigationSort = 1;
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->schema([
                 Forms\Components\Select::make('staff_id')
-                    ->relationship('staff.user', 'name')
+                    ->label('Staff Member')
+                    ->options(function () {
+                        return \App\Models\Staff::with('user')
+                            ->get()
+                            ->pluck('user.name', 'id');
+                    })
                     ->searchable()
-                    ->preload()
                     ->required(),
                 Forms\Components\TextInput::make('hours_worked')
                     ->numeric()
@@ -81,7 +87,7 @@ class StaffPayoutResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'paid' => 'success',
                         'pending' => 'warning',
                         'cancelled' => 'danger',
@@ -105,27 +111,39 @@ class StaffPayoutResource extends Resource
                     ])
                     ->query(function ($query, array $data) {
                         return $query
-                            ->when($data['from'], fn ($q) => $q->whereDate('payout_date', '>=', $data['from']))
-                            ->when($data['until'], fn ($q) => $q->whereDate('payout_date', '<=', $data['until']));
+                            ->when($data['from'], fn($q) => $q->whereDate('payout_date', '>=', $data['from']))
+                            ->when($data['until'], fn($q) => $q->whereDate('payout_date', '<=', $data['until']));
                     }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('mark_as_paid')
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success')
+                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\Action::make('mark_as_paid')
+                    ->action(function (StaffPayout $record) {
+                        $record->update(['status' => 'paid', 'paid_at' => now()]);
+                        Notification::make()
+                            ->title('Payout marked as paid')
+                            ->success()
+                            ->send();
+                    })
                     ->requiresConfirmation()
-                    ->action(fn (StaffPayout $record) => $record->markAsPaid())
-                    ->visible(fn (StaffPayout $record) => $record->status === 'pending'),
+                    ->color('success')
+                    ->icon('heroicon-o-check-circle')
+                    ->visible(fn(StaffPayout $record) => $record->status === 'pending'),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\BulkAction::make('mark_as_paid')
-                        ->icon('heroicon-o-check-circle')
-                        ->color('success')
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
+                    \Filament\Actions\BulkAction::make('mark_as_paid')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $records->each->update(['status' => 'paid', 'paid_at' => now()]);
+                            Notification::make()
+                                ->title('Payouts marked as paid')
+                                ->success()
+                                ->send();
+                        })
                         ->requiresConfirmation()
-                        ->action(fn ($records) => $records->each->markAsPaid()),
+                        ->color('success')
+                        ->icon('heroicon-o-check-circle'),
                 ]),
             ]);
     }

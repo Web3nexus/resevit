@@ -26,6 +26,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register model observers
+        \App\Models\Reservation::observe(\App\Observers\ReservationObserver::class);
+
+        // Register policies
+        \Illuminate\Support\Facades\Gate::policy(
+            \App\Models\CalendarEvent::class,
+            \App\Policies\CalendarEventPolicy::class
+        );
+
+        // Register global impersonation banner
+        \Filament\Support\Facades\FilamentView::registerRenderHook(
+            \Filament\View\PanelsRenderHook::BODY_END,
+            fn(): string => \Illuminate\Support\Facades\View::make('components.impersonation-banner')->render(),
+        );
+
+        // Register Calendar Widget manually as it's in a custom location
+        \Livewire\Livewire::component('app.filament.dashboard.components.calendar-widget', \App\Filament\Dashboard\Components\CalendarWidget::class);
     }
 }

@@ -26,21 +26,33 @@ class DashboardPanelProvider extends PanelProvider
             ->default()
             ->id('dashboard')
             ->path('dashboard')
-            ->login()
+            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->registration(\App\Filament\Pages\Auth\Register::class)
             ->colors([
                 'primary' => \Filament\Support\Colors\Color::hex('#0B132B'),
                 'gold' => \Filament\Support\Colors\Color::hex('#F1C40F'),
             ])
+            ->darkMode(false)
+            ->viteTheme('resources/css/app.css')
             ->discoverResources(in: app_path('Filament/Dashboard/Resources'), for: 'App\\Filament\\Dashboard\\Resources')
             ->discoverPages(in: app_path('Filament/Dashboard/Pages'), for: 'App\\Filament\\Dashboard\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Dashboard/Widgets'), for: 'App\\Filament\\Dashboard\\Widgets')
-            ->widgets([
-                
+            ->widgets([])
+            ->navigationGroups([
+                'Calendar',
+                'Reservations',
+                'Staff Management',
             ])
+            ->spa()
             ->middleware([
+                \Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class,
+                \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
+                \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+                \Illuminate\Foundation\Http\Middleware\TrimStrings::class,
+                \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
@@ -50,10 +62,28 @@ class DashboardPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\SetTenantTimezone::class, // Set timezone after tenancy init
+            ])
+            ->userMenuItems([
+                'account' => \Filament\Actions\Action::make('account')
+                    ->label('Account')
+                    ->url(fn() => \App\Filament\Dashboard\Pages\EditProfile::getUrl())
+                    ->icon('heroicon-o-user-circle'),
+                'settings' => \Filament\Actions\Action::make('settings')
+                    ->label('System Settings')
+                    ->url(fn() => route('filament.dashboard.resources.system-settings.edit'))
+                    ->icon('heroicon-o-cog-6-tooth'),
+                'plans' => \Filament\Actions\Action::make('plans')
+                    ->label('Plans')
+                    ->url('#')
+                    ->icon('heroicon-o-credit-card'),
+                'help' => \Filament\Actions\Action::make('help')
+                    ->label('Help center')
+                    ->url('#')
+                    ->icon('heroicon-o-question-mark-circle'),
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
-            ->tenant(\App\Models\Tenant::class);
+            ]);
     }
 }
