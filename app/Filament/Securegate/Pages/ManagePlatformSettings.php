@@ -93,6 +93,48 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                     ->itemLabel(fn(array $state): ?string => $state['label'] ?? null),
                             ])
                     ]),
+
+                Section::make('Error Pages')
+                    ->description('Customize the content of 404 and 500 error pages.')
+                    ->icon('heroicon-o-exclamation-triangle')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Section::make('404 Page (Not Found)')
+                                    ->schema([
+                                        TextInput::make('error_pages.404.title')
+                                            ->label('Title')
+                                            ->placeholder('Oops! This page doesn\'t exist.')
+                                            ->default('Oops! This page doesn\'t exist.'),
+                                        TextInput::make('error_pages.404.description')
+                                            ->label('Description')
+                                            ->placeholder('Let\'s get you back on track.')
+                                            ->default('Oops! This page doesn\'t exist. Let\'s get you back on track and find what you are looking for.'),
+                                        FileUpload::make('error_pages.404.image')
+                                            ->label('Image')
+                                            ->image()
+                                            ->directory('platform/errors')
+                                            ->visibility('public'),
+                                    ])->columnSpan(1),
+
+                                Section::make('500 Page (Server Error)')
+                                    ->schema([
+                                        TextInput::make('error_pages.500.title')
+                                            ->label('Title')
+                                            ->placeholder('Something went wrong.')
+                                            ->default('Something went wrong.'),
+                                        TextInput::make('error_pages.500.description')
+                                            ->label('Description')
+                                            ->placeholder('We\'re working on it.')
+                                            ->default('An unexpected error occurred on our server. We\'re working to fix it.'),
+                                        FileUpload::make('error_pages.500.image')
+                                            ->label('Image')
+                                            ->image()
+                                            ->directory('platform/errors')
+                                            ->visibility('public'),
+                                    ])->columnSpan(1),
+                            ]),
+                    ]),
             ])
             ->statePath('data');
     }

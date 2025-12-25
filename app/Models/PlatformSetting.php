@@ -12,11 +12,13 @@ class PlatformSetting extends Model
         'favicon_path',
         'supported_languages',
         'footer_settings',
+        'error_pages',
     ];
 
     protected $casts = [
         'supported_languages' => 'array',
         'footer_settings' => 'array',
+        'error_pages' => 'array',
     ];
 
     public static function current(): self
