@@ -27,6 +27,7 @@ class SectionsRelationManager extends RelationManager
                 \Filament\Forms\Components\Select::make('type')
                     ->options([
                         'announcement_bar' => 'Announcement Bar',
+                        'page_header' => 'Simple Page Header',
                         'hero' => 'Hero',
                         'logo_cloud' => 'Logo Cloud',
                         'features' => 'Key Features (3 Cards)',
