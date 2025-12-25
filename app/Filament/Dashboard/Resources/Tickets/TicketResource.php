@@ -31,6 +31,11 @@ class TicketResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Communication';
 
+    public static function canViewAny(): bool
+    {
+        return has_feature('support_tickets');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

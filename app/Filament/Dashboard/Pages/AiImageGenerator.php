@@ -23,6 +23,11 @@ class AiImageGenerator extends Page implements HasForms
 
     protected string $view = 'filament.dashboard.pages.ai-image-generator';
 
+    public static function canViewAny(): bool
+    {
+        return has_feature('ai_generator');
+    }
+
     public ?array $data = [];
     public ?string $generatedImageUrl = null;
     public bool $isGenerating = false;

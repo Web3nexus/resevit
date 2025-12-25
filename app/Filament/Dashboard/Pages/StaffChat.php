@@ -11,10 +11,15 @@ use Livewire\Attributes\Computed;
 
 class StaffChat extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
-    protected static string | \UnitEnum | null $navigationGroup = 'Communication';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    protected static string|\UnitEnum|null $navigationGroup = 'Communication';
     protected static ?string $title = 'Staff Chat';
     protected string $view = 'filament.dashboard.pages.staff-chat';
+
+    public static function canViewAny(): bool
+    {
+        return has_feature('staff_chat');
+    }
 
     public $selectedConversationId = null;
     public $newMessage = '';
@@ -35,14 +40,14 @@ class StaffChat extends Page
         // Fetch conversations user is part of. 
         // For MVP, let's just show a "General" group chat accessible to everyone if it exists,
         // or create one if not.
-        
+
         $general = StaffConversation::firstOrCreate(
             ['name' => 'General', 'type' => 'group']
         );
-        
+
         // Ensure current user is participant
         if (!$general->participants()->where('user_id', Auth::id())->exists()) {
-           $general->participants()->attach(Auth::id());
+            $general->participants()->attach(Auth::id());
         }
 
         return StaffConversation::with('participants')->get();
@@ -51,14 +56,16 @@ class StaffChat extends Page
     #[Computed]
     public function activeConversation()
     {
-        if (!$this->selectedConversationId) return null;
+        if (!$this->selectedConversationId)
+            return null;
         return StaffConversation::find($this->selectedConversationId);
     }
-    
+
     #[Computed]
     public function messages()
     {
-        if (!$this->selectedConversationId) return [];
+        if (!$this->selectedConversationId)
+            return [];
         return StaffMessage::where('staff_conversation_id', $this->selectedConversationId)
             ->with('sender')
             ->orderBy('created_at', 'asc')
@@ -79,7 +86,7 @@ class StaffChat extends Page
         // But to satisfy "select the staff", let's prioritize Staff.
         // If we want to enable chatting with the Owner, we should add them too.
         // Let's stick to Staff first as requested.
-        
+
         return $staffUsers->where('id', '!=', Auth::id());
     }
 
@@ -106,7 +113,7 @@ class StaffChat extends Page
                 'type' => 'private',
                 'name' => $targetUser->name, // Optional for private
             ]);
-            
+
             $conversation->participants()->attach([Auth::id(), $targetUserId]);
         }
 
@@ -125,7 +132,8 @@ class StaffChat extends Page
             return;
         }
 
-        if (!$this->selectedConversationId) return;
+        if (!$this->selectedConversationId)
+            return;
 
         StaffMessage::create([
             'staff_conversation_id' => $this->selectedConversationId,
@@ -134,7 +142,7 @@ class StaffChat extends Page
         ]);
 
         $this->newMessage = '';
-        
+
         // Scroll to bottom dispatch
         $this->dispatch('message-sent');
     }

@@ -10,7 +10,7 @@ class ReservationStatsWidget extends BaseWidget
 {
     public static function canView(): bool
     {
-        return auth()->user() instanceof \App\Models\User;
+        return has_feature('analytics');
     }
 
     protected static ?int $sort = 1;

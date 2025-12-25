@@ -20,6 +20,11 @@ class StaffPayoutResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    public static function canViewAny(): bool
+    {
+        return has_feature('staff');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

@@ -18,5 +18,10 @@ class PosPage extends Page
 
     protected static ?int $navigationSort = 10;
 
+    public static function canViewAny(): bool
+    {
+        return has_feature('pos');
+    }
+
     // We can add mount logic or authentication checks here if needed.
 }

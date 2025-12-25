@@ -19,6 +19,11 @@ class RoleResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Staff Management';
 
+    public static function canViewAny(): bool
+    {
+        return has_feature('staff');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

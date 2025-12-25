@@ -24,6 +24,11 @@ class ActivityLogResource extends Resource
 
     protected static ?string $label = 'Audit Log';
 
+    public static function canViewAny(): bool
+    {
+        return has_feature('audit_logs');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

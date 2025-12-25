@@ -25,6 +25,11 @@ class Messaging extends Page implements HasActions
 
     protected string $view = 'filament.dashboard.pages.messaging';
 
+    public static function canViewAny(): bool
+    {
+        return has_feature('messaging');
+    }
+
     public $selectedChatId = null;
     public $newMessage = '';
     public $filter = 'all'; // all, open, closed

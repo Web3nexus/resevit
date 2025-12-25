@@ -18,6 +18,11 @@ class LiveMonitor extends Page
 
     protected static string|\UnitEnum|null $navigationGroup = 'Reservations';
 
+    public static function canViewAny(): bool
+    {
+        return has_feature('live_monitoring');
+    }
+
     public $selectedRoomId;
     public $tables = [];
     public $statuses = [];
@@ -71,7 +76,8 @@ class LiveMonitor extends Page
 
     public function refreshStatuses()
     {
-        if (!$this->selectedRoomId) return;
+        if (!$this->selectedRoomId)
+            return;
 
         // Fetch just statuses to avoid overwriting layout changes during drag
         $this->statuses = \App\Models\Table::where('room_id', $this->selectedRoomId)

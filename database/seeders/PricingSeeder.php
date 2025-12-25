@@ -27,6 +27,11 @@ class PricingSeeder extends Seeder
             ['name' => 'Omnichannel Reservations', 'feature_key' => 'omnichannel_reservations', 'category' => 'Operations'],
             ['name' => 'Staff Scheduling', 'feature_key' => 'staff_scheduling', 'category' => 'Operations'],
             ['name' => 'Investment Opportunities', 'feature_key' => 'investment_opportunities', 'category' => 'Finance'],
+            ['name' => 'Floor Plan & Rooms', 'feature_key' => 'rooms', 'category' => 'Operations'],
+            ['name' => 'Live Monitoring', 'feature_key' => 'live_monitoring', 'category' => 'Operations'],
+            ['name' => 'Support Tickets', 'feature_key' => 'support_tickets', 'category' => 'Customer Care'],
+            ['name' => 'Staff Chat', 'feature_key' => 'staff_chat', 'category' => 'Communication'],
+            ['name' => 'Audit Logs', 'feature_key' => 'audit_logs', 'category' => 'Security'],
         ];
 
         foreach ($features as $f) {
@@ -82,8 +87,8 @@ class PricingSeeder extends Seeder
             ]);
         }
 
-        // Growth: Starter + Marketing + Analytics + Omnichannel + Investment
-        $growthFeatures = array_merge($starterFeatures, ['marketing', 'analytics', 'messaging', 'omnichannel_reservations', 'investment_opportunities']);
+        // Growth: Starter + Marketing + Analytics + Omnichannel + Investment + Rooms
+        $growthFeatures = array_merge($starterFeatures, ['marketing', 'analytics', 'messaging', 'omnichannel_reservations', 'investment_opportunities', 'rooms']);
         foreach ($allFeatures as $feature) {
             $isIncluded = in_array($feature->feature_key, $growthFeatures);
             $growth->features()->syncWithoutDetaching([

@@ -17,11 +17,16 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Reservations'; // Or put in a new Sales/Orders group
+    protected static string|\UnitEnum|null $navigationGroup = 'Reservations'; // Or put in a new Sales/Orders group
 
     protected static ?int $navigationSort = 5;
+
+    public static function canViewAny(): bool
+    {
+        return has_feature('pos');
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -65,7 +70,7 @@ class OrderResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('menu_item_display')
                                     ->label('Menu Item')
-                                    ->formatStateUsing(fn ($record) => $record?->menuItem?->name)
+                                    ->formatStateUsing(fn($record) => $record?->menuItem?->name)
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->columnSpan(1),

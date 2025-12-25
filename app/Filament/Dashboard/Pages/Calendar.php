@@ -14,6 +14,11 @@ class Calendar extends Page
 
     protected static ?int $navigationSort = -1;
 
+    public static function canViewAny(): bool
+    {
+        return has_feature('reservations');
+    }
+
     protected static ?string $title = 'Calendar';
 
     protected function getHeaderWidgets(): array
