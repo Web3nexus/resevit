@@ -30,7 +30,11 @@ class FilamentTenantGate
         }
 
         // If NOT on central domain, we MUST be on a tenant domain.
-        // Enforce Tenancy as usual.
+        // Enforce Tenancy as usual, but check if already initialized by global middleware.
+        if (function_exists('tenancy') && tenancy()->initialized) {
+            return $next($request);
+        }
+
         try {
             return app(Pipeline::class)
                 ->send($request)

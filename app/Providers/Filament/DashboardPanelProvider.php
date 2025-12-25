@@ -29,7 +29,7 @@ class DashboardPanelProvider extends PanelProvider
             ->login(\App\Filament\Pages\Auth\Login::class)
             ->registration(\App\Filament\Pages\Auth\Register::class)
             ->databaseNotifications()
-            ->databaseNotificationsPolling('30s')
+            // ->databaseNotificationsPolling('30s')
             ->colors([
                 'primary' => \Filament\Support\Colors\Color::hex('#0B132B'),
                 'gold' => \Filament\Support\Colors\Color::hex('#F1C40F'),
@@ -48,26 +48,23 @@ class DashboardPanelProvider extends PanelProvider
                 'Menu Management',
                 'Staff Management',
             ])
-            ->spa()
+            // ->spa()
             ->middleware([
-                \App\Http\Middleware\FilamentTenantGate::class,
-                \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
-                \Illuminate\Foundation\Http\Middleware\TrimStrings::class,
-                \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                AuthenticateSession::class,
                 \App\Http\Middleware\SetLocale::class,
-                    // AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
+                \App\Http\Middleware\FilamentTenantGate::class,
+                \App\Http\Middleware\SetTenantTimezone::class,
                 DispatchServingFilamentEvent::class,
-                \App\Http\Middleware\SetTenantTimezone::class, // Set timezone after tenancy init
             ])
             ->userMenuItems([
-                \Filament\Navigation\MenuItem::make()
+                'profile' => \Filament\Navigation\MenuItem::make()
                     ->label('Account')
                     ->url(fn() => \App\Filament\Dashboard\Pages\EditProfile::getUrl())
                     ->icon('heroicon-o-user-circle'),

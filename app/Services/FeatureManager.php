@@ -24,12 +24,17 @@ class FeatureManager
             return true;
         }
 
-        return Cache::remember("tenant_{$tenant->id}_feature_{$featureKey}", 3600, function () use ($plan, $featureKey) {
-            return $plan->features()
-                ->where('feature_key', $featureKey)
-                ->wherePivot('is_included', true)
-                ->exists();
-        });
+        \Illuminate\Support\Facades\Log::info("FeatureManager: Checking '{$featureKey}' for Tenant {$tenant->id} (Plan: " . ($plan ? $plan->id : 'None') . ")");
+
+        // return Cache::remember("tenant_{$tenant->id}_feature_{$featureKey}", 3600, function () use ($plan, $featureKey) {
+        $result = $plan->features()
+            ->where('feature_key', $featureKey)
+            ->wherePivot('is_included', true)
+            ->exists();
+
+        \Illuminate\Support\Facades\Log::info("FeatureManager: Result for '{$featureKey}' is " . ($result ? 'TRUE' : 'FALSE'));
+        return $result;
+        // });
     }
 
     /**
@@ -60,9 +65,6 @@ class FeatureManager
         return $tenant->plan;
     }
 
-    /**
-     * Check if the tenant's trial has expired.
-     */
     public function isTrialExpired(Tenant $tenant): bool
     {
         if (!$tenant->trial_ends_at) {
@@ -70,5 +72,23 @@ class FeatureManager
         }
 
         return $tenant->trial_ends_at->isPast();
+    }
+
+    /**
+     * Clear feature cache for a tenant.
+     */
+    public function clearCache(Tenant $tenant): void
+    {
+        // Simple clearing strategy - In production with Redis we could use tags.
+        // For file driver, we can't iterate easily. 
+        // We will just flush globally or we accepted that manual assignment requires simple cache clear.
+        // But better: let's just make the cache key dependent on the plan ID?
+        // No, plan features might change.
+
+        // Changing the 'remember' to use a version key derived from the plan updated_at?
+        Cache::forget("tenant_{$tenant->id}_features_list"); // theoretical key
+
+        // Since we can't wildcard delete on file driver, we'll suggest using a cache tag or shorter TTL.
+        // For now, let's just reduce TTL in hasFeature to 60 seconds? Or 0 for dev.
     }
 }

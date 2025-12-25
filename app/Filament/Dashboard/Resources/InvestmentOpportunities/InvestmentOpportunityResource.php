@@ -24,6 +24,11 @@ class InvestmentOpportunityResource extends Resource
             ->where('tenant_id', tenancy()->tenant->id);
     }
 
+    public static function canViewAny(): bool
+    {
+        return has_feature('investment_opportunities');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return InvestmentOpportunityForm::configure($schema);

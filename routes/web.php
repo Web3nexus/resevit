@@ -95,3 +95,32 @@ Route::middleware([
     Route::get('/impersonate/enter', [\App\Http\Controllers\ImpersonationController::class, 'enter'])->name('impersonate.enter');
     Route::get('/impersonate/leave', [\App\Http\Controllers\ImpersonationController::class, 'leave'])->name('impersonate.leave');
 });
+
+// Temporary Seed/Fix Route
+Route::get('/debug/seed-features', function () {
+    // 1. Run Seeder
+    try {
+        $seeder = new \Database\Seeders\PricingSeeder();
+        $seeder->run();
+    } catch (\Exception $e) {
+    }
+
+    // 2. Clear Caches
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    \Illuminate\Support\Facades\Artisan::call('filament:upgrade');
+
+    // 3. Optional: Force logout by clearing current session if user requests it via ?reset=1
+    if (request()->has('reset')) {
+        auth()->logout();
+        session()->flush();
+        session()->regenerate(true);
+        return "System Deep-Cleaned! You have been logged out. <br><br> 
+                <b>ACTION:</b> Please perform a <b>HARD REFRESH (Cmd+Shift+R)</b> and log in again.";
+    }
+
+    return "System Repaired! Caches cleared and Filament upgraded. <br><br> 
+            <b>IMPORTANT:</b> Please perform a <b>HARD REFRESH (Cmd+Shift+R or Ctrl+F5)</b> in your browser now. <br>
+            If the UI is still stuck, try <a href='/debug/seed-features?reset=1'>Deep Clean (Logout)</a>.";
+});

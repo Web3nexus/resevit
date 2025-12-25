@@ -15,12 +15,10 @@ class SetUserLocalization
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $timezone = config('app.timezone');
-
-        if (auth()->check()) {
+        if ($request->hasSession() && auth()->check()) {
             $timezone = auth()->user()->timezone;
             $locale = auth()->user()->locale;
-        } elseif (tenant()) {
+        } elseif (function_exists('tenant') && tenant()) {
             $timezone = tenant()->timezone;
             $locale = tenant()->locale ?? config('app.locale');
         }
@@ -29,7 +27,7 @@ class SetUserLocalization
             app()->setLocale($locale);
         }
 
-        if ($timezone) {
+        if (isset($timezone) && $timezone) {
             date_default_timezone_set($timezone);
             config(['app.timezone' => $timezone]);
         }
@@ -37,3 +35,4 @@ class SetUserLocalization
         return $next($request);
     }
 }
+

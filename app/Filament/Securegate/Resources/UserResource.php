@@ -196,16 +196,20 @@ class UserResource extends Resource
                         $tenant->subscriptions()->create($subscriptionData);
 
                         // Log the action explicitly
-                        activity()
-                            ->performedOn($tenant)
-                            ->causedBy(auth()->user())
-                            ->withProperties([
-                                'plan_id' => $plan->id,
-                                'plan_name' => $plan->name,
-                                'status' => $data['status'],
-                                'old_plan_id' => $tenant->getOriginal('plan_id'),
-                            ])
-                            ->log('assigned_subscription_manually');
+                        try {
+                            activity()
+                                ->performedOn($tenant)
+                                ->causedBy(auth()->user())
+                                ->withProperties([
+                                    'plan_id' => $plan->id,
+                                    'plan_name' => $plan->name,
+                                    'status' => $data['status'],
+                                    'old_plan_id' => $tenant->getOriginal('plan_id'),
+                                ])
+                                ->log('assigned_subscription_manually');
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::error('Failed to log subscription assignment activity: ' . $e->getMessage());
+                        }
 
                         \Filament\Notifications\Notification::make()
                             ->title('Subscription Assigned')

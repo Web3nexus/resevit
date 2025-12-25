@@ -24,7 +24,7 @@ class Subscription extends Page
     public function mount()
     {
         $this->plans = PricingPlan::where('is_active', true)->orderBy('order')->get();
-        $this->currentPlan = tenant()->plan;
+        $this->currentPlan = tenant() ? tenant()->plan : null;
     }
 
     public function upgrade($planSlug)

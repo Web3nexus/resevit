@@ -10,96 +10,45 @@ class TenantBasePolicy
     use HandlesAuthorization;
 
     /**
-     * Determine whether the user can view any models.
+     * Business Owners and Staff can view anything in their tenant.
      */
-    /**
-     * Determine whether the user can view any models.
-     *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
-     */
-    public function viewAny($user): bool
+    public function viewAny(User $user): bool
     {
-        if ($user instanceof \App\Models\Admin) {
-            return true;
-        }
         return $user->hasRole(['Business Owner', 'Staff']);
     }
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
-     */
-    public function view($user, $model): bool
+    public function view(User $user, $model): bool
     {
-        if ($user instanceof \App\Models\Admin) {
-            return true;
-        }
         return $user->hasRole(['Business Owner', 'Staff']);
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
-     */
-    public function create($user): bool
+    public function create(User $user): bool
     {
-        if ($user instanceof \App\Models\Admin) {
-            return true;
-        }
         return $user->hasRole(['Business Owner', 'Staff']);
     }
 
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
-     */
-    public function update($user, $model): bool
+    public function update(User $user, $model): bool
     {
-        if ($user instanceof \App\Models\Admin) {
-            return true;
-        }
         return $user->hasRole(['Business Owner', 'Staff']);
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
-     */
-    public function delete($user, $model): bool
+    public function delete(User $user, $model): bool
     {
-        if ($user instanceof \App\Models\Admin) {
-            return true;
-        }
-        return $user->hasRole('Business Owner');
+        return $user->hasRole(['Business Owner']);
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
-     */
-    public function restore($user, $model): bool
+    public function deleteAny(User $user): bool
     {
-        if ($user instanceof \App\Models\Admin) {
-            return true;
-        }
-        return $user->hasRole('Business Owner');
+        return $user->hasRole(['Business Owner']);
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
-     */
-    public function forceDelete($user, $model): bool
+    public function forceDelete(User $user, $model): bool
     {
-        if ($user instanceof \App\Models\Admin) {
-            return true;
-        }
-        return $user->hasRole('Business Owner');
+        return false; // Typically restricted
+    }
+
+    public function restore(User $user, $model): bool
+    {
+        return $user->hasRole(['Business Owner']);
     }
 }

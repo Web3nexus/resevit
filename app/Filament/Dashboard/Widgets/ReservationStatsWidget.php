@@ -8,6 +8,11 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class ReservationStatsWidget extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        return auth()->user() instanceof \App\Models\User;
+    }
+
     protected static ?int $sort = 1;
 
     protected function getStats(): array

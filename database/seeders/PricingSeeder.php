@@ -26,6 +26,7 @@ class PricingSeeder extends Seeder
             ['name' => 'AI Table Optimization', 'feature_key' => 'ai_optimization', 'category' => 'AI'],
             ['name' => 'Omnichannel Reservations', 'feature_key' => 'omnichannel_reservations', 'category' => 'Operations'],
             ['name' => 'Staff Scheduling', 'feature_key' => 'staff_scheduling', 'category' => 'Operations'],
+            ['name' => 'Investment Opportunities', 'feature_key' => 'investment_opportunities', 'category' => 'Finance'],
         ];
 
         foreach ($features as $f) {
@@ -81,8 +82,8 @@ class PricingSeeder extends Seeder
             ]);
         }
 
-        // Growth: Starter + Marketing + Analytics + Omnichannel
-        $growthFeatures = array_merge($starterFeatures, ['marketing', 'analytics', 'messaging', 'omnichannel_reservations']);
+        // Growth: Starter + Marketing + Analytics + Omnichannel + Investment
+        $growthFeatures = array_merge($starterFeatures, ['marketing', 'analytics', 'messaging', 'omnichannel_reservations', 'investment_opportunities']);
         foreach ($allFeatures as $feature) {
             $isIncluded = in_array($feature->feature_key, $growthFeatures);
             $growth->features()->syncWithoutDetaching([
@@ -93,7 +94,7 @@ class PricingSeeder extends Seeder
             ]);
         }
 
-        // Pro: Everything except custom AI? Let's say Pro has everything.
+        // Pro: Everything
         foreach ($allFeatures as $feature) {
             $pro->features()->syncWithoutDetaching([
                 $feature->id => [

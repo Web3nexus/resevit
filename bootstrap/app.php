@@ -19,6 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Initialize tenancy on web routes, but skip for Securegate (Super Admin panel)
         $middleware->web(prepend: [
             \App\Http\Middleware\ConditionalTenancy::class,
+        ]);
+
+        $middleware->web(append: [
             \App\Http\Middleware\SetUserLocalization::class,
         ]);
 

@@ -10,6 +10,7 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../../app/Filament/**/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
 @source '../../vendor/filament/**/*.blade.php';
@@ -69,5 +70,31 @@
     .dark input::placeholder {
         color: #9ca3af !important;
         /* gray-400 */
+    }
+
+    /* Aggressive fix for dropdowns being cut off in the top bar */
+    .fi-topbar,
+    .fi-topbar-content,
+    .fi-topbar-content>div,
+    header.fi-topbar {
+        overflow: visible !important;
+    }
+
+    /* Ensure the user menu dropdown is properly aligned and visible */
+    .fi-user-menu {
+        position: relative !important;
+        overflow: visible !important;
+    }
+
+    /* Target the actual dropdown panel in Filament v4 */
+    .fi-dropdown-panel {
+        max-width: calc(100vw - 2rem) !important;
+        right: 0 !important;
+        left: auto !important;
+    }
+
+    /* Alpine x-cloak helper (pre-boot hide) */
+    [x-cloak] {
+        display: none !important;
     }
 }
