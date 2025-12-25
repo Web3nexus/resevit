@@ -12,16 +12,22 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
+use Filament\Schemas\Components\Utilities\Set;
 
 class MenuItemResource extends Resource
 {
     protected static ?string $model = MenuItem::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-cake';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cake';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Menu Management';
+    protected static string|\UnitEnum|null $navigationGroup = 'Menu Management';
 
-    protected static ?int $navigationSort = 2;
+    protected static int|null $navigationSort = 2;
+
+    public static function canViewAny(): bool
+    {
+        return has_feature('menu');
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -39,7 +45,7 @@ class MenuItemResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn(string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
+                            ->afterStateUpdated(fn(string $operation, $state, Set $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
 
                         Forms\Components\TextInput::make('slug')
                             ->required()
@@ -132,7 +138,7 @@ class MenuItemResource extends Resource
                 Tables\Filters\SelectFilter::make('category')
                     ->relationship('category', 'name'),
             ])
-            ->actions([
+            ->recordActions([
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])

@@ -19,7 +19,22 @@ class StaffResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Staff Management';
 
-    protected static ?int $navigationSort = 0;
+    protected static int|null $navigationSort = 0;
+
+    public static function canViewAny(): bool
+    {
+        return has_feature('staff');
+    }
+
+    public static function canCreate(): bool
+    {
+        $limit = get_feature_limit('staff');
+
+        if ($limit === null)
+            return true; // Unlimited
+
+        return \App\Models\Staff::count() < $limit;
+    }
 
     public static function getNavigationGroup(): ?string
     {
@@ -54,6 +69,12 @@ class StaffResource extends Resource
                         'waiter' => 'Waiter',
                     ])
                     ->required(),
+                Forms\Components\Select::make('roles')
+                    ->relationship('user.roles', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->visible(fn() => has_feature('staff')),
                 Forms\Components\TextInput::make('phone')
                     ->tel()
                     ->maxLength(255),
@@ -141,7 +162,7 @@ class StaffResource extends Resource
                         'waiter' => 'Waiter',
                     ]),
             ])
-            ->actions([
+            ->recordActions([
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])

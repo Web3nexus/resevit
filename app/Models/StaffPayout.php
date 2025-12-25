@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StaffPayout extends Model
 {
+    protected $connection = 'tenant';
+    
+
     protected $fillable = [
         'staff_id',
         'amount',

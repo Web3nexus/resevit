@@ -86,7 +86,7 @@ class TableResource extends Resource
                 Tables\Filters\SelectFilter::make('location'),
                 Tables\Filters\SelectFilter::make('status'),
             ])
-            ->actions([
+            ->recordActions([
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])

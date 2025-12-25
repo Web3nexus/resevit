@@ -28,11 +28,13 @@ class DashboardPanelProvider extends PanelProvider
             ->path('dashboard')
             ->login(\App\Filament\Pages\Auth\Login::class)
             ->registration(\App\Filament\Pages\Auth\Register::class)
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->colors([
                 'primary' => \Filament\Support\Colors\Color::hex('#0B132B'),
                 'gold' => \Filament\Support\Colors\Color::hex('#F1C40F'),
             ])
-            ->darkMode(false)
+            ->darkMode(true)
             ->viteTheme('resources/css/app.css')
             ->discoverResources(in: app_path('Filament/Dashboard/Resources'), for: 'App\\Filament\\Dashboard\\Resources')
             ->discoverPages(in: app_path('Filament/Dashboard/Pages'), for: 'App\\Filament\\Dashboard\\Pages')
@@ -40,7 +42,6 @@ class DashboardPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Dashboard/Widgets'), for: 'App\\Filament\\Dashboard\\Widgets')
-            ->widgets([])
             ->navigationGroups([
                 'Calendar',
                 'Reservations',
@@ -49,15 +50,15 @@ class DashboardPanelProvider extends PanelProvider
             ])
             ->spa()
             ->middleware([
-                \Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class,
-                \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
+                \App\Http\Middleware\FilamentTenantGate::class,
                 \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
                 \Illuminate\Foundation\Http\Middleware\TrimStrings::class,
                 \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
-                AuthenticateSession::class,
+                \App\Http\Middleware\SetLocale::class,
+                    // AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
@@ -66,25 +67,33 @@ class DashboardPanelProvider extends PanelProvider
                 \App\Http\Middleware\SetTenantTimezone::class, // Set timezone after tenancy init
             ])
             ->userMenuItems([
-                'account' => \Filament\Actions\Action::make('account')
+                \Filament\Navigation\MenuItem::make()
                     ->label('Account')
                     ->url(fn() => \App\Filament\Dashboard\Pages\EditProfile::getUrl())
                     ->icon('heroicon-o-user-circle'),
-                'settings' => \Filament\Actions\Action::make('settings')
+                \Filament\Navigation\MenuItem::make()
                     ->label('System Settings')
                     ->url(fn() => route('filament.dashboard.resources.system-settings.edit'))
                     ->icon('heroicon-o-cog-6-tooth'),
-                'plans' => \Filament\Actions\Action::make('plans')
-                    ->label('Plans')
-                    ->url('#')
+                \Filament\Navigation\MenuItem::make()
+                    ->label('Subscription & Plans')
+                    ->url(fn() => \App\Filament\Dashboard\Pages\Subscription::getUrl())
                     ->icon('heroicon-o-credit-card'),
-                'help' => \Filament\Actions\Action::make('help')
+                \Filament\Navigation\MenuItem::make()
                     ->label('Help center')
                     ->url('#')
                     ->icon('heroicon-o-question-mark-circle'),
             ])
+            ->sidebarWidth('250px')
+            ->sidebarCollapsibleOnDesktop()
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->brandLogo(fn() => ($setting = \App\Models\PlatformSetting::current()) && $setting->logo_path ? \Illuminate\Support\Facades\Storage::url($setting->logo_path) : null)
+            ->favicon(fn() => ($setting = \App\Models\PlatformSetting::current()) && $setting->favicon_path ? \Illuminate\Support\Facades\Storage::url($setting->favicon_path) : null);
+        // ->renderHook(
+        //     'panels::user-menu.before',
+        //     fn() => view('filament.components.language-switcher-hook')
+        // );
     }
 }

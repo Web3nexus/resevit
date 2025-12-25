@@ -16,13 +16,13 @@ class CustomerResource extends Resource
     protected static ?string $model = Customer::class;
 
     protected static ?string $navigationLabel = 'Customers';
-    
+
     protected static ?string $modelLabel = 'Customer';
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
-    
+
     protected static string|\UnitEnum|null $navigationGroup = 'External Users';
-    
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
@@ -46,9 +46,9 @@ class CustomerResource extends Resource
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('password')
                     ->password()
-                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                    ->dehydrated(fn ($state) => filled($state))
-                    ->required(fn (string $context): bool => $context === 'create')
+                    ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                    ->dehydrated(fn($state) => filled($state))
+                    ->required(fn(string $context): bool => $context === 'create')
                     ->maxLength(255),
             ]);
     }
@@ -85,10 +85,20 @@ class CustomerResource extends Resource
                     })
                     ->default('Active')
                     ->getStateUsing(function ($record) {
-                        // Derive status from soft deletes
-                        if ($record->trashed()) {
+                        // Derive status from soft deletes if available, otherwise fall back to checking deleted_at
+                        try {
+                            if (method_exists($record, 'trashed') && $record->trashed()) {
+                                return 'Deleted';
+                            }
+                        } catch (\Throwable $_) {
+                            // ignore and fall through to attribute check
+                        }
+
+                        $deletedAt = $record->getAttribute('deleted_at');
+                        if (!empty($deletedAt)) {
                             return 'Deleted';
                         }
+
                         return 'Active';
                     }),
                 Tables\Columns\TextColumn::make('created_at')
@@ -100,7 +110,39 @@ class CustomerResource extends Resource
                 //
             ])
             ->actions([
-                // Row click will navigate to view/edit
+                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\Action::make('addFunds')
+                    ->label('Add Funds')
+                    ->icon('heroicon-o-currency-dollar')
+                    ->color('success')
+                    ->form([
+                        Forms\Components\TextInput::make('amount')
+                            ->numeric()
+                            ->prefix('$')
+                            ->required()
+                            ->minValue(0.01),
+                    ])
+                    ->action(function (Customer $record, array $data) {
+                        if (isset($record->wallet_balance)) {
+                            $record->increment('wallet_balance', $data['amount']);
+
+                            \Filament\Notifications\Notification::make()
+                                ->title('Funds Added Successfully')
+                                ->body("Added $" . number_format($data['amount'], 2) . " to {$record->name}'s wallet.")
+                                ->success()
+                                ->send();
+                        } else {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Action Unavailable')
+                                ->body("This user type does not currently have a wallet.")
+                                ->warning()
+                                ->send();
+                        }
+                    }),
+            ])
+            ->recordActions([
+                \Filament\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 // Bulk actions can be added here

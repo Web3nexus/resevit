@@ -83,8 +83,10 @@ class ReservationNotificationService
     {
         try {
             // Create a temporary notifiable object with guest email
-            $notifiable = new class($reservation->guest_email) {
-                public function __construct(public string $email) {}
+            $notifiable = new class ($reservation->guest_email) {
+                public function __construct(public string $email)
+                {
+                }
 
                 public function routeNotificationForMail()
                 {
@@ -130,14 +132,12 @@ class ReservationNotificationService
             };
 
             foreach ($staffToNotify as $staff) {
-                $staff->notify(
-                    new \Filament\Notifications\Notification(
-                        title: $title,
-                        body: $body,
-                        icon: 'heroicon-o-calendar-days',
-                        iconColor: $eventType === 'new_reservation' ? 'success' : 'warning',
-                    )
-                );
+                \Filament\Notifications\Notification::make()
+                    ->title($title)
+                    ->body($body)
+                    ->icon('heroicon-o-calendar-days')
+                    ->iconColor($eventType === 'new_reservation' ? 'success' : 'warning')
+                    ->sendToDatabase($staff);
             }
         } catch (\Exception $e) {
             \Log::error('Failed to notify staff', [

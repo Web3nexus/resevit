@@ -50,7 +50,7 @@ class RoomResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
                 \Filament\Actions\Action::make('design')

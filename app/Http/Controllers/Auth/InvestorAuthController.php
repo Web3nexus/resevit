@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Investor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -19,25 +19,21 @@ class InvestorAuthController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:investors,email',
             'password' => 'required|confirmed|min:8',
         ]);
 
-        $user = User::create([
+        $user = Investor::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => $data['password'], // Automagically hashed in model or via cast
         ]);
 
-        // Assign investor role if using Spatie
-        if (method_exists($user, 'assignRole')) {
-            try {
-                $user->assignRole('investor');
-            } catch (\Throwable $e) { /* ignore if role missing */
-            }
-        }
+        // Assign investor role with investor guard
+        $user->assignRole('investor', 'investor');
 
-        Auth::login($user);
+        Auth::guard('investor')->login($user);
+
         return redirect()->to('/invest');
     }
 
@@ -53,7 +49,7 @@ class InvestorAuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (Auth::guard('investor')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             return redirect()->intended('/invest');
         }

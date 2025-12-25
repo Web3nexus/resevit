@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Session;
@@ -78,12 +79,13 @@ class RestaurantCheckout extends Component
         });
     }
 
+    #[Layout('components.layouts.app')]
     public function render()
     {
         $subtotal = array_reduce($this->cart, fn($carry, $item) => $carry + ($item['price'] * $item['quantity']), 0);
 
         return view('livewire.restaurant-checkout', [
             'subtotal' => $subtotal,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

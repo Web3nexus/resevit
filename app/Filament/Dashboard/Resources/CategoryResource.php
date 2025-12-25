@@ -10,6 +10,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 
 class CategoryResource extends Resource
 {
@@ -31,7 +32,7 @@ class CategoryResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn(string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
+                            ->afterStateUpdated(fn(string $operation, $state, Set $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
 
                         Forms\Components\TextInput::make('slug')
                             ->required()
@@ -78,7 +79,7 @@ class CategoryResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])

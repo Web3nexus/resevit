@@ -103,7 +103,7 @@ class UserResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 \Filament\Actions\Action::make('impersonate')
                     ->label('Login as')
                     ->icon('heroicon-o-eye')
@@ -116,7 +116,7 @@ class UserResource extends Resource
                         $service = new \App\Services\ImpersonationService();
                         $url = $service->generateImpersonationUrl($record);
 
-                        if (! $url) {
+                        if (!$url) {
                             \Filament\Notifications\Notification::make()
                                 ->title('Impersonation failed')
                                 ->body('This user does not have a valid tenant configuration.')
@@ -128,6 +128,90 @@ class UserResource extends Resource
                         \Illuminate\Support\Facades\Log::info('Impersonation URL generated:', ['url' => $url, 'user_id' => $record->id]);
 
                         return redirect()->to($url);
+                    }),
+                \Filament\Actions\Action::make('assign_subscription')
+                    ->label('Assign Subscription')
+                    ->icon('heroicon-o-credit-card')
+                    ->color('success')
+                    ->visible(fn(User $record) => $record->tenants()->exists())
+                    ->form([
+                        Forms\Components\Select::make('tenant_id')
+                            ->label('Business')
+                            ->options(fn(User $record) => $record->tenants()->pluck('name', 'id'))
+                            ->required()
+                            ->default(fn(User $record) => $record->tenants()->first()?->id)
+                            ->searchable(),
+                        Forms\Components\Select::make('plan_id')
+                            ->label('Plan')
+                            ->options(\App\Models\PricingPlan::where('is_active', true)->pluck('name', 'id'))
+                            ->required()
+                            ->searchable(),
+                        Forms\Components\DateTimePicker::make('trial_ends_at')
+                            ->label('Trial Ends At')
+                            ->native(false),
+                        Forms\Components\DateTimePicker::make('ends_at')
+                            ->label('Subscription Ends At')
+                            ->native(false),
+                        Forms\Components\Select::make('status')
+                            ->label('Status')
+                            ->options([
+                                'active' => 'Active',
+                                'trialing' => 'Trialing',
+                                'canceled' => 'Canceled',
+                                'past_due' => 'Past Due',
+                            ])
+                            ->default('active')
+                            ->required(),
+                    ])
+                    ->action(function (User $record, array $data) {
+                        $tenant = \App\Models\Tenant::find($data['tenant_id']);
+                        $plan = \App\Models\PricingPlan::find($data['plan_id']);
+
+                        if (!$tenant || !$plan) {
+                            return;
+                        }
+
+                        // Update Tenant Plan Reference
+                        $tenant->update([
+                            'plan_id' => $plan->id,
+                            'trial_ends_at' => $data['trial_ends_at'],
+                        ]);
+
+                        // Handle Manual Subscription Record (Mocking Cashier)
+                        // This ensures 'Billable' checks pass if they check the database
+                        $subscriptionData = [
+                            'type' => 'default',
+                            'stripe_id' => 'manually_assigned_' . \Illuminate\Support\Str::random(10),
+                            'stripe_status' => $data['status'],
+                            'stripe_price' => $plan->stripe_id ?? 'price_' . $plan->id,
+                            'quantity' => 1,
+                            'trial_ends_at' => $data['trial_ends_at'],
+                            'ends_at' => $data['ends_at'],
+                        ];
+
+                        // Remove existing default subscriptions to avoid conflict
+                        $tenant->subscriptions()->where('type', 'default')->delete();
+
+                        // Create new subscription
+                        $tenant->subscriptions()->create($subscriptionData);
+
+                        // Log the action explicitly
+                        activity()
+                            ->performedOn($tenant)
+                            ->causedBy(auth()->user())
+                            ->withProperties([
+                                'plan_id' => $plan->id,
+                                'plan_name' => $plan->name,
+                                'status' => $data['status'],
+                                'old_plan_id' => $tenant->getOriginal('plan_id'),
+                            ])
+                            ->log('assigned_subscription_manually');
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Subscription Assigned')
+                            ->body("Plan '{$plan->name}' assigned to '{$tenant->name}' as {$data['status']}.")
+                            ->success()
+                            ->send();
                     }),
                 \Filament\Actions\ViewAction::make(),
                 \Filament\Actions\EditAction::make(),

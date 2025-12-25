@@ -10,7 +10,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Reservation extends Model
 {
+    protected $connection = 'tenant';
     use HasFactory, SoftDeletes;
+
+    
 
     protected $fillable = [
         'table_id',
@@ -22,6 +25,7 @@ class Reservation extends Model
         'reservation_time',
         'duration_minutes',
         'status',
+        'source',
         'special_requests',
         'confirmed_at',
         'reminder_sent_at',

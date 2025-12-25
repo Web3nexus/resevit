@@ -26,6 +26,8 @@ class CustomerPanelProvider extends PanelProvider
             ->id('customer')
             ->path('customer')
             ->authGuard('customer')
+            ->databaseNotifications()
+            ->viteTheme('resources/css/app.css')
             ->login()
             ->colors([
                 'primary' => \Filament\Support\Colors\Color::hex('#0B132B'),
@@ -34,6 +36,12 @@ class CustomerPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Customer/Pages'), for: 'App\\Filament\\Customer\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+            ])
+            ->userMenuItems([
+                'account' => \Filament\Actions\Action::make('account')
+                    ->label('Account')
+                    ->url(fn() => \App\Filament\Customer\Pages\EditProfile::getUrl())
+                    ->icon('heroicon-o-user-circle'),
             ])
             ->spa()
             ->discoverWidgets(in: app_path('Filament/Customer/Widgets'), for: 'App\\Filament\\Customer\\Widgets')
@@ -44,6 +52,7 @@ class CustomerPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                \App\Http\Middleware\SetLocale::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
@@ -51,10 +60,15 @@ class CustomerPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            ->sidebarWidth('250px')
+            ->sidebarCollapsibleOnDesktop()
             ->authMiddleware([
                 Authenticate::class,
                 \App\Http\Middleware\EnsureCustomerRole::class,
             ])
-        ;
+            ->renderHook(
+                'panels::user-menu.before',
+                fn() => view('filament.components.language-switcher-hook')
+            );
     }
 }

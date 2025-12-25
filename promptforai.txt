@@ -1,0 +1,301 @@
+
+
+# 🧯 MASTER BUG-FIX PROMPT (SECURITY + LOGIC + UI)
+
+**NO FEATURES — FIX ONLY**
+
+You are a **senior Laravel + Filament v4 engineer** auditing and fixing a **multi-tenant SaaS system**.
+
+⚠️ **ABSOLUTE RULES**
+
+* ❌ Do NOT add new features
+* ❌ Do NOT remove existing features
+* ❌ Do NOT hide bugs
+* ❌ Do NOT guess
+* ✅ Trace root causes
+* ✅ Fix bugs properly
+* ✅ Audit business logic and security
+
+---
+
+## 🧩 TECH STACK (STRICT)
+
+* Laravel (latest stable)
+* Filament v4
+* Tailwind v4
+* MySQL
+* Multi-tenant architecture
+* Role-based access (Super Admin / Business Owner with ability to add staffs / Customer, etc)
+* Filament impersonation enabled
+
+---
+
+## 🐞 BUGS + LOGIC FAILURES TO FIX
+
+---
+
+## 1️⃣ LANDING PAGE RETURNS 404 (CRITICAL)
+
+### Problem
+
+* Public landing page intermittently returns **404**
+* This page must **ALWAYS** be accessible
+
+### Fix Requirements
+
+* Ensure:
+
+  * Route exists
+  * Controller exists
+  * View exists
+* Remove any:
+
+  * Tenant middleware
+  * Auth middleware
+  * Guard restrictions
+* Landing page must be **public and tenant-agnostic**
+
+---
+
+## 2️⃣ DASHBOARD WIDGET COUNT MISMATCH
+
+### Problem
+
+* Super Admin dashboard widget shows:
+
+  * `Total Businesses = 10`
+* Business Owners list shows:
+
+  * `1 Business Owner`
+
+### Fix Requirements
+
+* Identify:
+
+  * Incorrect queries
+  * Mixed scopes (users vs tenants)
+* Ensure:
+
+  * Widgets count **actual businesses**
+  * No soft-deleted or duplicated data
+* Fix aggregation logic and explain the root cause
+
+---
+
+## 3️⃣ BUSINESS OWNER SEEING SUPER ADMIN DASHBOARD WIDGETS (CRITICAL)
+
+### Problem
+
+* **Business Owner is NOT a landlord**
+* **Business Owner is NOT Super Admin**
+* Yet:
+
+  * Super Admin dashboard widgets appear in Business Owner dashboard
+
+### Fix Requirements
+
+* Audit:
+
+  * Dashboard widget registration
+  * Filament panel separation
+  * Permission & guard checks
+* Ensure:
+
+  * Super Admin widgets ONLY render in Super Admin panel
+  * Business Owner dashboard has ONLY owner-related widgets
+* No UI hiding hacks — fix at **logic level**
+
+---
+
+## 4️⃣ BUSINESS OWNER SIDEBAR IS INCOMPLETE
+
+### Problem
+
+When impersonating a Business Owner:
+
+* Sidebar only shows:
+
+  * Dashboard
+  * Investment Opportunity
+* Missing expected modules
+
+### Fix Requirements
+
+* Trace:
+
+  * Navigation registration
+  * Permission gates
+  * Subscription feature checks
+* Ensure:
+
+  * Sidebar reflects role + active subscription
+  * No hardcoded role checks
+* Navigation must be dynamic and correct
+
+---
+
+## 5️⃣ PROFILE DROPDOWN OPENS BY DEFAULT (UI BUG)
+
+### Problem
+
+* Profile dropdown is open by default
+* Only occurs on Business Owner pages
+
+### Fix Requirements
+
+* Identify:
+
+  * AlpineJS state leakage
+  * Filament component override
+* Fix default state
+* Dropdown must open **only on click**
+
+---
+
+## 6️⃣ NOTIFICATION BAR STUCK (BLOCKING UI)
+
+### Problem
+
+* Clicking **Investment Opportunity**:
+
+  * Triggers notification
+  * Notification cannot be closed
+  * UI becomes blocked
+
+### Fix Requirements
+
+* Identify:
+
+  * Event listener conflicts
+  * Duplicate notification triggers
+* Fix:
+
+  * Notification lifecycle
+  * Close behavior
+* Ensure notifications behave normally
+
+---
+
+## 🔐 SECURITY & AUTHORIZATION AUDIT (MANDATORY)
+
+### 7️⃣ SERVER-SIDE AUTHORIZATION CHECKS
+
+You must audit **ALL server-side logic** to ensure:
+
+* Business Owner **CANNOT**:
+
+  * Access Super Admin routes
+  * Call Super Admin APIs
+  * Trigger Super Admin actions
+* Customer **CANNOT**:
+
+  * Access Business Owner or Admin logic
+* Super Admin **ONLY** can:
+
+  * Perform Super Admin operations
+
+⚠️ UI checks are NOT enough — enforce this at:
+
+* Controllers
+* Actions
+* Policies
+* Form actions
+* API endpoints
+
+---
+
+### 8️⃣ REQUEST VALIDATION (SECURITY)
+
+* Only **explicitly allowed fields** must be accepted
+* Reject:
+
+  * Extra fields
+  * Over-posting
+  * Mass-assignment exploits
+* Validate:
+
+  * Request payloads
+  * Form submissions
+  * API requests
+
+---
+
+### 9️⃣ DATA & FILE SECURITY
+
+* Ensure:
+
+  * No file paths are leaked
+  * No internal directory structure is exposed
+  * No stack traces shown to users
+* Sanitize:
+
+  * Errors
+  * Exceptions
+  * Validation messages
+
+---
+
+## 🔥 ERROR HANDLING (PRODUCTION-SAFE)
+
+### Problem
+
+* Internal errors may be visible to users
+
+### Fix Requirements
+
+* Implement:
+
+  * Proper exception handling
+  * User-friendly error messages
+* Ensure:
+
+  * Detailed logs go to logs only
+  * Users never see:
+
+    * File paths
+    * SQL errors
+    * Stack traces
+
+---
+
+## 🧭 IMPERSONATION RULES
+
+* Impersonation must:
+
+  * Load correct role context
+  * Load correct permissions
+  * Load correct dashboard + sidebar
+* No role leakage
+* No stale state between roles
+
+---
+
+## 🧪 OUTPUT REQUIREMENTS (MANDATORY)
+
+For **each issue**, you MUST:
+
+1. Explain **why the bug happens**
+2. Identify **exact files involved**
+3. Provide **corrected code**
+4. Explain **how to test the fix**
+
+---
+
+## 🚫 DO NOT
+
+* Do not disable impersonation
+* Do not hide widgets with CSS
+* Do not hardcode role IDs
+* Do not bypass policies
+* Do not assume trust from the client
+
+---
+
+## 🎯 FINAL GOAL
+
+* Business Owner sees **only Business Owner logic**
+* Super Admin logic is **fully isolated**
+* No authorization leaks
+* No data exposure
+* Stable UI
+* Production-safe error handling

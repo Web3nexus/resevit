@@ -115,8 +115,9 @@ class StaffPayoutResource extends Resource
                             ->when($data['until'], fn($q) => $q->whereDate('payout_date', '<=', $data['until']));
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
                 \Filament\Actions\Action::make('mark_as_paid')
                     ->action(function (StaffPayout $record) {
                         $record->update(['status' => 'paid', 'paid_at' => now()]);

@@ -15,11 +15,20 @@ return Application::configure(basePath: dirname(__DIR__))
         // NOTE: PreventAccessFromCentralDomains removed for local development to
         // avoid 404s when accessing the central registration routes on localhost.
         // If you deploy to production, review tenancy config and re-enable as needed.
+    
+        // Initialize tenancy on web routes, but skip for Securegate (Super Admin panel)
+        $middleware->web(prepend: [
+            \App\Http\Middleware\ConditionalTenancy::class,
+            \App\Http\Middleware\SetUserLocalization::class,
+        ]);
 
-        // If you need an alias for tenant middleware, configure it here.
-        // $middleware->alias([
-        //     'tenant' => \Stancl\Tenancy\Middleware\NeedsTenant::class,
-        // ]);
+        $middleware->alias([
+            'feature' => \App\Http\Middleware\CheckFeatureAccess::class,
+        ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/social/*',
+        ]);
     })
     ->withSchedule(function (Schedule $schedule): void {
         // Send reservation reminders hourly

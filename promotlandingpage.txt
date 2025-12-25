@@ -1,0 +1,207 @@
+
+# ✅ UPDATED PROMPT — RESEVIT LANDING PAGES ONLY
+
+## CONTEXT
+
+You are working inside an existing Laravel project called **Resevit**.
+**Admin / Super Admin panels already exist** — DO NOT recreate authentication, roles, or panels.
+
+Your task is to **build only the public marketing / landing pages** and connect them to the **existing Super Admin** so all content is editable from there.
+
+---
+
+## BRAND
+
+**Product Name:** Resevit
+**Positioning:** Smart reservations, automation, and business growth platform
+**Tone:** Premium, modern SaaS, clean, trustworthy
+
+---
+
+## DESIGN DIRECTION (IMPORTANT)
+
+The layout, spacing, and section structure should be inspired by the provided reference design (hero + dashboard preview, feature cards, workflow visuals, stats band, testimonials, CTA).
+
+❌ **DO NOT USE GREEN as primary**
+
+### Color Palette (use consistently)
+
+* **Primary (dark):** `#071B2D` (deep navy)
+* **Secondary:** `#0B3A53`
+* **Accent:** `#2EE6D6` (aqua)
+* **Accent 2 (optional):** `#7C5CFF` (violet for links/badges)
+* **Background light:** `#EAF7F5`
+* **Card background:** `#FBFDFC`
+* **Text primary:** `#0B1220`
+* **Text muted:** `#5B6777`
+* **Border:** `#E6EEF2`
+
+Design rules:
+
+* Hero section uses **gradient background (navy → blue/teal)**
+* Large rounded cards (16–24px)
+* Soft shadows
+* Clean SaaS typography
+* Responsive first (mobile → desktop)
+
+---
+
+## TECH REQUIREMENTS
+
+* Laravel 12
+* Blade (NO SPA)
+* Tailwind CSS v4
+* Use **existing Super Admin** for content management
+* Use **existing roles/guards**
+* Use **Spatie Media Library** for images
+* SEO-friendly routes
+
+---
+
+## PAGES TO BUILD (PUBLIC ONLY)
+
+Create ONLY public-facing pages:
+
+1. `/` — Home
+2. `/features`
+3. `/pricing`
+4. `/integrations`
+5. `/resources`
+6. `/resources/{slug}`
+7. `/about`
+8. `/contact`
+9. `/faq`
+10. `/privacy`
+11. `/terms`
+12. `/404` (custom)
+
+All pages must share:
+
+* Header (logo, nav, CTA)
+* Footer (links, socials, newsletter)
+
+---
+
+## HOME PAGE SECTIONS (ORDER MATTERS)
+
+Each section must be:
+
+* Editable from Super Admin
+* Enable/disable toggle
+* Sortable (reorder sections)
+
+### Sections:
+
+1. **Announcement Bar**
+2. **Hero**
+
+   * Headline
+   * Subheadline
+   * Primary CTA
+   * Secondary CTA
+   * Dashboard preview image
+3. **Trust / Logo Cloud**
+4. **Key Value Propositions (3 cards)**
+5. **Connected Tools / Automation Section**
+6. **Workflow / How It Works**
+7. **Stats Band**
+8. **Resources Preview (3 cards)**
+9. **Testimonials**
+10. **Final CTA Banner**
+11. **Footer**
+
+---
+
+## PRICING PAGE
+
+* 3 plans (Starter / Pro / Business/Enterprise)
+* Monthly / yearly toggle
+* Highlighted plan
+* Feature list per plan
+* CTA per plan
+* Pricing FAQ
+
+All pricing data must come from DB (editable).
+
+---
+
+## DATA INTEGRATION (NO NEW PANEL)
+
+Use or extend existing tables/models **if possible**.
+
+If missing, create minimal tables:
+
+* `landing_pages`
+* `landing_sections`
+* `landing_items`
+* `testimonials`
+* `pricing_plans`
+* `pricing_features`
+* `faqs`
+* `newsletter_subscribers`
+* `contact_messages`
+
+⚠️ **DO NOT build new Filament resources unless necessary**
+Just hook into the **existing Super Admin structure**.
+
+---
+
+## RENDERING LOGIC (VERY IMPORTANT)
+
+* Pages load dynamically by slug/key
+* Sections render based on DB config
+* Disabled sections do not render
+* Section type decides Blade partial:
+
+  * `hero.blade.php`
+  * `features.blade.php`
+  * `stats.blade.php`
+  * `testimonials.blade.php`
+* All text, images, CTAs are database-driven
+
+---
+
+## CONTENT DEFAULTS
+
+Seed realistic content specific to **Resevit**:
+
+* Reservations
+* Scheduling
+* Automation
+* POS / calendar sync
+* Business growth
+* Customer experience
+
+NO generic lorem ipsum.
+
+---
+
+## QUALITY BAR
+
+* Looks like a real SaaS product
+* Smooth spacing
+* Clean hierarchy
+* Mobile friendly
+* SEO ready
+* Fast load
+
+---
+
+## ACCEPTANCE CHECKS
+
+* Super Admin edits hero text → homepage updates
+* Reorder sections → layout updates
+* Disable section → section disappears
+* Change pricing → pricing page updates
+* Resource posts render correctly by slug
+
+---
+
+If you want, next I can:
+
+* 🔹 Convert this into a **step-by-step task list**
+* 🔹 Generate **Blade section templates**
+* 🔹 Create **DB schema optimized for Resevit**
+* 🔹 Rewrite homepage copy specifically for your market
+
+Just tell me which one.

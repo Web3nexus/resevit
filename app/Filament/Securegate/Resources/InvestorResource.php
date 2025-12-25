@@ -16,13 +16,13 @@ class InvestorResource extends Resource
     protected static ?string $model = Investor::class;
 
     protected static ?string $navigationLabel = 'Investors';
-    
+
     protected static ?string $modelLabel = 'Investor';
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
-    
+
     protected static string|\UnitEnum|null $navigationGroup = 'External Users';
-    
+
     protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
@@ -49,9 +49,9 @@ class InvestorResource extends Resource
                     ->step(0.01),
                 Forms\Components\TextInput::make('password')
                     ->password()
-                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                    ->dehydrated(fn ($state) => filled($state))
-                    ->required(fn (string $context): bool => $context === 'create')
+                    ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                    ->dehydrated(fn($state) => filled($state))
+                    ->required(fn(string $context): bool => $context === 'create')
                     ->maxLength(255),
             ]);
     }
@@ -105,7 +105,31 @@ class InvestorResource extends Resource
                 //
             ])
             ->actions([
-                // Row click will navigate to view/edit
+                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\Action::make('addFunds')
+                    ->label('Add Funds')
+                    ->icon('heroicon-o-currency-dollar')
+                    ->color('success')
+                    ->form([
+                        Forms\Components\TextInput::make('amount')
+                            ->numeric()
+                            ->prefix('$')
+                            ->required()
+                            ->minValue(0.01),
+                    ])
+                    ->action(function (Investor $record, array $data) {
+                        $record->increment('wallet_balance', $data['amount']);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Funds Added Successfully')
+                            ->body("Added $" . number_format($data['amount'], 2) . " to {$record->name}'s wallet.")
+                            ->success()
+                            ->send();
+                    }),
+            ])
+            ->recordActions([
+                \Filament\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 // Bulk actions can be added here

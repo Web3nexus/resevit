@@ -132,7 +132,7 @@
                                     <ul role="list" class="-my-6 divide-y divide-gray-200 dark:divide-gray-700">
                                         @foreach($cart as $item)
                                         <li class="flex py-6">
-                                            <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
+                                            <div class="h-24 w-24 shrink-0 overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
                                                 <!-- Placeholder img or item img -->
                                                 <div class="h-full w-full bg-gray-100 flex items-center justify-center">
                                                     <span class="text-2xl">🍔</span>

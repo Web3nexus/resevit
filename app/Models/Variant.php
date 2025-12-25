@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Variant extends Model
 {
+    protected $connection = 'tenant';
+    
+
     protected $guarded = [];
 
     protected $casts = [

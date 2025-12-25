@@ -188,7 +188,7 @@ INCLUDE:
 - Analytics per campaign
 
 =========================================================
-FEATURE 9 — Billing + Subscription
+FEATURE 9 — Billing + Subscription  + /promptmasteraccesscontrol.txt
 =========================================================
 USE:
 - Laravel Cashier
@@ -240,6 +240,12 @@ INCLUDE:
 - Connect Facebook / Instagram
 - Auto-post menus or campaigns
 - Receive orders from social platforms (webhook-ready)
+- Auto-confirmation rules
+- AI assistant responses
+- AI content generator
+- INtegrate socil media messaging with the messaging features -- any messaging from the resturant social media to show up in the messaging system and ability to reply from the system
+- Ability to use automate chat resposne using AI and RAG system
+- Add a tag that show the socil media type 
 
 =========================================================
 FEATURE 13 — AI Integration
@@ -252,15 +258,26 @@ USE:
 - Reservation prediction & analytics
 
 =========================================================
-FEATURE 14 — Custom Website Builder / Reservation Page Builder
+FEATURE 14 — Custom Website Builder / Reservation Page Builder (NEXT MVP)
 =========================================================
 USE:
 - Tenant DB
 - Builder library (Tiptap / Blocks)
 - Filament page editor
 
-INCLUDE:
+
+
+INCLUDE:(MUST BE DB ORIENTED)
 - Sections (Hero, Menu, Gallery, Contact)
+- Multi page site builder
+- Custom domain addition for the website 
+- cutom Email for sending business emails
+- customemail template that use our the platfrom email design
+- Custom phone number for the restaurant
+- Custom address for the restaurant
+- custom timezone for the restaurant
+- custom currency for the restaurant
+- custom timezone for the restaurant
 - Themes
 - Publish to tenant domain
 - Custom reservation page for restaurants

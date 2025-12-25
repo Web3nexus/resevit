@@ -9,7 +9,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Staff extends Model
 {
+    protected $connection = 'tenant';
     use SoftDeletes;
+
+    
 
     protected $table = 'staff';
 

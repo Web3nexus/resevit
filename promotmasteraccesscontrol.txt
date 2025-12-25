@@ -1,0 +1,256 @@
+Here’s a **clean, professional, copy-paste–ready MASTER PROMPT** you can drop into your **anti-gravity / Copilot / Jules / AI coding prompt file**.
+It’s written to force the AI to **scan the entire codebase**, **extract features**, and **build a controllable pricing + permissions system** without guessing.
+
+---
+
+## 🔐 MASTER PROMPT — Feature Segmentation, Pricing & Access Control System
+
+### ROLE
+
+You are a **senior Laravel architect** working on a **multi-tenant SaaS platform** built with:
+
+* Laravel (latest)
+* Filament v4
+* Tailwind v4
+* Spatie Permission
+* Multi-panel architecture (Super Admin, Business Owner, Staff, Customer)
+* Tenant-based database structure
+
+You must **analyze the entire project codebase** before implementing anything.
+
+---
+
+## 🎯 OBJECTIVE
+
+Build a **centralized Feature Control & Pricing Module** that:
+
+1. Automatically **detects and registers all system features**
+2. Allows **pricing plans to enable/disable features**
+3. Controls **user access via subscription AND role permissions**
+4. Allows **business owners to create custom staff roles**
+5. Supports **free trials with limitations**
+6. Works cleanly across **multi-tenant architecture**
+
+---
+
+## 🧠 STEP 1 — FEATURE DISCOVERY (MANDATORY)
+
+Before building anything:
+
+* Scan **all source files**, including:
+
+  * Filament Resources
+  * Livewire Components
+  * Controllers
+  * Services
+  * Jobs
+  * Routes
+  * Policies
+* Extract **every feature or capability** in the system
+* Group features into logical domains, e.g.:
+
+  * Reservations
+  * POS
+  * Calendar
+  * Menu Management
+  * AI Tools
+  * Analytics
+  * Staff Management
+  * Payments
+  * Integrations
+  * Notifications
+
+Create a **Feature Registry** table containing:
+
+* Feature key (snake_case)
+* Feature name
+* Description
+* Category
+* Is core / optional
+* Is billable
+
+---
+
+## 💰 STEP 2 — PRICING MODULE ARCHITECTURE
+
+### Create **4 Pricing Plans**
+
+1. **Starter** (Paid + 7-day free trial)
+2. **Growth** (Paid)
+3. **Pro** (Paid)
+4. **Enterprise** (Custom / Unlimited)
+
+#### Trial Rules (Starter Plan)
+
+* 7 days free
+* Feature limitations (example):
+
+  * Limited staff count
+  * Limited reservations
+  * Limited AI usage
+  * Watermark / badge if needed
+* Trial expiration must automatically:
+
+  * Restrict features
+  * Prompt upgrade
+  * Never delete data
+
+Plans must support:
+
+* Monthly / Yearly
+* Feature toggles per plan
+* Limits (counts, usage, quotas)
+
+---
+
+## 🧩 STEP 3 — FEATURE → PLAN MAPPING
+
+Create a **many-to-many relationship**:
+
+* Pricing Plans ↔ Features
+
+Each feature must support:
+
+* Enabled / Disabled
+* Optional limits (numeric or boolean)
+* Enterprise override
+
+Super Admin must be able to:
+
+* Enable/disable features per plan
+* Override any plan manually for a tenant
+* Grant paid feature access without plan change
+
+---
+
+## 👥 STEP 4 — BUSINESS OWNER FEATURE CONTROL
+
+Business Owners must be able to:
+
+* See **only features included in their plan**
+* Enable/disable features **within plan limits**
+* Assign features to staff roles
+* Create **custom staff roles** (not hardcoded)
+
+Examples:
+
+* Custom role: “Evening Manager”
+* Custom role: “Front Desk”
+* Custom role: “Finance Viewer”
+
+Each role can have:
+
+* Feature access
+* Action-level permissions (view, create, update, delete)
+
+---
+
+## 🔑 STEP 5 — PERMISSION SYSTEM (SPATIE)
+
+Use **Spatie Permission** with:
+
+* Roles
+* Permissions
+* Feature-based permissions (feature.{key}.{action})
+
+Rules:
+
+* Super Admin bypasses all checks
+* Business Owner constrained by subscription
+* Staff constrained by:
+
+  * Subscription
+  * Assigned role
+  * Feature permissions
+
+---
+
+## 🧪 STEP 6 — ENFORCEMENT LAYER (CRITICAL)
+
+Implement enforcement at:
+
+* Routes
+* Filament Resources
+* Actions
+* Navigation items
+* API endpoints
+
+Create helper methods like:
+
+* `hasFeature($featureKey)`
+* `canUseFeature($featureKey)`
+* `withinUsageLimit($featureKey)`
+
+UI must:
+
+* Hide inaccessible features
+* Show upgrade prompts when blocked
+* Never expose restricted endpoints
+
+---
+
+## 🧱 STEP 7 — FILAMENT ADMIN PANELS
+
+### Super Admin Panel
+
+* Feature Registry Manager
+* Pricing Plan Manager
+* Plan ↔ Feature Matrix
+* Tenant Overrides
+* Usage Monitoring
+
+### Business Owner Panel
+
+* Subscription overview
+* Feature toggles (within plan)
+* Staff Role Builder
+* Staff Permission Assignment
+
+---
+
+## 🧬 STEP 8 — MULTI-TENANCY RULES
+
+* All subscriptions are **tenant-scoped**
+* Features resolved in this order:
+
+  1. Super Admin override
+  2. Subscription plan
+  3. Business feature toggles
+  4. Role permissions
+* No cross-tenant data leakage
+
+---
+
+## 📦 OUTPUT EXPECTATIONS
+
+You must deliver:
+
+* Database schema & migrations
+* Models & relationships
+* Policies & middleware
+* Filament Resources
+* Service classes
+* Clear comments for extension
+* No hardcoded roles or features
+
+---
+
+## ❌ HARD CONSTRAINTS
+
+* Do NOT hardcode feature access
+* Do NOT assume fixed staff roles
+* Do NOT bypass subscription checks
+* Do NOT mix tenant and system data
+
+---
+
+## ✅ FINAL GOAL
+
+A **fully modular, scalable SaaS feature + pricing system** where:
+
+* Features drive pricing
+* Pricing controls access
+* Business owners control staff
+* Enterprise plan unlocks everything
+* The system can grow without rewrites
+

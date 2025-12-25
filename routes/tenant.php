@@ -26,9 +26,9 @@ Route::middleware([
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
-    Route::get('/', function () {
-        return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id');
-    });
+    // Route::get('/', function () {
+    //     return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id');
+    // });
 
     Route::get('/impersonate/enter', [\App\Http\Controllers\ImpersonationController::class, 'enter'])->name('impersonate.enter');
     Route::get('/impersonate/leave', [\App\Http\Controllers\ImpersonationController::class, 'leave'])->name('impersonate.leave');
@@ -36,4 +36,10 @@ Route::middleware([
     Route::get('/menu', \App\Livewire\RestaurantMenu::class)->name('tenant.menu');
     Route::get('/checkout', \App\Livewire\RestaurantCheckout::class)->name('tenant.checkout');
     Route::get('/order/{order}', \App\Livewire\OrderStatus::class)->name('tenant.order.status');
+
+    Route::get('/pos/receipt/{order}', [\App\Http\Controllers\Dashboard\ReceiptController::class, 'show'])->name('dashboard.pos.receipt');
+
+    // Social Messaging Webhooks
+    Route::match(['get', 'post'], '/webhooks/social/{platform}', [\App\Http\Controllers\SocialWebhookController::class, 'handle'])
+        ->name('webhooks.social');
 });

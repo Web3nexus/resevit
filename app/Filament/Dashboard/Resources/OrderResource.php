@@ -11,7 +11,7 @@ use Filament\Tables\Table;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Placeholder;
+use Filament\Actions\EditAction;
 
 class OrderResource extends Resource
 {
@@ -56,30 +56,38 @@ class OrderResource extends Resource
                         Forms\Components\Select::make('table_id')
                             ->relationship('table', 'name')
                             ->label('Table'),
-                    ])->columns(2),
+                    ])->columns(1),
 
                 Section::make('Order Items')
                     ->schema([
                         Repeater::make('items')
                             ->relationship()
                             ->schema([
-                                Forms\Components\Select::make('menu_item_id')
-                                    ->relationship('menuItem', 'name')
+                                Forms\Components\TextInput::make('menu_item_display')
+                                    ->label('Menu Item')
+                                    ->formatStateUsing(fn ($record) => $record?->menuItem?->name)
                                     ->disabled()
-                                    ->required(),
+                                    ->dehydrated(false)
+                                    ->columnSpan(1),
                                 Forms\Components\TextInput::make('quantity')
                                     ->numeric()
-                                    ->disabled(),
+                                    ->disabled()
+                                    ->columnSpan(1),
                                 Forms\Components\TextInput::make('unit_price')
                                     ->prefix('$')
-                                    ->disabled(),
-                                Forms\Components\Placeholder::make('variant')
-                                    ->content(fn($record) => $record?->variant?->name ?? '-'),
+                                    ->disabled()
+                                    ->columnSpan(1),
+                                Forms\Components\TextInput::make('variant')
+                                    ->formatStateUsing(fn($record) => $record?->variant?->name ?? '-')
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->columnSpan(1),
                                 Forms\Components\TextInput::make('subtotal')
                                     ->prefix('$')
-                                    ->disabled(),
+                                    ->disabled()
+                                    ->columnSpan(1),
                             ])
-                            ->columns(5)
+                            ->columns(2)
                             ->addable(false)
                             ->deletable(false),
                     ]),
@@ -91,7 +99,7 @@ class OrderResource extends Resource
                             ->disabled(),
                         Forms\Components\Textarea::make('notes')
                             ->disabled(),
-                    ])->columns(2),
+                    ])->columns(1),
             ]);
     }
 
@@ -144,8 +152,8 @@ class OrderResource extends Resource
                         'cancelled' => 'Cancelled',
                     ]),
             ])
-            ->actions([
-                \Filament\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
             ->bulkActions([
                 //

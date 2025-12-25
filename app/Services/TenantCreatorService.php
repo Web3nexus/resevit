@@ -33,6 +33,7 @@ class TenantCreatorService
             'mobile' => $extraData['mobile'] ?? null,
             'country' => $extraData['country'] ?? null,
             'staff_count' => $extraData['staff_count'] ?? null,
+            'plan_id' => \App\Models\PricingPlan::where('slug', 'starter')->first()?->id,
         ]);
 
         // Get the actual DB name determined by the package (likely tenant_UUID)
@@ -61,7 +62,7 @@ class TenantCreatorService
                 // Use the tenant's specific database manager (MySQL/Postgres/etc)
                 try {
                     $manager = $tenant->database()->manager();
-                    if (! $manager->databaseExists($databaseName)) {
+                    if (!$manager->databaseExists($databaseName)) {
                         $manager->createDatabase($tenant);
                     }
                 } catch (\Throwable $e) {
@@ -69,53 +70,46 @@ class TenantCreatorService
                 }
             }
 
+            // 2. Now initialize tenancy
+            // This will swap both 'mysql' and 'tenant' connections
             tenancy()->initialize($tenant);
 
-            \Artisan::call('tenants:migrate', [
-                '--tenants' => [$tenant->id],
-                '--force' => true,
-            ]);
-
-
-            // Paranoia: Manually set the DB config to ensure it works
-            // We do this AFTER initialize because initialize might be setting it to null/empty if failing
-            if (!empty($tenant->database_name)) {
-                config(['database.connections.tenant.database' => $tenant->database_name]);
-                \Illuminate\Support\Facades\DB::purge('tenant');
-                \Illuminate\Support\Facades\DB::reconnect('tenant');
-            }
-
-            \Illuminate\Support\Facades\DB::setDefaultConnection('tenant');
-
-            \Log::info("Tenancy Initialized.");
-            \Log::info("Tenant DB Name from Model: " . $tenant->database_name);
-            \Log::info("Tenant Connection DB from Driver: " . \DB::connection('tenant')->getDatabaseName());
-
-            // Explicitly run migrations to ensure tables exist before seeding
+            // 3. Run migrations Specifically for this tenant
             \Artisan::call('migrate', [
+                '--database' => 'tenant',
                 '--path' => 'database/migrations/tenant',
                 '--force' => true,
             ]);
 
-            \Artisan::call('tenants:seed', [
-                '--tenants' => [$tenant->id],
+            \Log::info("Tenant Migrations Done.");
+
+            // 4. Run seeds
+            \Artisan::call('db:seed', [
+                '--database' => 'tenant',
                 '--class' => 'Database\\Seeders\\TenantRolesSeeder',
                 '--force' => true,
             ]);
 
+            \Log::info("Tenancy Initialized and Setup Complete.");
+            \Log::info("Tenant DB Name: " . $tenant->database_name);
 
-            // Create user in tenant DB using TenantUser (explicit connection)
-            // Ensure we are using the tenant connection
-            $tenantUser = \App\Models\TenantUser::on('tenant')->create([
+            // Create user in tenant DB using TenantUser (tenant connection)
+            $tenantUser = \App\Models\TenantUser::create([
                 'name' => $user->name,
                 'email' => $user->email,
                 'password' => $user->password, // Password is already hashed
             ]);
 
             // Assign business_owner role
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
             $role = \Spatie\Permission\Models\Role::on('tenant')->where('name', 'business_owner')->first();
             if ($role) {
-                $tenantUser->assignRole('business_owner');
+                // Ensure the user is also recognized on the tenant connection for the role assignment
+                $tenantUser->assignRole($role);
+                \Log::info("Assigned business_owner role to user: " . $tenantUser->email);
+            } else {
+                \Log::error("Could not find business_owner role for user: " . $tenantUser->email);
             }
         } catch (\Exception $e) {
             \Log::error("Tenant Creation Failed: " . $e->getMessage());

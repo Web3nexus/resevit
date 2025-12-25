@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -19,24 +19,21 @@ class CustomerAuthController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:customers,email',
             'password' => 'required|confirmed|min:8',
         ]);
 
-        $user = User::create([
+        $user = Customer::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => $data['password'], // Automagically hashed in model or via cast
         ]);
 
-        if (method_exists($user, 'assignRole')) {
-            try {
-                $user->assignRole('customer');
-            } catch (\Throwable $e) { /* ignore if role missing */
-            }
-        }
+        // Assign customer role with customer guard
+        $user->assignRole('customer', 'customer');
 
-        Auth::login($user);
+        Auth::guard('customer')->login($user);
+
         return redirect()->to('/customer');
     }
 
@@ -52,7 +49,7 @@ class CustomerAuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (Auth::guard('customer')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             return redirect()->intended('/customer');
         }

@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 use App\Models\Order;
 
 class OrderStatus extends Component
@@ -14,9 +15,9 @@ class OrderStatus extends Component
         $this->order = $order;
     }
 
+    #[Layout('components.layouts.app')]
     public function render()
     {
-        return view('livewire.order-status')
-            ->layout('components.layouts.app');
+        return view('livewire.order-status');
     }
 }

@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderItem extends Model
 {
+    protected $connection = 'tenant';
+    
+
     protected $guarded = [];
 
     protected $casts = [

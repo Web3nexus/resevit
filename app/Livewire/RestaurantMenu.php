@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 use App\Models\Category;
 use App\Models\MenuItem;
 use Illuminate\Support\Facades\Session;
@@ -64,6 +65,7 @@ class RestaurantMenu extends Component
         Session::put('cart', $this->cart);
     }
 
+    #[Layout('components.layouts.app')]
     public function render()
     {
         $categories = Category::where('is_active', true)
@@ -75,6 +77,6 @@ class RestaurantMenu extends Component
 
         return view('livewire.restaurant-menu', [
             'categories' => $categories,
-        ])->layout('components.layouts.app'); // Use a guest layout
+        ]); // Use a guest layout
     }
 }

@@ -2,3 +2,39 @@
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
+
+/* Page-specific overrides for communication settings */
+.communication-settings h3 {
+    font-size: 1.5rem;
+    /* 24px */
+    line-height: 1.2;
+    font-weight: 600;
+}
+
+.communication-settings p {
+    margin-bottom: 1.25rem !important;
+}
+
+/* Ensure extra space between form fields and the action button */
+.communication-settings form>div {
+    margin-top: 1.5rem !important;
+}
+
+/* Extra vertical gap between the two cards */
+.communication-settings>.bg-white {
+    margin-bottom: 1.75rem !important;
+}
+
+/* If Filament applies flex or resets, make sure buttons have spacing from text */
+.communication-settings x-filament\:\:button,
+.communication-settings .filament-button {
+    margin-top: 0.5rem !important;
+}
+
+/* Small helper: increase title size a bit more on larger screens */
+@media (min-width: 768px) {
+    .communication-settings h3 {
+        font-size: 1.75rem;
+        /* 28px */
+    }
+}

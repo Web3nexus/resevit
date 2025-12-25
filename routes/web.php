@@ -1,11 +1,26 @@
 <?php
 
 use App\Http\Controllers\Auth\OAuthController;
+use App\Http\Controllers\LandingPageController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// dd('Web routes loaded');
+
+Route::get('/', [LandingPageController::class, 'home'])->name('home');
+Route::get('/pricing', [LandingPageController::class, 'pricing'])->name('pricing');
+Route::get('/features', [LandingPageController::class, 'features'])->name('features');
+Route::get('/integrations', [LandingPageController::class, 'integrations'])->name('integrations');
+Route::get('/about', [LandingPageController::class, 'about'])->name('about');
+Route::get('/contact', [LandingPageController::class, 'contact'])->name('contact');
+Route::post('/contact/submit', [LandingPageController::class, 'submitContact'])->name('contact.submit');
+Route::post('/newsletter/subscribe', [LandingPageController::class, 'subscribeNewsletter'])->name('newsletter.subscribe');
+Route::get('/faq', [LandingPageController::class, 'faq'])->name('faq');
+Route::get('/legal/{slug}', [App\Http\Controllers\LegalController::class, 'show'])->name('legal.show');
+Route::get('/resources', [LandingPageController::class, 'resources'])->name('resources');
+Route::get('/resources/{slug}', [LandingPageController::class, 'resourceShow'])->name('resources.show');
+Route::get('/status', [App\Http\Controllers\StatusController::class, 'index'])->name('status');
+Route::get('/docs', [App\Http\Controllers\DocsController::class, 'index'])->name('docs.index');
+Route::get('/docs/{slug}', [App\Http\Controllers\DocsController::class, 'show'])->name('docs.show');
 
 // Investor panel auth
 Route::prefix('investor')->name('investor.')->middleware('guest')->group(function () {
@@ -33,9 +48,9 @@ Route::middleware('guest')->group(function () {
     })->name('register');
 
     // Central Login (Redirects to Tenant Dashboard)
-    Route::get('login', function () {
-        return redirect()->route('filament.dashboard.auth.login');
-    })->name('login');
+    // Central Login (Redirects to Tenant Dashboard)
+    Route::get('login', [\App\Http\Controllers\Auth\CentralLoginController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [\App\Http\Controllers\Auth\CentralLoginController::class, 'login']);
 
     // Password Reset - utilizing standard controller for now, could be replaced with Filament/Livewire later
     Route::get('forgot-password', [\App\Http\Controllers\Auth\PasswordResetLinkController::class, 'create'])->name('password.request');

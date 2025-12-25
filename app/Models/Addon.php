@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Addon extends Model
 {
+    protected $connection = 'tenant';
+    
+
     protected $guarded = [];
 
     protected $casts = [

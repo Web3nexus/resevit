@@ -90,8 +90,11 @@ class Login extends BaseLogin
             $email = $credentials['email']; // Define email early for logging
 
             // 1. Try Local Login first
+            \Illuminate\Support\Facades\Log::info("DEBUG: Attempting local login for $email on connection: " . (new \App\Models\User)->getConnectionName());
+
             if (\Filament\Facades\Filament::auth()->attempt($credentials, $remember)) {
-                \Illuminate\Support\Facades\Log::info('LOGIN: Local login success for ' . $email . '. User ID: ' . \Filament\Facades\Filament::auth()->id());
+                $user = \Filament\Facades\Filament::auth()->user();
+                \Illuminate\Support\Facades\Log::info('LOGIN: Local login success for ' . $email . '. User ID: ' . $user->id . ' on connection: ' . $user->getConnectionName());
                 // session()->regenerate(); // default attempt() already does this
 
                 // Explicitly redirect to dashboard to prevent 'intended' loop back to login
@@ -132,8 +135,10 @@ class Login extends BaseLogin
                         $url = tenant_route($domain, 'filament.dashboard.auth.login');
                         \Illuminate\Support\Facades\Log::info('LOGIN: Redirecting to ' . $url);
 
-                        return new class($url) implements \Filament\Auth\Http\Responses\Contracts\LoginResponse, \Illuminate\Contracts\Support\Responsable {
-                            public function __construct(protected string $url) {}
+                        return new class ($url) implements \Filament\Auth\Http\Responses\Contracts\LoginResponse, \Illuminate\Contracts\Support\Responsable {
+                            public function __construct(protected string $url)
+                            {
+                            }
                             public function toResponse($request)
                             {
                                 return redirect()->to($this->url);

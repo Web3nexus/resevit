@@ -26,6 +26,8 @@ class InvestorPanelProvider extends PanelProvider
             ->id('invest')
             ->path('invest')
             ->authGuard('investor')
+            ->databaseNotifications()
+            ->viteTheme('resources/css/app.css')
             // enable the built-in login form
             ->login()
             // NOTE: Filament's registration page is enabled by adding the Register page
@@ -37,18 +39,26 @@ class InvestorPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Invest/Resources'), for: 'App\\Filament\\Invest\\Resources')
             ->discoverPages(in: app_path('Filament/Invest/Pages'), for: 'App\\Filament\\Invest\\Pages')
             ->pages([
-                // default dashboard placeholder; projects can add real pages under App\Filament\Invest\Pages
+                    // default dashboard placeholder; projects can add real pages under App\Filament\Invest\Pages
                 Pages\Dashboard::class,
+            ])
+            ->userMenuItems([
+                'account' => \Filament\Actions\Action::make('account')
+                    ->label('Account')
+                    ->url(fn() => \App\Filament\Invest\Pages\EditProfile::getUrl())
+                    ->icon('heroicon-o-user-circle'),
             ])
             ->spa()
             ->discoverWidgets(in: app_path('Filament/Invest/Widgets'), for: 'App\\Filament\\Invest\\Widgets')
             ->widgets([
-                // placeholder widgets
+                \App\Filament\Invest\Widgets\InvestorStatsWidget::class,
+                \App\Filament\Invest\Widgets\InvestmentPerformanceChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                \App\Http\Middleware\SetLocale::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
@@ -57,12 +67,17 @@ class InvestorPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             // Use Filament's Authenticate middleware and a custom EnsureInvestorRole middleware
+            ->sidebarWidth('250px')
+            ->sidebarCollapsibleOnDesktop()
             ->authMiddleware([
                 Authenticate::class,
                 \App\Http\Middleware\EnsureInvestorRole::class,
             ])
             // Navigation is provided by discovered resources/pages. Add Filament resources/pages under
             // app/Filament/Invest/* (for example: Investments, Portfolio, Wallet) to populate navigation.
-        ;
+            ->renderHook(
+                'panels::user-menu.before',
+                fn() => view('filament.components.language-switcher-hook')
+            );
     }
 }

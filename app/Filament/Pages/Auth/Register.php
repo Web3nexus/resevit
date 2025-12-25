@@ -42,12 +42,12 @@ class Register extends BaseRegister
         parent::mount();
     }
 
-    public function getHeading(): string | Htmlable
+    public function getHeading(): string|Htmlable
     {
         return "We're excited you're here!";
     }
 
-    public function getSubheading(): string | Htmlable | null
+    public function getSubheading(): string|Htmlable|null
     {
         return "Start by creating an account.";
     }
@@ -68,7 +68,11 @@ class Register extends BaseRegister
                                 ->email()
                                 ->required()
                                 ->maxLength(255)
-                                ->unique(table: 'users', column: 'email'),
+                                ->unique(table: fn(Get $get) => match ($get('role')) {
+                                    'investor' => 'investors',
+                                    'customer' => 'customers',
+                                    default => 'users',
+                                }, column: 'email'),
 
                             TextInput::make('password')
                                 // ->label('Password')
@@ -106,30 +110,28 @@ class Register extends BaseRegister
                                 ->required()
                                 ->maxLength(255),
 
-                            TextInput::make('mobile')
-                                // ->label('Mobile Number')
-                                ->hiddenLabel()
-                                ->placeholder('Mobile Number')
-                                ->prefixIcon('heroicon-o-phone')
-                                ->tel()
-                                ->required()
-                                ->maxLength(255),
-
                             Select::make('country')
                                 // ->label('Country')
                                 ->hiddenLabel()
                                 ->placeholder('Select Country')
                                 ->prefixIcon('heroicon-o-globe-alt')
-                                ->options([
-                                    'Nigeria' => 'Nigeria',
-                                    'Ghana' => 'Ghana',
-                                    'Kenya' => 'Kenya',
-                                    'South Africa' => 'South Africa',
-                                    'United States' => 'United States',
-                                    'United Kingdom' => 'United Kingdom',
-                                ])
+                                ->options(self::getCountries())
                                 ->searchable()
+                                ->live()
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    $phoneCode = self::getPhoneCode($state);
+                                    $set('phone_code', $phoneCode);
+                                })
                                 ->required(),
+
+                            TextInput::make('mobile')
+                                // ->label('Mobile Number')
+                                ->hiddenLabel()
+                                ->placeholder('Mobile Number')
+                                ->prefix(fn(Get $get) => self::getPhoneCode($get('country')) ?: '+')
+                                ->tel()
+                                ->required()
+                                ->maxLength(255),
                         ]),
 
                     Wizard\Step::make('Business Details')
@@ -187,9 +189,16 @@ class Register extends BaseRegister
                     // ✅ ONLY customize the final submit button
                     ->submitAction(
                         new \Illuminate\Support\HtmlString(
-                            '<button type="submit"
-            class="fi-btn fi-btn-size-md w-full rounded-lg bg-custom-600 text-gold font-bold">
-            Register
+                            '<button type="submit" wire:loading.attr="disabled" wire:target="register"
+            class="fi-btn fi-btn-size-md w-full rounded-lg bg-custom-600 text-gold-500 font-bold flex items-center justify-center gap-2">
+            <span wire:loading.remove wire:target="register">Register</span>
+            <span wire:loading wire:target="register" class="flex items-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-gold-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating your restaurant...
+            </span>
         </button>'
                         )
                     ),
@@ -353,6 +362,9 @@ class Register extends BaseRegister
             'newsletter_subscribed' => $data['newsletter_subscribed'] ?? false,
         ]);
 
+        // Assign role with correct guard
+        $customer->assignRole('customer', 'customer');
+
         // Store intended redirect
         $this->redirectUrl = route('customer.login');
 
@@ -369,8 +381,127 @@ class Register extends BaseRegister
             'newsletter_subscribed' => $data['newsletter_subscribed'] ?? false,
         ]);
 
+        // Assign role with correct guard
+        $investor->assignRole('investor', 'investor');
+
         $this->redirectUrl = route('investor.login');
 
         return $investor;
+    }
+
+    protected static function getCountries(): array
+    {
+        return [
+            'Afghanistan' => 'Afghanistan',
+            'Albania' => 'Albania',
+            'Algeria' => 'Algeria',
+            'Argentina' => 'Argentina',
+            'Australia' => 'Australia',
+            'Austria' => 'Austria',
+            'Bangladesh' => 'Bangladesh',
+            'Belgium' => 'Belgium',
+            'Brazil' => 'Brazil',
+            'Canada' => 'Canada',
+            'China' => 'China',
+            'Colombia' => 'Colombia',
+            'Denmark' => 'Denmark',
+            'Egypt' => 'Egypt',
+            'Finland' => 'Finland',
+            'France' => 'France',
+            'Germany' => 'Germany',
+            'Ghana' => 'Ghana',
+            'Greece' => 'Greece',
+            'India' => 'India',
+            'Indonesia' => 'Indonesia',
+            'Ireland' => 'Ireland',
+            'Italy' => 'Italy',
+            'Japan' => 'Japan',
+            'Kenya' => 'Kenya',
+            'Malaysia' => 'Malaysia',
+            'Mexico' => 'Mexico',
+            'Netherlands' => 'Netherlands',
+            'New Zealand' => 'New Zealand',
+            'Nigeria' => 'Nigeria',
+            'Norway' => 'Norway',
+            'Pakistan' => 'Pakistan',
+            'Philippines' => 'Philippines',
+            'Poland' => 'Poland',
+            'Portugal' => 'Portugal',
+            'Russia' => 'Russia',
+            'Saudi Arabia' => 'Saudi Arabia',
+            'Singapore' => 'Singapore',
+            'South Africa' => 'South Africa',
+            'South Korea' => 'South Korea',
+            'Spain' => 'Spain',
+            'Sweden' => 'Sweden',
+            'Switzerland' => 'Switzerland',
+            'Thailand' => 'Thailand',
+            'Turkey' => 'Turkey',
+            'Uganda' => 'Uganda',
+            'Ukraine' => 'Ukraine',
+            'United Arab Emirates' => 'United Arab Emirates',
+            'United Kingdom' => 'United Kingdom',
+            'United States' => 'United States',
+            'Vietnam' => 'Vietnam',
+        ];
+    }
+
+    protected static function getPhoneCode(?string $country): ?string
+    {
+        $phoneCodes = [
+            'Afghanistan' => '+93',
+            'Albania' => '+355',
+            'Algeria' => '+213',
+            'Argentina' => '+54',
+            'Australia' => '+61',
+            'Austria' => '+43',
+            'Bangladesh' => '+880',
+            'Belgium' => '+32',
+            'Brazil' => '+55',
+            'Canada' => '+1',
+            'China' => '+86',
+            'Colombia' => '+57',
+            'Denmark' => '+45',
+            'Egypt' => '+20',
+            'Finland' => '+358',
+            'France' => '+33',
+            'Germany' => '+49',
+            'Ghana' => '+233',
+            'Greece' => '+30',
+            'India' => '+91',
+            'Indonesia' => '+62',
+            'Ireland' => '+353',
+            'Italy' => '+39',
+            'Japan' => '+81',
+            'Kenya' => '+254',
+            'Malaysia' => '+60',
+            'Mexico' => '+52',
+            'Netherlands' => '+31',
+            'New Zealand' => '+64',
+            'Nigeria' => '+234',
+            'Norway' => '+47',
+            'Pakistan' => '+92',
+            'Philippines' => '+63',
+            'Poland' => '+48',
+            'Portugal' => '+351',
+            'Russia' => '+7',
+            'Saudi Arabia' => '+966',
+            'Singapore' => '+65',
+            'South Africa' => '+27',
+            'South Korea' => '+82',
+            'Spain' => '+34',
+            'Sweden' => '+46',
+            'Switzerland' => '+41',
+            'Thailand' => '+66',
+            'Turkey' => '+90',
+            'Uganda' => '+256',
+            'Ukraine' => '+380',
+            'United Arab Emirates' => '+971',
+            'United Kingdom' => '+44',
+            'United States' => '+1',
+            'Vietnam' => '+84',
+        ];
+
+        return $phoneCodes[$country] ?? null;
     }
 }

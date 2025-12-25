@@ -20,6 +20,8 @@ class Admin extends Authenticatable implements FilamentUser
     /** @use HasFactory<\Database\Factories\AdminFactory> */
     use HasFactory, Notifiable, HasRoles;
 
+    protected $connection = 'landlord';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -82,7 +84,7 @@ class Admin extends Authenticatable implements FilamentUser
         if ($panel->getId() === 'securegate') {
             return true;
         }
-        
+
         return false;
     }
 }

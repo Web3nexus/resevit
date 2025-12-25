@@ -14,15 +14,15 @@ use Filament\Schemas\Schema;
 class AdminResource extends Resource
 {
     protected static ?string $model = Admin::class;
-    
+
     protected static ?string $navigationLabel = 'Admin Users';
-    
+
     protected static ?string $modelLabel = 'Admin User';
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
-    
+
     protected static string|\UnitEnum|null $navigationGroup = 'Internal Users';
-    
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
@@ -40,12 +40,12 @@ class AdminResource extends Resource
                     ->unique(ignoreRecord: true),
                 Forms\Components\TextInput::make('password')
                     ->password()
-                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                    ->dehydrated(fn ($state) => filled($state))
-                    ->required(fn (string $context): bool => $context === 'create'),
+                    ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                    ->dehydrated(fn($state) => filled($state))
+                    ->required(fn(string $context): bool => $context === 'create'),
                 Forms\Components\Select::make('roles')
                     ->multiple()
-                    ->relationship('roles', 'name', fn ($query) => $query->where('guard_name', 'securegate'))
+                    ->relationship('roles', 'name', fn($query) => $query->where('guard_name', 'securegate'))
                     ->preload(),
             ]);
     }
@@ -111,7 +111,7 @@ class AdminResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 // Row click will navigate to view/edit
             ])
             ->bulkActions([

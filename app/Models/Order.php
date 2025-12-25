@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    protected $connection = 'tenant';
+    
+
     protected $guarded = [];
 
     protected $casts = [
@@ -26,4 +29,14 @@ class Order extends Model
 
     // public function customer() relation depends on if Customer is in global or tenant.
     // If Global, we might need a custom relation or just store ID.
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function staff(): BelongsTo
+    {
+        return $this->belongsTo(Staff::class);
+    }
 }

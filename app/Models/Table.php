@@ -9,7 +9,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Table extends Model
 {
+    protected $connection = 'tenant';
     use HasFactory, SoftDeletes;
+
+    
 
     protected $fillable = [
         'name',

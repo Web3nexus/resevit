@@ -25,6 +25,8 @@ class Investor extends Authenticatable implements FilamentUser
     /** @use HasFactory<\Database\Factories\InvestorFactory> */
     use HasFactory, Notifiable, HasRoles;
 
+    protected $connection = 'landlord';
+
     /**
      * The table associated with the model.
      *
@@ -93,5 +95,21 @@ class Investor extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->hasRole('investor');
+    }
+
+    /**
+     * Get the investments for the investor.
+     */
+    public function investments()
+    {
+        return $this->hasMany(Investment::class);
+    }
+
+    /**
+     * Get the payouts for the investor.
+     */
+    public function payouts()
+    {
+        return $this->hasMany(InvestorPayout::class);
     }
 }

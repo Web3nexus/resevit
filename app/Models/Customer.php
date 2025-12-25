@@ -26,6 +26,8 @@ class Customer extends Authenticatable implements FilamentUser
     /** @use HasFactory<\Database\Factories\CustomerFactory> */
     use HasFactory, Notifiable, HasRoles;
 
+    protected $connection = 'landlord';
+
     /**
      * The table associated with the model.
      *

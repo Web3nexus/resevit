@@ -4,17 +4,18 @@ namespace App\Filament\Dashboard\Pages;
 
 use App\Models\ReservationSetting;
 use Filament\Forms;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
-class EditProfile extends Page implements HasForms
+class EditProfile extends Page implements HasSchemas
 {
-    use InteractsWithForms;
+    use InteractsWithSchemas;
 
     protected string $view = 'filament.dashboard.pages.edit-profile';
 
@@ -30,6 +31,9 @@ class EditProfile extends Page implements HasForms
         $this->profileData = [
             'name' => $user->name,
             'email' => $user->email,
+            'currency' => $user->currency,
+            'timezone' => $user->timezone,
+            'locale' => $user->locale ?? 'en',
         ];
 
         $settings = ReservationSetting::getInstance();
@@ -38,10 +42,12 @@ class EditProfile extends Page implements HasForms
             'business_address' => $settings->business_address,
             'business_phone' => $settings->business_phone,
             'business_hours' => $settings->business_hours,
+            'currency' => $settings->currency,
+            'timezone' => $settings->timezone,
         ];
     }
 
-    protected function getForms(): array
+    protected function getSchemas(): array
     {
         return [
             'profileForm',
@@ -50,11 +56,11 @@ class EditProfile extends Page implements HasForms
         ];
     }
 
-    public function profileForm(Form $form): Form
+    public function profileForm(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
-                Forms\Components\Section::make('Profile Information')
+                Section::make('Profile Information')
                     ->description('Update your account\'s profile information and email address.')
                     ->schema([
                         Forms\Components\TextInput::make('name')
@@ -63,6 +69,23 @@ class EditProfile extends Page implements HasForms
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true),
+                        Forms\Components\Select::make('currency')
+                            ->options(app(\App\Services\CurrencyService::class)->getSupportedCurrencies())
+                            ->required(),
+                        Forms\Components\Select::make('timezone')
+                            ->options(array_combine(timezone_identifiers_list(), timezone_identifiers_list()))
+                            ->searchable()
+                            ->required(),
+                        Forms\Components\Select::make('locale')
+                            ->label('Language')
+                            ->options([
+                                'en' => 'English',
+                                'es' => 'Spanish',
+                                'fr' => 'French',
+                                'de' => 'German',
+                                'ar' => 'Arabic',
+                            ])
+                            ->required(),
                         Forms\Components\FileUpload::make('avatar_url')
                             ->label('Avatar')
                             ->avatar()
@@ -75,11 +98,11 @@ class EditProfile extends Page implements HasForms
             ->model(auth()->user());
     }
 
-    public function passwordForm(Form $form): Form
+    public function passwordForm(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
-                Forms\Components\Section::make('Update Password')
+                Section::make('Update Password')
                     ->description('Ensure your account is using a long, random password to stay secure.')
                     ->schema([
                         Forms\Components\TextInput::make('current_password')
@@ -103,11 +126,11 @@ class EditProfile extends Page implements HasForms
             ->statePath('passwordData');
     }
 
-    public function businessForm(Form $form): Form
+    public function businessForm(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
-                Forms\Components\Section::make('Business Details')
+                Section::make('Business Details')
                     ->description('Manage your business information and operating hours.')
                     ->schema([
                         Forms\Components\TextInput::make('business_name')
@@ -119,6 +142,13 @@ class EditProfile extends Page implements HasForms
                         Forms\Components\Textarea::make('business_address')
                             ->rows(3)
                             ->columnSpanFull(),
+                        Forms\Components\Select::make('currency')
+                            ->options(app(\App\Services\CurrencyService::class)->getSupportedCurrencies())
+                            ->required(),
+                        Forms\Components\Select::make('timezone')
+                            ->options(array_combine(timezone_identifiers_list(), timezone_identifiers_list()))
+                            ->searchable()
+                            ->required(),
 
                         Forms\Components\KeyValue::make('business_hours')
                             ->label('Weekly Schedule')

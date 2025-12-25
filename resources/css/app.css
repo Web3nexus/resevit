@@ -4,6 +4,10 @@
 @import '../../vendor/filament/filament/resources/css/theme.css';
 @config "../../tailwind.config.js";
 
+[x-cloak] {
+    display: none !important;
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
@@ -12,12 +16,37 @@
 @source '../../vendor/filament/**/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Inter', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    --color-navy: #0B132B;
-    --color-gold: #F1C40F;
-    --color-offwhite: #F9FAFB;
+    --color-brand-primary: #0B132B;
+    --color-brand-secondary: #5D4E12;
+    /* A dark gold/brown for contrast */
+    --color-brand-accent: #F1C40F;
+    --color-brand-offwhite: #F9FAFB;
+
+    /* Define colors as Tailwind color scales */
+    --color-navy-50: #e8e9ec;
+    --color-navy-100: #c5c7cf;
+    --color-navy-200: #9ea2af;
+    --color-navy-300: #777c8f;
+    --color-navy-400: #5a6077;
+    --color-navy-500: #3d445f;
+    --color-navy-600: #373e57;
+    --color-navy-700: #2f354d;
+    --color-navy-800: #272d43;
+    --color-navy-900: #0B132B;
+
+    --color-gold-50: #fef9e7;
+    --color-gold-100: #fdf0c3;
+    --color-gold-200: #fce79b;
+    --color-gold-300: #fbdd73;
+    --color-gold-400: #fad655;
+    --color-gold-500: #F1C40F;
+    --color-gold-600: #f0be0e;
+    --color-gold-700: #eeb60c;
+    --color-gold-800: #edaf0a;
+    --color-gold-900: #eba206;
 
     --shadow-elegant: 0 10px 30px rgba(11, 19, 43, 0.12);
 }
@@ -25,15 +54,20 @@
 /* Utility component classes removed in favor of Tailwind utilities */
 
 @layer utilities {
-    .dark input, 
-    .dark select, 
+
+    .dark input,
+    .dark select,
     .dark textarea {
-        background-color: #1f2937 !important; /* gray-800 */
-        color: #f3f4f6 !important; /* gray-100 */
-        border-color: #374151 !important; /* gray-700 */
+        background-color: #1f2937 !important;
+        /* gray-800 */
+        color: #f3f4f6 !important;
+        /* gray-100 */
+        border-color: #374151 !important;
+        /* gray-700 */
     }
-    
+
     .dark input::placeholder {
-        color: #9ca3af !important; /* gray-400 */
+        color: #9ca3af !important;
+        /* gray-400 */
     }
 }

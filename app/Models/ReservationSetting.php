@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReservationSetting extends Model
 {
+    protected $connection = 'tenant';
+    
+
     protected $fillable = [
         'business_name',
         'business_address',
@@ -27,6 +30,8 @@ class ReservationSetting extends Model
         'notify_staff_new_reservation',
         'allow_guest_bookings',
         'require_email_verification',
+        'currency',
+        'timezone',
     ];
 
     protected $casts = [

@@ -10,7 +10,10 @@ use Carbon\Carbon;
 
 class CalendarEvent extends Model
 {
+    protected $connection = 'tenant';
     use SoftDeletes;
+
+    
 
     protected $fillable = [
         'title',

@@ -18,7 +18,12 @@ class ReservationResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Reservations';
 
-    protected static ?int $navigationSort = 1;
+    protected static int|null $navigationSort = 1;
+
+    public static function canViewAny(): bool
+    {
+        return has_feature('reservations');
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -61,6 +66,17 @@ class ReservationResource extends Resource
                     ->searchable()
                     ->preload()
                     ->placeholder('Assign a table (optional)'),
+                Forms\Components\Select::make('source')
+                    ->label('Source')
+                    ->options([
+                        'manual' => 'Manual',
+                        'website' => 'Website',
+                        'whatsapp' => 'WhatsApp',
+                        'facebook' => 'Facebook',
+                        'instagram' => 'Instagram',
+                    ])
+                    ->default('manual')
+                    ->required(),
                 Forms\Components\Select::make('status')
                     ->options([
                         'pending' => 'Pending',
@@ -85,6 +101,24 @@ class ReservationResource extends Resource
                 Tables\Columns\TextColumn::make('guest_name')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('source')
+                    ->badge()
+                    ->icon(fn(string $state): ?string => match ($state) {
+                        'manual' => 'heroicon-m-user',
+                        'website' => 'heroicon-m-globe-alt',
+                        'whatsapp' => 'heroicon-m-chat-bubble-left-ellipsis',
+                        'facebook' => 'heroicon-m-chat-bubble-oval-left-ellipsis',
+                        'instagram' => 'heroicon-m-camera',
+                        default => null,
+                    })
+                    ->color(fn(string $state): string => match ($state) {
+                        'manual' => 'gray',
+                        'website' => 'info',
+                        'whatsapp' => 'success',
+                        'facebook' => 'primary',
+                        'instagram' => 'warning',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('reservation_time')
                     ->label('Start Time')
                     ->dateTime()
@@ -133,14 +167,8 @@ class ReservationResource extends Resource
                         'completed' => 'Completed',
                     ]),
             ])
-            ->actions([
+            ->recordActions([
                 \Filament\Actions\EditAction::make(),
-                \Filament\Actions\Action::make('confirm')
-                    ->action(fn(Reservation $record) => $record->update(['status' => 'confirmed']))
-                    ->requiresConfirmation()
-                    ->color('info')
-                    ->visible(fn(Reservation $record) => $record->status === 'pending')
-                    ->icon('heroicon-o-check'),
                 \Filament\Actions\Action::make('seat')
                     ->action(fn(Reservation $record) => $record->update(['status' => 'seated']))
                     ->requiresConfirmation()

@@ -116,11 +116,9 @@ class CalendarEventResource extends Resource
                             ->when($data['until'], fn($q) => $q->whereDate('end_time', '<=', $data['until']));
                     }),
             ])
-            ->actions([
-                \Filament\Actions\EditAction::make()
-                    ->hidden(fn($record) => $record->isReservationEvent()),
-                \Filament\Actions\DeleteAction::make()
-                    ->hidden(fn($record) => $record->isReservationEvent()),
+            ->recordActions([
+                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([

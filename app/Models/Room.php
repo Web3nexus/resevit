@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
+    protected $connection = 'tenant';
     use HasFactory;
+
+    
 
     protected $fillable = [
         'name',

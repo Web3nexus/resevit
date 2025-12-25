@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderItemAddon extends Model
 {
+    protected $connection = 'tenant';
+    
+
     protected $guarded = [];
 
     protected $casts = [

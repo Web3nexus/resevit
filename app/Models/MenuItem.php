@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MenuItem extends Model
 {
+    protected $connection = 'tenant';
+    
+
     protected $guarded = [];
 
     protected $casts = [

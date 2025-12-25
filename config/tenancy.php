@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Stancl\Tenancy\Database\Models\Domain;
+use App\Models\Domain;
 use App\Models\Tenant;
 
 return [
@@ -19,6 +19,7 @@ return [
     'central_domains' => [
         '127.0.0.1',
         'localhost',
+        'resevit.test',
     ],
 
     /**
@@ -29,7 +30,7 @@ return [
      */
     'bootstrappers' => [
         Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper::class,
-        Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper::class,
+        // Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper::class,
         Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper::class,
         Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper::class,
         // Stancl\Tenancy\Bootstrappers\RedisTenancyBootstrapper::class, // Note: phpredis is needed
@@ -39,7 +40,15 @@ return [
      * Database tenancy config. Used by DatabaseTenancyBootstrapper.
      */
     'database' => [
-        'central_connection' => env('DB_CONNECTION', 'landlord'),
+        'central_connection' => 'landlord',
+
+        /**
+         * The connection names that will be swapped to the tenant database.
+         */
+        'connections' => [
+            'mysql',
+            'tenant',
+        ],
 
         /**
          * Connection used as a "template" for the dynamically created tenant database connection.
@@ -63,15 +72,15 @@ return [
             'pgsql' => Stancl\Tenancy\TenantDatabaseManagers\PostgreSQLDatabaseManager::class,
 
             /**
-         * Use this database manager for MySQL to have a DB user created for each tenant database.
-         * You can customize the grants given to these users by changing the $grants property.
-         */
+             * Use this database manager for MySQL to have a DB user created for each tenant database.
+             * You can customize the grants given to these users by changing the $grants property.
+             */
             // 'mysql' => Stancl\Tenancy\TenantDatabaseManagers\PermissionControlledMySQLDatabaseManager::class,
 
             /**
-         * Disable the pgsql manager above, and enable the one below if you
-         * want to separate tenant DBs by schemas rather than databases.
-         */
+             * Disable the pgsql manager above, and enable the one below if you
+             * want to separate tenant DBs by schemas rather than databases.
+             */
             // 'pgsql' => Stancl\Tenancy\TenantDatabaseManagers\PostgreSQLSchemaManager::class, // Separate by schema instead of database
         ],
     ],
