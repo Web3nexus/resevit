@@ -20,7 +20,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @foreach($plans as $plan)
                     <div
-                        class="flex flex-col p-8 rounded-3xl @if($plan->is_featured) bg-brand-primary text-white ring-4 ring-brand-accent/30 shadow-2xl scale-105 z-10 @else bg-slate-50 border border-slate-100 @endif transition-all duration-300">
+                        class="flex flex-col p-8 rounded-3xl @if($plan->is_featured) bg-brand-primary text-white ring-4 ring-brand-accent/30 shadow-2xl scale-105 z-10 @else bg-white border border-slate-200 shadow-xl @endif transition-all duration-300">
                         <div class="mb-8">
                             <div class="flex justify-between items-start mb-2">
                                 <h3 class="text-2xl font-bold">{{ $plan->name }}</h3>
@@ -40,7 +40,7 @@
                         </div>
 
                         <ul class="space-y-4 mb-10 flex-grow">
-                            @foreach($plan->features as $feature)
+                            @foreach($plan->features->where('pivot.is_included', true) as $feature)
                                 <li class="flex items-center space-x-3">
                                     <svg class="w-5 h-5 @if($plan->is_featured) text-brand-accent @else text-brand-primary @endif flex-shrink-0"
                                         fill="currentColor" viewBox="0 0 20 20">
