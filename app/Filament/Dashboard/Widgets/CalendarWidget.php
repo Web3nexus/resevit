@@ -18,6 +18,12 @@ class CalendarWidget extends Widget implements HasForms, HasActions
     use InteractsWithForms;
     use InteractsWithActions;
 
+    public static function canView(): bool
+    {
+        // Only show on the dedicated Calendar page, not on the main Dashboard
+        return request()->routeIs('filament.dashboard.pages.calendar');
+    }
+
     protected string $view = 'filament.dashboard.widgets.calendar-widget';
 
     protected int|string|array $columnSpan = 'full';

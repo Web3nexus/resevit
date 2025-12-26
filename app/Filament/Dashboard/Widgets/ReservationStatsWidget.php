@@ -8,11 +8,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class ReservationStatsWidget extends BaseWidget
 {
-    public static function canView(): bool
-    {
-        return has_feature('analytics');
-    }
-
+    // Exposing to dashboard by default as per user request
     protected static ?int $sort = 1;
 
     protected function getStats(): array
