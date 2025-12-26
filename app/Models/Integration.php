@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Integration extends Model
 {
-    protected $connection = 'tenant';
+    protected $connection = 'landlord';
     protected $fillable = [
         'name',
         'logo_path',

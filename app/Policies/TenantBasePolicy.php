@@ -3,6 +3,8 @@
 namespace App\Policies;
 
 use App\Models\User;
+use App\Models\Admin;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class TenantBasePolicy
@@ -12,43 +14,57 @@ class TenantBasePolicy
     /**
      * Business Owners and Staff can view anything in their tenant.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(Authenticatable $user): bool
     {
-        return $user->hasRole(['Business Owner', 'Staff']);
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole(['Business Owner', 'Staff']);
     }
 
-    public function view(User $user, $model): bool
+    public function view(Authenticatable $user, $model): bool
     {
-        return $user->hasRole(['Business Owner', 'Staff']);
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole(['Business Owner', 'Staff']);
     }
 
-    public function create(User $user): bool
+    public function create(Authenticatable $user): bool
     {
-        return $user->hasRole(['Business Owner', 'Staff']);
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole(['Business Owner', 'Staff']);
     }
 
-    public function update(User $user, $model): bool
+    public function update(Authenticatable $user, $model): bool
     {
-        return $user->hasRole(['Business Owner', 'Staff']);
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole(['Business Owner', 'Staff']);
     }
 
-    public function delete(User $user, $model): bool
+    public function delete(Authenticatable $user, $model): bool
     {
-        return $user->hasRole(['Business Owner']);
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole(['Business Owner']);
     }
 
-    public function deleteAny(User $user): bool
+    public function deleteAny(Authenticatable $user): bool
     {
-        return $user->hasRole(['Business Owner']);
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole(['Business Owner']);
     }
 
-    public function forceDelete(User $user, $model): bool
+    public function forceDelete(Authenticatable $user, $model): bool
     {
         return false; // Typically restricted
     }
 
-    public function restore(User $user, $model): bool
+    public function restore(Authenticatable $user, $model): bool
     {
-        return $user->hasRole(['Business Owner']);
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole(['Business Owner']);
     }
 }

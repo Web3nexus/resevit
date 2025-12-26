@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Dashboard\Components;
+namespace App\Filament\Dashboard\Widgets;
 
 use App\Models\CalendarEvent;
 use App\Services\CalendarService;
@@ -20,7 +20,7 @@ class CalendarWidget extends Widget implements HasForms, HasActions
 
     protected string $view = 'filament.dashboard.widgets.calendar-widget';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     public string $viewMode = 'week'; // 'week' or 'day'
     public string $currentDate;

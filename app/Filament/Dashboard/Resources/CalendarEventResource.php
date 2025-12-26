@@ -20,6 +20,11 @@ class CalendarEventResource extends Resource
 
     protected static ?int $navigationSort = 0;
 
+    public static function canViewAny(): bool
+    {
+        return has_feature('reservations');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

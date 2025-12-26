@@ -4,6 +4,8 @@ namespace App\Policies;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Admin;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class OrderPolicy
@@ -13,58 +15,73 @@ class OrderPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(Authenticatable $user): bool
     {
-        return $user->hasRole(['Business Owner', 'Staff']);
+        if ($user instanceof Admin)
+            return true;
+
+        return has_feature('pos');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Order $order): bool
+    public function view(Authenticatable $user, Order $order): bool
     {
+        if ($user instanceof Admin)
+            return true;
         // Tenant scope is handled by Global Scope / Database Connection
         // Additional check: User must be part of this tenant context
-        return $user->hasRole(['Business Owner', 'Staff']);
+        return $user instanceof User && $user->hasRole(['Business Owner', 'Staff']);
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(Authenticatable $user): bool
     {
-        return $user->hasRole(['Business Owner', 'Staff']);
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole(['Business Owner', 'Staff']);
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Order $order): bool
+    public function update(Authenticatable $user, Order $order): bool
     {
-        return $user->hasRole(['Business Owner', 'Staff']);
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole(['Business Owner', 'Staff']);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Order $order): bool
+    public function delete(Authenticatable $user, Order $order): bool
     {
-        return $user->hasRole('Business Owner'); // Only Owner can delete
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole('Business Owner'); // Only Owner can delete
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Order $order): bool
+    public function restore(Authenticatable $user, Order $order): bool
     {
-        return $user->hasRole('Business Owner');
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole('Business Owner');
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Order $order): bool
+    public function forceDelete(Authenticatable $user, Order $order): bool
     {
-        return $user->hasRole('Business Owner');
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole('Business Owner');
     }
 }

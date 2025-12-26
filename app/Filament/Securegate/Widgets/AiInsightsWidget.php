@@ -15,9 +15,9 @@ class AiInsightsWidget extends Widget
     public function getViewData(): array
     {
         // Gather key metrics to feed to AI
-        $tenantGrowth = \App\Models\Tenant::where('created_at', '>=', now()->subDays(30))->count();
+        $tenantGrowth = \App\Models\Tenant::where('status', 'active')->where('created_at', '>=', now()->subDays(30))->count();
         $totalInvestors = \App\Models\Investor::count();
-        $activeTenants = \App\Models\Tenant::count();
+        $activeTenants = \App\Models\Tenant::where('status', 'active')->count();
 
         // Prepare prompt for AI
         $prompt = "Analyze these metrics for a SaaS platform: 

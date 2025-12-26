@@ -15,11 +15,16 @@ class AddonResource extends Resource
 {
     protected static ?string $model = Addon::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-plus-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-plus-circle';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Menu Management';
+    protected static string|\UnitEnum|null $navigationGroup = 'Menu Management';
 
     protected static ?int $navigationSort = 3;
+
+    public static function canViewAny(): bool
+    {
+        return has_feature('menu');
+    }
 
     public static function form(Schema $schema): Schema
     {

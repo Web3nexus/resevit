@@ -36,7 +36,12 @@ class PricingPlan extends Model
     public function features()
     {
         return $this->belongsToMany(PricingFeature::class, 'pricing_plan_feature')
-            ->withPivot('is_included', 'value')
+            ->withPivot('is_included', 'value', 'limit_value')
             ->withTimestamps();
+    }
+
+    public function planFeatures()
+    {
+        return $this->hasMany(PricingPlanFeature::class, 'pricing_plan_id');
     }
 }

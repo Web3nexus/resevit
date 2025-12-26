@@ -98,5 +98,25 @@ class AppServiceProvider extends ServiceProvider
 
         // Register Calendar Widget manually as it's in a custom location
         // \Livewire\Livewire::component('app.filament.dashboard.components.calendar-widget', \App\Filament\Dashboard\Components\CalendarWidget::class);
+
+        // Register Subscription Sync Listeners if Cashier events exist
+        if (class_exists(\Laravel\Cashier\Events\SubscriptionCreated::class)) {
+            \Illuminate\Support\Facades\Event::listen(
+                \Laravel\Cashier\Events\SubscriptionCreated::class,
+                [\App\Listeners\SubscriptionSyncListener::class, 'handleSubscriptionCreated']
+            );
+        }
+        if (class_exists(\Laravel\Cashier\Events\SubscriptionUpdated::class)) {
+            \Illuminate\Support\Facades\Event::listen(
+                \Laravel\Cashier\Events\SubscriptionUpdated::class,
+                [\App\Listeners\SubscriptionSyncListener::class, 'handleSubscriptionUpdated']
+            );
+        }
+        if (class_exists(\Laravel\Cashier\Events\SubscriptionDeleted::class)) {
+            \Illuminate\Support\Facades\Event::listen(
+                \Laravel\Cashier\Events\SubscriptionDeleted::class,
+                [\App\Listeners\SubscriptionSyncListener::class, 'handleSubscriptionDeleted']
+            );
+        }
     }
 }

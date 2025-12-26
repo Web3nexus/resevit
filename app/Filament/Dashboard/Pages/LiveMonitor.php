@@ -18,7 +18,7 @@ class LiveMonitor extends Page
 
     protected static string|\UnitEnum|null $navigationGroup = 'Reservations';
 
-    public static function canViewAny(): bool
+    public static function canAccess(): bool
     {
         return has_feature('live_monitoring');
     }

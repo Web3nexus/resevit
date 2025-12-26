@@ -14,7 +14,7 @@ class Calendar extends Page
 
     protected static ?int $navigationSort = -1;
 
-    public static function canViewAny(): bool
+    public static function canAccess(): bool
     {
         return has_feature('reservations');
     }
@@ -24,7 +24,7 @@ class Calendar extends Page
     protected function getHeaderWidgets(): array
     {
         return [
-            \App\Filament\Dashboard\Components\CalendarWidget::class,
+            \App\Filament\Dashboard\Widgets\CalendarWidget::class,
         ];
     }
 }

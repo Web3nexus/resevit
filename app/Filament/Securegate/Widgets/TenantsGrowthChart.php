@@ -22,6 +22,8 @@ class TenantsGrowthChart extends ChartWidget
                 DB::raw('strftime("%Y-%m", created_at) as month'),
                 DB::raw('count(*) as count')
             )
+                ->whereNotNull('owner_user_id')
+                ->where('status', 'active')
                 ->where('created_at', '>=', now()->subMonths(11)->startOfMonth())
                 ->groupBy('month')
                 ->orderBy('month')
@@ -32,6 +34,8 @@ class TenantsGrowthChart extends ChartWidget
                 DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
                 DB::raw('count(*) as count')
             )
+                ->whereNotNull('owner_user_id')
+                ->where('status', 'active')
                 ->where('created_at', '>=', now()->subMonths(11)->startOfMonth())
                 ->groupBy('month')
                 ->orderBy('month')

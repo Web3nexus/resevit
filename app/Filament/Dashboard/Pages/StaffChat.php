@@ -16,7 +16,7 @@ class StaffChat extends Page
     protected static ?string $title = 'Staff Chat';
     protected string $view = 'filament.dashboard.pages.staff-chat';
 
-    public static function canViewAny(): bool
+    public static function canAccess(): bool
     {
         return has_feature('staff_chat');
     }

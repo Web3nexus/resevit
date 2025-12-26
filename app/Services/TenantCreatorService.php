@@ -16,10 +16,11 @@ class TenantCreatorService
      * @param User $user
      * @param string $restaurantName
      * @param string $subdomain
-     * @param array $extraData
+     * @param string|int|null $planId
+     * @param string|null $paymentMethodId
      * @return Tenant
      */
-    public function createTenant(User $user, string $restaurantName, string $subdomain, array $extraData = []): Tenant
+    public function createTenant(User $user, string $restaurantName, string $subdomain, array $extraData = [], $planId = null, $paymentMethodId = null): Tenant
     {
         // 1. Create Tenant
         /** @var Tenant $tenant */
@@ -33,7 +34,7 @@ class TenantCreatorService
             'mobile' => $extraData['mobile'] ?? null,
             'country' => $extraData['country'] ?? null,
             'staff_count' => $extraData['staff_count'] ?? null,
-            'plan_id' => \App\Models\PricingPlan::where('slug', 'starter')->first()?->id,
+            'plan_id' => $planId ?: \App\Models\PricingPlan::where('slug', 'starter')->first()?->id,
         ]);
 
         // Get the actual DB name determined by the package (likely tenant_UUID)
@@ -110,6 +111,23 @@ class TenantCreatorService
                 \Log::info("Assigned business_owner role to user: " . $tenantUser->email);
             } else {
                 \Log::error("Could not find business_owner role for user: " . $tenantUser->email);
+            }
+            // 5. Handle Stripe Subscription if plan and payment method provided
+            if ($paymentMethodId && $planId) {
+                $plan = \App\Models\PricingPlan::find($planId);
+                if ($plan && $plan->stripe_id) {
+                    \Log::info("Initiating Stripe Subscription for Tenant: " . $tenant->id . " Plan: " . $plan->slug);
+
+                    $subscription = $tenant->newSubscription('default', $plan->stripe_id);
+
+                    if ($plan->trial_days > 0) {
+                        $subscription->trialDays($plan->trial_days);
+                    }
+
+                    $subscription->create($paymentMethodId);
+
+                    \Log::info("Stripe Subscription Created.");
+                }
             }
         } catch (\Exception $e) {
             \Log::error("Tenant Creation Failed: " . $e->getMessage());

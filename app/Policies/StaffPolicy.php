@@ -4,32 +4,39 @@ namespace App\Policies;
 
 use App\Models\Staff;
 use App\Models\User;
+use App\Models\Admin;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 class StaffPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(Authenticatable $user): bool
     {
-        // Temporarily allow all authenticated users
-        // TODO: Fix tenant-aware role checking
-        return true;
+        if ($user instanceof Admin)
+            return true;
+
+        return has_feature('staff');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Staff $staff): bool
+    public function view(Authenticatable $user, Staff $staff): bool
     {
-        return $user->hasAnyRole(['business_owner', 'manager']);
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasAnyRole(['business_owner', 'manager']);
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(Authenticatable $user): bool
     {
+        if ($user instanceof Admin)
+            return true;
         // Temporarily allow all authenticated users
         return true;
     }
@@ -37,32 +44,40 @@ class StaffPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Staff $staff): bool
+    public function update(Authenticatable $user, Staff $staff): bool
     {
-        return $user->hasAnyRole(['business_owner', 'manager']);
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasAnyRole(['business_owner', 'manager']);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Staff $staff): bool
+    public function delete(Authenticatable $user, Staff $staff): bool
     {
-        return $user->hasRole('business_owner');
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole('business_owner');
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Staff $staff): bool
+    public function restore(Authenticatable $user, Staff $staff): bool
     {
-        return $user->hasRole('business_owner');
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole('business_owner');
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Staff $staff): bool
+    public function forceDelete(Authenticatable $user, Staff $staff): bool
     {
-        return $user->hasRole('business_owner');
+        if ($user instanceof Admin)
+            return true;
+        return $user instanceof User && $user->hasRole('business_owner');
     }
 }

@@ -32,6 +32,7 @@ class PricingSeeder extends Seeder
             ['name' => 'Support Tickets', 'feature_key' => 'support_tickets', 'category' => 'Customer Care'],
             ['name' => 'Staff Chat', 'feature_key' => 'staff_chat', 'category' => 'Communication'],
             ['name' => 'Audit Logs', 'feature_key' => 'audit_logs', 'category' => 'Security'],
+            ['name' => 'Multi-Business Management', 'feature_key' => 'multi_business', 'category' => 'Operations'],
         ];
 
         foreach ($features as $f) {
@@ -45,6 +46,7 @@ class PricingSeeder extends Seeder
             'price_monthly' => 29.00,
             'price_yearly' => 290.00,
             'trial_days' => 7,
+            'stripe_id' => 'price_STARTER_PLACEHOLDER', // Replace with Stripe Price ID
             'order' => 1,
         ]);
 
@@ -53,6 +55,7 @@ class PricingSeeder extends Seeder
             'description' => 'Scale your restaurant with marketing and AI.',
             'price_monthly' => 79.00,
             'price_yearly' => 790.00,
+            'stripe_id' => 'price_GROWTH_PLACEHOLDER', // Replace with Stripe Price ID
             'order' => 2,
         ]);
 
@@ -61,6 +64,7 @@ class PricingSeeder extends Seeder
             'description' => 'For busy restaurants that need advanced POS and analytics.',
             'price_monthly' => 149.00,
             'price_yearly' => 1490.00,
+            'stripe_id' => 'price_PRO_PLACEHOLDER', // Replace with Stripe Price ID
             'order' => 3,
         ]);
 

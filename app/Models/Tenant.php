@@ -92,6 +92,9 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'currency',
             'trial_ends_at',
             'plan_id',
+            'stripe_id',
+            'pm_type',
+            'pm_last_four',
         ];
     }
 }

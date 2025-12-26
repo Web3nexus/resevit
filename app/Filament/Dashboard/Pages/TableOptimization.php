@@ -26,7 +26,7 @@ class TableOptimization extends Page implements HasForms
     public array $suggestions = [];
     public bool $isOptimizing = false;
 
-    public static function canViewAny(): bool
+    public static function canAccess(): bool
     {
         return has_feature('ai_optimization');
     }

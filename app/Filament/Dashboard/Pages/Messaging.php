@@ -13,6 +13,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Page;
+use Livewire\Attributes\Computed;
 
 class Messaging extends Page implements HasActions
 {
@@ -25,7 +26,7 @@ class Messaging extends Page implements HasActions
 
     protected string $view = 'filament.dashboard.pages.messaging';
 
-    public static function canViewAny(): bool
+    public static function canAccess(): bool
     {
         return has_feature('messaging');
     }

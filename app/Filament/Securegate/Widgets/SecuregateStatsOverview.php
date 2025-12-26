@@ -19,34 +19,34 @@ class SecuregateStatsOverview extends BaseWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Total Businesses', Tenant::whereNotNull('owner_user_id')->count())
-                ->description('Active Tenants with Owners')
+            Stat::make('Active Businesses', Tenant::where('status', 'active')->count())
+                ->description('Businesses with active status')
                 ->descriptionIcon('heroicon-m-building-storefront')
-                ->color('primary')
+                ->color('success')
                 ->chart([
-                    Tenant::whereNotNull('owner_user_id')->where('created_at', '>=', now()->subDays(6))->count(),
-                    Tenant::whereNotNull('owner_user_id')->where('created_at', '>=', now()->subDays(5))->count(),
-                    Tenant::whereNotNull('owner_user_id')->where('created_at', '>=', now()->subDays(4))->count(),
-                    Tenant::whereNotNull('owner_user_id')->where('created_at', '>=', now()->subDays(3))->count(),
-                    Tenant::whereNotNull('owner_user_id')->where('created_at', '>=', now()->subDays(2))->count(),
-                    Tenant::whereNotNull('owner_user_id')->where('created_at', '>=', now()->subDays(1))->count(),
-                    Tenant::whereNotNull('owner_user_id')->count(),
+                    Tenant::where('status', 'active')->where('created_at', '>=', now()->subDays(6))->count(),
+                    Tenant::where('status', 'active')->where('created_at', '>=', now()->subDays(5))->count(),
+                    Tenant::where('status', 'active')->where('created_at', '>=', now()->subDays(4))->count(),
+                    Tenant::where('status', 'active')->where('created_at', '>=', now()->subDays(3))->count(),
+                    Tenant::where('status', 'active')->where('created_at', '>=', now()->subDays(2))->count(),
+                    Tenant::where('status', 'active')->where('created_at', '>=', now()->subDays(1))->count(),
+                    Tenant::where('status', 'active')->count(),
                 ]),
 
-            Stat::make('Total Customers', Customer::count())
-                ->description('Registered Users')
-                ->descriptionIcon('heroicon-m-user-group')
-                ->color('success'),
+            Stat::make('Total Businesses', Tenant::count())
+                ->description('All businesses in the system')
+                ->descriptionIcon('heroicon-m-building-office-2')
+                ->color('gray'),
 
             Stat::make('Total Investors', Investor::count())
                 ->description('Active Investors')
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('warning'),
 
-            Stat::make('Newsletter Subs', NewsletterSubscriber::count())
-                ->description('Marketing Audience')
-                ->descriptionIcon('heroicon-m-envelope')
-                ->color('info'),
+            Stat::make('Total Customers', Customer::count())
+                ->description('Registered Users')
+                ->descriptionIcon('heroicon-m-user-group')
+                ->color('primary'),
         ];
     }
 }

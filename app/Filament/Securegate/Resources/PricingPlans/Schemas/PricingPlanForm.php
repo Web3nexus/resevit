@@ -53,7 +53,7 @@ class PricingPlanForm
                 Section::make('Features')
                     ->schema([
                         Repeater::make('planFeatures')
-                            ->relationship('features')
+                            ->relationship('planFeatures')
                             ->schema([
                                 Select::make('pricing_feature_id')
                                     ->label('Feature')

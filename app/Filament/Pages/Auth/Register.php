@@ -7,6 +7,7 @@ use Filament\Auth\Pages\Register as BaseRegister;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Forms;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Components\Utilities\Get;
@@ -151,6 +152,41 @@ class Register extends BaseRegister
                                 ->prefixIcon('heroicon-o-users')
                                 ->options(fn() => \App\Models\StaffRange::pluck('label', 'range'))
                                 ->required(),
+                        ]),
+
+                    Wizard\Step::make('Select Plan')
+                        ->visible(fn(Get $get) => $get('role') === 'business_owner')
+                        ->schema([
+                            Select::make('plan_id')
+                                ->label('Choose a Pricing Plan')
+                                ->prefixIcon('heroicon-o-credit-card')
+                                ->options(fn() => \App\Models\PricingPlan::where('is_active', true)->where('is_free', false)->pluck('name', 'id'))
+                                ->required()
+                                ->live()
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    $plan = \App\Models\PricingPlan::find($state);
+                                    if ($plan) {
+                                        $set('plan_description', $plan->description);
+                                        $set('plan_price', $plan->price_monthly);
+                                        $set('plan_trial', $plan->trial_days);
+                                    }
+                                }),
+                            Forms\Components\Placeholder::make('plan_info')
+                                ->content(fn(Get $get) => $get('plan_description') ? "Price: $" . $get('plan_price') . "/mo - Includes " . $get('plan_trial') . " days trial." : "Select a plan to see details."),
+                        ]),
+
+                    Wizard\Step::make('Payment')
+                        ->visible(fn(Get $get) => $get('role') === 'business_owner')
+                        ->schema([
+                            \Filament\Schemas\Components\View::make('filament.pages.auth.partials.stripe-payment-step')
+                                ->viewData([
+                                    'stripeKey' => config('cashier.key'),
+                                ]),
+                            Forms\Components\Hidden::make('payment_method_id')
+                                ->required()
+                                ->validationMessages([
+                                    'required' => 'Please provide valid card details.',
+                                ]),
                         ]),
 
                     Wizard\Step::make('Terms')
@@ -329,7 +365,7 @@ class Register extends BaseRegister
             ];
 
             $tenant = app(TenantCreatorService::class)
-                ->createTenant($user, $data['restaurant_name'], $slug, $extraData);
+                ->createTenant($user, $data['restaurant_name'], $slug, $extraData, $data['plan_id'] ?? null, $data['payment_method_id'] ?? null);
 
             DB::purge('tenant');
             DB::setDefaultConnection('landlord');
