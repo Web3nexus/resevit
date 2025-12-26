@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingPageController::class, 'home'])->name('home');
 Route::get('/pricing', [LandingPageController::class, 'pricing'])->name('pricing');
+
+// Directory Routes
+Route::get('/directory', [\App\Http\Controllers\DirectoryController::class, 'index'])->name('directory.index');
+Route::get('/directory/{slug}', [\App\Http\Controllers\DirectoryController::class, 'show'])->name('directory.show');
 Route::get('/features', [LandingPageController::class, 'features'])->name('features');
 Route::get('/integrations', [LandingPageController::class, 'integrations'])->name('integrations');
 Route::get('/about', [LandingPageController::class, 'about'])->name('about');

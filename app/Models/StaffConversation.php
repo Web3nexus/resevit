@@ -18,6 +18,6 @@ class StaffConversation extends Model
 
     public function participants(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'staff_conversation_participants', 'staff_conversation_id', 'user_id');
+        return $this->belongsToMany(TenantUser::class, 'staff_conversation_participants', 'staff_conversation_id', 'user_id');
     }
 }

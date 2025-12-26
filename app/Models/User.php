@@ -62,6 +62,7 @@ class User extends Authenticatable implements FilamentUser
         'currency',
         'timezone',
         'locale',
+        'wallet_balance',
     ];
 
     /**
@@ -86,7 +87,13 @@ class User extends Authenticatable implements FilamentUser
             'password' => 'hashed',
             'terms_accepted' => 'boolean',
             'newsletter_subscribed' => 'boolean',
+            'wallet_balance' => 'decimal:2',
         ];
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
     }
 
     public function canAccessPanel(Panel $panel): bool

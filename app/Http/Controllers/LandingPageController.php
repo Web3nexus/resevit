@@ -134,6 +134,24 @@ class LandingPageController extends Controller
             ->first();
 
         if (!$page) {
+            // Check if it's a legal page that we have in PlatformSettings
+            $settings = \App\Models\PlatformSetting::current();
+            $legal = $settings->legal_settings ?? [];
+
+            $legalMapping = [
+                'terms' => 'terms_of_service',
+                'privacy' => 'privacy_policy',
+                'cookie-policy' => 'cookie_policy',
+                'gdpr' => 'gdpr',
+            ];
+
+            if (isset($legalMapping[$slug]) && !empty($legal[$legalMapping[$slug]])) {
+                return view('landing.legal-simple', [
+                    'title' => ucwords(str_replace('-', ' ', $slug)),
+                    'content' => $legal[$legalMapping[$slug]],
+                ]);
+            }
+
             // Fallback to a static view if no DB entry exists, or 404
             if (view()->exists("landing.{$slug}")) {
                 return view("landing.{$slug}");

@@ -58,8 +58,13 @@ class BusinessResource extends Resource
                             ->label('Pricing Plan')
                             ->options(\App\Models\PricingPlan::where('is_active', true)->pluck('name', 'id'))
                             ->required()
-                            ->hiddenOn('create') // Hidden on create, auto-assigned
+                            ->hiddenOn('create')
                             ->helperText('Plan is inherited from your main business.'),
+                        Forms\Components\Select::make('business_category_id')
+                            ->label('Business Category')
+                            ->relationship('businessCategory', 'name')
+                            ->searchable()
+                            ->preload(),
                     ])->columns(2),
             ]);
     }

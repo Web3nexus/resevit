@@ -13,12 +13,18 @@ class PlatformSetting extends Model
         'supported_languages',
         'footer_settings',
         'error_pages',
+        'promotion_settings',
+        'landing_settings',
+        'legal_settings',
     ];
 
     protected $casts = [
         'supported_languages' => 'array',
         'footer_settings' => 'array',
         'error_pages' => 'array',
+        'promotion_settings' => 'array',
+        'landing_settings' => 'array',
+        'legal_settings' => 'array',
     ];
 
     public static function current(): self
@@ -26,6 +32,13 @@ class PlatformSetting extends Model
         $settings = static::firstOrCreate([], [
             'supported_languages' => ['en', 'es', 'fr', 'de', 'ar'],
             'footer_settings' => self::getDefaultFooterSettings(),
+            'landing_settings' => [
+                'hero_badge' => 'THE FUTURE OF DINING',
+                'hero_title' => 'Maximize Your Restaurant’s <span class="text-brand-accent">Potential</span>',
+                'hero_subtitle' => "Streamline reservations, optimize staff schedules, and delight customers with the world's most advanced restaurant management platform.",
+                'hero_cta_text' => 'Get Started Free',
+                'hero_cta_url' => '/register',
+            ],
         ]);
 
         return $settings;

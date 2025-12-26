@@ -57,12 +57,23 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'currency',
         'trial_ends_at',
         'plan_id',
+        'is_public',
+        'is_sponsored',
+        'sponsored_ranking',
+        'business_category_id',
+        'description',
+        'cover_image',
+        'seo_title',
+        'seo_description',
     ];
 
     protected $casts = [
         'trial_ends_at' => 'datetime',
         'staff_count' => 'integer',
         'data' => 'array',
+        'is_public' => 'boolean',
+        'is_sponsored' => 'boolean',
+        'sponsored_ranking' => 'integer',
     ];
 
     public function owner()
@@ -73,6 +84,26 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     public function plan()
     {
         return $this->belongsTo(PricingPlan::class, 'plan_id');
+    }
+
+    public function businessCategory()
+    {
+        return $this->belongsTo(BusinessCategory::class, 'business_category_id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'tenant_id');
+    }
+
+    public function averageRating(): float
+    {
+        return (float) $this->reviews()->where('is_published', true)->avg('rating') ?: 0;
+    }
+
+    public function publishedReviews()
+    {
+        return $this->reviews()->where('is_published', true)->orderByDesc('created_at');
     }
 
     public static function getCustomColumns(): array
@@ -95,6 +126,14 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'stripe_id',
             'pm_type',
             'pm_last_four',
+            'is_public',
+            'is_sponsored',
+            'sponsored_ranking',
+            'business_category_id',
+            'description',
+            'cover_image',
+            'seo_title',
+            'seo_description',
         ];
     }
 }

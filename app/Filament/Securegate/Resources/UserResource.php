@@ -47,6 +47,12 @@ class UserResource extends Resource
                     ->multiple()
                     ->relationship('roles', 'name', fn($query) => $query->where('guard_name', 'web'))
                     ->preload(),
+                Forms\Components\TextInput::make('wallet_balance')
+                    ->label('Wallet Balance')
+                    ->numeric()
+                    ->prefix('$')
+                    ->default(0)
+                    ->helperText('Available balance for promotions and other services.'),
             ]);
     }
 
@@ -59,9 +65,13 @@ class UserResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('email')
-                    ->searchable()
                     ->sortable()
                     ->copyable(),
+                Tables\Columns\TextColumn::make('wallet_balance')
+                    ->label('Wallet Balance')
+                    ->money('USD')
+                    ->sortable()
+                    ->color('success'),
                 Tables\Columns\TextColumn::make('user_type')
                     ->label('User Type')
                     ->badge()

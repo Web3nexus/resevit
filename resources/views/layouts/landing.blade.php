@@ -40,6 +40,8 @@
                             class="text-slate-600 hover:text-brand-primary font-medium transition-colors">Features</a>
                         <a href="{{ route('pricing') }}"
                             class="text-slate-600 hover:text-brand-primary font-medium transition-colors">Pricing</a>
+                        <a href="{{ route('directory.index') }}"
+                            class="text-slate-600 hover:text-brand-primary font-medium transition-colors">Directory</a>
                         <a href="{{ route('integrations') }}"
                             class="text-slate-600 hover:text-brand-primary font-medium transition-colors">Integrations</a>
                         <a href="{{ route('about') }}"
@@ -76,6 +78,8 @@
                         class="block px-3 py-2 text-base font-medium text-slate-600">Features</a>
                     <a href="{{ route('pricing') }}"
                         class="block px-3 py-2 text-base font-medium text-slate-600">Pricing</a>
+                    <a href="{{ route('directory.index') }}"
+                        class="block px-3 py-2 text-base font-medium text-slate-600">Directory</a>
                     <a href="{{ route('integrations') }}"
                         class="block px-3 py-2 text-base font-medium text-slate-600">Integrations</a>
                     <a href="{{ route('login') }}" class="block px-3 py-2 text-base font-medium text-slate-600">Log
@@ -130,6 +134,8 @@
                                 <li><a href="{{ $link['url'] }}" class="hover:text-brand-accent">{{ $link['label'] }}</a>
                                 </li>
                             @endforeach
+                            <li><a href="{{ route('directory.index') }}" class="hover:text-brand-accent">Directory</a>
+                            </li>
                         </ul>
                     </div>
 

@@ -59,6 +59,115 @@ class ManagePlatformSettings extends Page implements HasSchemas
                     ])
                     ->columns(2),
 
+                Section::make('Landing Page Management')
+                    ->description('Customize the visual content of your platform landing page.')
+                    ->icon('heroicon-o-home')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('landing_settings.hero_badge')
+                                    ->label('Hero Badge Text')
+                                    ->placeholder('e.g. THE FUTURE OF DINING'),
+                                TextInput::make('landing_settings.hero_title')
+                                    ->label('Hero Title')
+                                    ->placeholder('e.g. The Operating System for Restaurants')
+                                    ->columnSpanFull(),
+                                TextInput::make('landing_settings.hero_subtitle')
+                                    ->label('Hero Subtitle')
+                                    ->placeholder('e.g. Manage reservations, staff, and orders in one place.')
+                                    ->columnSpanFull(),
+                                TextInput::make('landing_settings.hero_cta_text')
+                                    ->label('CTA Button Text')
+                                    ->placeholder('e.g. Start Free Trial'),
+                                TextInput::make('landing_settings.hero_cta_url')
+                                    ->label('CTA Button URL')
+                                    ->placeholder('e.g. /register'),
+                                TextInput::make('landing_settings.hero_secondary_cta_text')
+                                    ->label('Secondary CTA Text')
+                                    ->placeholder('e.g. Watch Demo'),
+                                TextInput::make('landing_settings.hero_secondary_cta_url')
+                                    ->label('Secondary CTA URL')
+                                    ->placeholder('e.g. #'),
+                                FileUpload::make('landing_settings.hero_image')
+                                    ->label('Hero Background/Image')
+                                    ->image()
+                                    ->directory('platform/landing')
+                                    ->visibility('public')
+                                    ->columnSpanFull(),
+                            ]),
+                    ]),
+
+                Section::make('Documents & Documentation')
+                    ->description('Set links for user documentation and technical support.')
+                    ->icon('heroicon-o-document-text')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('landing_settings.docs_url')
+                                    ->label('Documentation URL')
+                                    ->placeholder('https://docs.resevit.com'),
+                                TextInput::make('landing_settings.help_center_url')
+                                    ->label('Help Center URL')
+                                    ->placeholder('https://support.resevit.com'),
+                                TextInput::make('landing_settings.status_page_url')
+                                    ->label('Status Page URL')
+                                    ->placeholder('https://status.resevit.com'),
+                            ]),
+                    ]),
+
+                Section::make('Legal & Compliance')
+                    ->description('Manage the official legal documents of the platform.')
+                    ->icon('heroicon-o-scale')
+                    ->schema([
+                        \Filament\Forms\Components\Tabs::make('Legal Documents')
+                            ->tabs([
+                                \Filament\Forms\Components\Tabs\Tab::make('Terms of Service')
+                                    ->schema([
+                                        \Filament\Forms\Components\RichEditor::make('legal_settings.terms_of_service')
+                                            ->label('Terms of Service')
+                                            ->required(),
+                                    ]),
+                                \Filament\Forms\Components\Tabs\Tab::make('Privacy Policy')
+                                    ->schema([
+                                        \Filament\Forms\Components\RichEditor::make('legal_settings.privacy_policy')
+                                            ->label('Privacy Policy')
+                                            ->required(),
+                                    ]),
+                                \Filament\Forms\Components\Tabs\Tab::make('Cookie Policy')
+                                    ->schema([
+                                        \Filament\Forms\Components\RichEditor::make('legal_settings.cookie_policy')
+                                            ->label('Cookie Policy'),
+                                    ]),
+                                \Filament\Forms\Components\Tabs\Tab::make('GDPR / Data Processing')
+                                    ->schema([
+                                        \Filament\Forms\Components\RichEditor::make('legal_settings.gdpr')
+                                            ->label('GDPR & Data Protection'),
+                                    ]),
+                            ])
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Social Media Links')
+                    ->description('Manage the platform social media profiles.')
+                    ->icon('heroicon-o-share')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('landing_settings.social_facebook')
+                                    ->label('Facebook URL')
+                                    ->placeholder('https://facebook.com/resevit'),
+                                TextInput::make('landing_settings.social_twitter')
+                                    ->label('Twitter / X URL')
+                                    ->placeholder('https://twitter.com/resevit'),
+                                TextInput::make('landing_settings.social_instagram')
+                                    ->label('Instagram URL')
+                                    ->placeholder('https://instagram.com/resevit'),
+                                TextInput::make('landing_settings.social_linkedin')
+                                    ->label('LinkedIn URL')
+                                    ->placeholder('https://linkedin.com/company/resevit'),
+                            ]),
+                    ]),
+
                 Section::make('Localization')
                     ->description('Select the languages available in the system.')
                     ->schema([
@@ -73,6 +182,26 @@ class ManagePlatformSettings extends Page implements HasSchemas
                             ])
                             ->columns(3)
                             ->required(),
+                    ]),
+
+                Section::make('Promotion Pricing')
+                    ->description('Set the prices for directory promotions (Featured Ads).')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('promotion_settings.7_days_price')
+                                    ->label('7 Days Price')
+                                    ->numeric()
+                                    ->prefix('$')
+                                    ->default(19.99)
+                                    ->required(),
+                                TextInput::make('promotion_settings.30_days_price')
+                                    ->label('30 Days Price')
+                                    ->numeric()
+                                    ->prefix('$')
+                                    ->default(49.99)
+                                    ->required(),
+                            ]),
                     ]),
 
                 Section::make('Footer Management')

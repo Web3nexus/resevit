@@ -72,6 +72,42 @@ class TenantResource extends Resource
                         Forms\Components\TextInput::make('timezone'),
                         Forms\Components\TextInput::make('currency'),
                     ])->columns(2),
+
+                \Filament\Schemas\Components\Section::make('Directory & SEO')
+                    ->schema([
+                        \Filament\Schemas\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\Toggle::make('is_public')
+                                    ->label('Public Listing')
+                                    ->default(true),
+                                Forms\Components\Toggle::make('is_sponsored')
+                                    ->label('Sponsored/Ad'),
+                                Forms\Components\TextInput::make('sponsored_ranking')
+                                    ->label('Ad Ranking Score')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->helperText('Higher score appears first'),
+                            ]),
+                        Forms\Components\Select::make('business_category_id')
+                            ->label('Directory Category')
+                            ->relationship('businessCategory', 'name')
+                            ->searchable()
+                            ->preload(),
+                        Forms\Components\FileUpload::make('cover_image')
+                            ->image()
+                            ->directory('businesses/covers'),
+                        Forms\Components\Textarea::make('description')
+                            ->label('Directory Description')
+                            ->rows(3),
+                        \Filament\Schemas\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('seo_title')
+                                    ->label('SEO Title'),
+                                Forms\Components\Textarea::make('seo_description')
+                                    ->label('SEO Description')
+                                    ->rows(2),
+                            ]),
+                    ]),
             ]);
     }
 
