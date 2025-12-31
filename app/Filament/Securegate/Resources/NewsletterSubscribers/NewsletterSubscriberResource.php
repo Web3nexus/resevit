@@ -2,13 +2,15 @@
 
 namespace App\Filament\Securegate\Resources\NewsletterSubscribers;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\NewsletterSubscribers\Pages\CreateNewsletterSubscriber;
 use App\Filament\Securegate\Resources\NewsletterSubscribers\Pages\EditNewsletterSubscriber;
 use App\Filament\Securegate\Resources\NewsletterSubscribers\Pages\ListNewsletterSubscribers;
 use App\Filament\Securegate\Resources\NewsletterSubscribers\Schemas\NewsletterSubscriberForm;
 use App\Filament\Securegate\Resources\NewsletterSubscribers\Tables\NewsletterSubscribersTable;
 use App\Models\NewsletterSubscriber;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,9 +20,9 @@ class NewsletterSubscriberResource extends Resource
 {
     protected static ?string $model = NewsletterSubscriber::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-at-symbol';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-at-symbol';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Marketing Tools';
+    protected static string | UnitEnum | null $navigationGroup = 'Marketing Tools';
 
     protected static ?int $navigationSort = 11;
 

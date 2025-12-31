@@ -2,13 +2,15 @@
 
 namespace App\Filament\Securegate\Resources\Testimonials;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\Testimonials\Pages\CreateTestimonial;
 use App\Filament\Securegate\Resources\Testimonials\Pages\EditTestimonial;
 use App\Filament\Securegate\Resources\Testimonials\Pages\ListTestimonials;
 use App\Filament\Securegate\Resources\Testimonials\Schemas\TestimonialForm;
 use App\Filament\Securegate\Resources\Testimonials\Tables\TestimonialsTable;
 use App\Models\Testimonial;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,9 +20,9 @@ class TestimonialResource extends Resource
 {
     protected static ?string $model = Testimonial::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-bottom-center-text';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-bottom-center-text';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Landing Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Landing Management';
 
     protected static ?int $navigationSort = 12;
 

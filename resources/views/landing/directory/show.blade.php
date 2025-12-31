@@ -7,7 +7,8 @@
     <!-- Business Banner -->
     <section class="relative h-[400px]">
         @if($tenant->cover_image)
-            <img src="{{ Storage::url($tenant->cover_image) }}" alt="{{ $tenant->name }}" class="w-full h-full object-cover">
+            <img src="{{ \App\Helpers\StorageHelper::getUrl($tenant->cover_image) }}" alt="{{ $tenant->name }}"
+                class="w-full h-full object-cover">
         @else
             <div class="w-full h-full bg-slate-900 flex items-center justify-center relative overflow-hidden">
                 <div class="absolute inset-0 opacity-20">
@@ -65,7 +66,8 @@
                         </div>
                     </div>
                     <div class="pb-2">
-                        <a href="https://{{ $tenant->domain ?? $tenant->slug . '.resevit.test' }}" target="_blank"
+                        <a href="https://{{ $tenant->domain ?? $tenant->slug . '.' . parse_url(config('app.url'), PHP_URL_HOST) }}"
+                            target="_blank"
                             class="inline-flex items-center px-8 py-4 bg-brand-accent text-brand-primary font-extrabold rounded-2xl hover:bg-white transition-all shadow-xl hover:scale-105">
                             Visit Website
                             <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

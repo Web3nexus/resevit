@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Pages;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Services\Social\SocialMessageRouterService;
@@ -18,9 +21,9 @@ use Livewire\Attributes\Computed;
 class Messaging extends Page implements HasActions
 {
     use InteractsWithActions;
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-ellipsis';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-ellipsis';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Communication';
+    protected static string|UnitEnum|null $navigationGroup = 'Communication';
 
     protected static ?string $title = 'Unified Inbox';
 
@@ -110,7 +113,13 @@ class Messaging extends Page implements HasActions
             ->icon('heroicon-o-calendar')
             ->form([
                 TextInput::make('guest_name')
-                    ->required(),
+                    ->required()
+                    ->formatStateUsing(function ($state) {
+                        if (auth()->user()->hasAnyRole(['owner', 'manager'])) {
+                            return $state;
+                        }
+                        return substr($state, 0, 1) . '****' . substr($state, -1);
+                    }),
                 TextInput::make('guest_phone'),
                 DateTimePicker::make('reservation_time')
                     ->required()
@@ -119,6 +128,14 @@ class Messaging extends Page implements HasActions
                     ->options(array_combine(range(1, 20), range(1, 20)))
                     ->default(2)
                     ->required(),
+                Select::make('assigned_to_staff_id')
+                    ->label('Assign To Staff')
+                    ->relationship('assignedTo.user', 'name', function ($query) {
+                        return $query->where('staff.branch_id', \Illuminate\Support\Facades\Session::get('current_branch_id'));
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->visible(fn() => auth()->user()->hasAnyRole(['owner', 'manager'])),
                 Select::make('source')
                     ->options([
                         'whatsapp' => 'WhatsApp',
@@ -135,7 +152,9 @@ class Messaging extends Page implements HasActions
                     'reservation_time' => $data['reservation_time'],
                     'party_size' => $data['party_size'],
                     'source' => $data['source'],
+                    'assigned_to_staff_id' => $data['assigned_to_staff_id'] ?? null,
                     'status' => 'confirmed',
+                    'branch_id' => \Illuminate\Support\Facades\Session::get('current_branch_id'),
                 ]);
 
                 Notification::make()

@@ -2,13 +2,15 @@
 
 namespace App\Filament\Securegate\Resources\Reviews;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\Reviews\Pages\CreateReview;
 use App\Filament\Securegate\Resources\Reviews\Pages\EditReview;
 use App\Filament\Securegate\Resources\Reviews\Pages\ListReviews;
 use App\Filament\Securegate\Resources\Reviews\Schemas\ReviewForm;
 use App\Filament\Securegate\Resources\Reviews\Tables\ReviewsTable;
 use App\Models\Review;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,7 +20,9 @@ class ReviewResource extends Resource
 {
     protected static ?string $model = Review::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-star';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Internal Users';
 
     public static function form(Schema $schema): Schema
     {

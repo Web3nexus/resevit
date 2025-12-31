@@ -2,6 +2,8 @@
 
 namespace App\Filament\Dashboard\Pages;
 
+
+use BackedEnum;
 use App\Models\BusinessCategory;
 use App\Models\Tenant;
 use Filament\Forms;
@@ -22,7 +24,7 @@ class DirectorySettings extends Page implements HasSchemas
 
     protected string $view = 'filament.dashboard.pages.directory-settings';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-presentation-chart-line';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-presentation-chart-line';
 
     protected static ?string $navigationLabel = 'Directory Profile';
 
@@ -92,7 +94,8 @@ class DirectorySettings extends Page implements HasSchemas
                             ->label('Cover Banner')
                             ->image()
                             ->directory('businesses/covers')
-                            ->imageEditor(),
+                            ->imageEditor()
+                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->cover_image ?? $record->profileData['cover_image'] ?? null)),
                         Forms\Components\Textarea::make('description')
                             ->label('Profile Description')
                             ->rows(4)

@@ -73,13 +73,20 @@ class CentralLoginController extends Controller
     {
         $protocol = request()->secure() ? 'https://' : 'http://';
 
-        // Assuming domains relationship or 'domain' column on tenant
-        // Stancl Tenancy usually puts domains in a separate table
-        $domain = $tenant->domains->first()?->domain;
+        $hasWhitelabelFeature = has_feature('whitelabel', $tenant);
+        $isWhitelabelActive = $tenant->whitelabel_active;
+        $dashboardDomain = $tenant->dashboard_custom_domain;
+
+        // Priority 1: If whitelabel is active AND a custom dashboard domain is set, use it.
+        if ($hasWhitelabelFeature && $isWhitelabelActive && $dashboardDomain) {
+            $domain = $dashboardDomain;
+        } else {
+            // Priority 2: Fallback to platform subdomain
+            $domain = \App\Helpers\DomainHelper::getPlatformSubdomain($tenant->slug);
+        }
 
         if (!$domain) {
             \Illuminate\Support\Facades\Log::error('CENTRAL LOGIN: No domain found for tenant ' . $tenant->id);
-            // Fallback if no domain found implementation
             return redirect()->back()->withErrors(['email' => 'No domain found for your account.']);
         }
 

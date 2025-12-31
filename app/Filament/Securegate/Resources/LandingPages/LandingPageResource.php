@@ -2,13 +2,15 @@
 
 namespace App\Filament\Securegate\Resources\LandingPages;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\LandingPages\Pages\CreateLandingPage;
 use App\Filament\Securegate\Resources\LandingPages\Pages\EditLandingPage;
 use App\Filament\Securegate\Resources\LandingPages\Pages\ListLandingPages;
 use App\Filament\Securegate\Resources\LandingPages\Schemas\LandingPageForm;
 use App\Filament\Securegate\Resources\LandingPages\Tables\LandingPagesTable;
 use App\Models\LandingPage;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,11 +20,11 @@ class LandingPageResource extends Resource
 {
     protected static ?string $model = LandingPage::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Landing Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Landing Management';
 
     protected static ?int $navigationSort = 10;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-window';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-window';
 
     public static function form(Schema $schema): Schema
     {

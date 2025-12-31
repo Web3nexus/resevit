@@ -2,13 +2,14 @@
 
 namespace App\Filament\Invest\Resources\Investments;
 
+
+use BackedEnum;
 use App\Filament\Invest\Resources\Investments\Pages\CreateInvestment;
 use App\Filament\Invest\Resources\Investments\Pages\EditInvestment;
 use App\Filament\Invest\Resources\Investments\Pages\ListInvestments;
 use App\Filament\Invest\Resources\Investments\Schemas\InvestmentForm;
 use App\Filament\Invest\Resources\Investments\Tables\InvestmentsTable;
 use App\Models\Investment;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -16,7 +17,7 @@ use Filament\Tables\Table;
 
 class InvestmentResource extends Resource
 {
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyDollar;
+    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedCurrencyDollar;
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

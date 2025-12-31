@@ -2,12 +2,17 @@
 
 namespace App\Filament\Securegate\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\TenantResource\Pages;
 use App\Models\Tenant;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Actions\ExportAction;
+use App\Filament\Exports\TenantExporter;
 use Filament\Schemas\Schema;
 
 class TenantResource extends Resource
@@ -18,9 +23,9 @@ class TenantResource extends Resource
 
     protected static ?string $modelLabel = 'Business';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Internal Users';
+    protected static string|UnitEnum|null $navigationGroup = 'Internal Users';
 
     protected static ?int $navigationSort = 1;
 
@@ -30,31 +35,33 @@ class TenantResource extends Resource
             ->schema([
                 \Filament\Schemas\Components\Section::make('General Information')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        \Filament\Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('slug')
+                        \Filament\Forms\Components\TextInput::make('slug')
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
-                        Forms\Components\TextInput::make('domain')
+                        \Filament\Forms\Components\TextInput::make('domain')
                             ->maxLength(255),
-                        Forms\Components\Select::make('owner_user_id')
+                        \Filament\Forms\Components\Select::make('owner_user_id')
                             ->relationship('owner', 'name')
                             ->searchable()
                             ->preload()
                             ->label('Owner'),
-                    ])->columns(2),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
 
                 \Filament\Schemas\Components\Section::make('Subscription & Plan')
                     ->schema([
-                        Forms\Components\Select::make('plan_id')
+                        \Filament\Forms\Components\Select::make('plan_id')
                             ->relationship('plan', 'name')
                             ->required()
                             ->label('Pricing Plan'),
-                        Forms\Components\DateTimePicker::make('trial_ends_at')
+                        \Filament\Forms\Components\DateTimePicker::make('trial_ends_at')
                             ->label('Trial Ends At'),
-                        Forms\Components\Select::make('status')
+                        \Filament\Forms\Components\Select::make('status')
                             ->options([
                                 'active' => 'Active',
                                 'suspended' => 'Suspended',
@@ -62,52 +69,58 @@ class TenantResource extends Resource
                             ])
                             ->required()
                             ->default('active'),
-                    ])->columns(3),
+                    ])
+                    ->columns(3)
+                    ->columnSpanFull(),
 
                 \Filament\Schemas\Components\Section::make('Location & Settings')
                     ->schema([
-                        Forms\Components\TextInput::make('mobile')
+                        \Filament\Forms\Components\TextInput::make('mobile')
                             ->tel(),
-                        Forms\Components\TextInput::make('country'),
-                        Forms\Components\TextInput::make('timezone'),
-                        Forms\Components\TextInput::make('currency'),
-                    ])->columns(2),
+                        \Filament\Forms\Components\TextInput::make('country'),
+                        \Filament\Forms\Components\TextInput::make('timezone'),
+                        \Filament\Forms\Components\TextInput::make('currency'),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
 
                 \Filament\Schemas\Components\Section::make('Directory & SEO')
                     ->schema([
                         \Filament\Schemas\Components\Grid::make(3)
                             ->schema([
-                                Forms\Components\Toggle::make('is_public')
+                                \Filament\Forms\Components\Toggle::make('is_public')
                                     ->label('Public Listing')
                                     ->default(true),
-                                Forms\Components\Toggle::make('is_sponsored')
+                                \Filament\Forms\Components\Toggle::make('is_sponsored')
                                     ->label('Sponsored/Ad'),
-                                Forms\Components\TextInput::make('sponsored_ranking')
+                                \Filament\Forms\Components\TextInput::make('sponsored_ranking')
                                     ->label('Ad Ranking Score')
                                     ->numeric()
                                     ->default(0)
                                     ->helperText('Higher score appears first'),
                             ]),
-                        Forms\Components\Select::make('business_category_id')
+                        \Filament\Forms\Components\Select::make('business_category_id')
                             ->label('Directory Category')
                             ->relationship('businessCategory', 'name')
                             ->searchable()
                             ->preload(),
-                        Forms\Components\FileUpload::make('cover_image')
+                        \Filament\Forms\Components\FileUpload::make('cover_image')
                             ->image()
-                            ->directory('businesses/covers'),
-                        Forms\Components\Textarea::make('description')
+                            ->directory('businesses/covers')
+                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->cover_image)),
+                        \Filament\Forms\Components\Textarea::make('description')
                             ->label('Directory Description')
                             ->rows(3),
                         \Filament\Schemas\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('seo_title')
+                                \Filament\Forms\Components\TextInput::make('seo_title')
                                     ->label('SEO Title'),
-                                Forms\Components\Textarea::make('seo_description')
+                                \Filament\Forms\Components\Textarea::make('seo_description')
                                     ->label('SEO Description')
                                     ->rows(2),
                             ]),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -148,6 +161,10 @@ class TenantResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(TenantExporter::class),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('plan')

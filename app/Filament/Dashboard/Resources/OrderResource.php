@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\OrderResource\Pages;
 use App\Models\Order;
 use Filament\Forms;
@@ -12,14 +15,17 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ExportBulkAction;
+use App\Filament\Exports\OrderExporter;
 
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Reservations'; // Or put in a new Sales/Orders group
+    protected static string|UnitEnum|null $navigationGroup = 'Reservations'; // Or put in a new Sales/Orders group
 
     protected static ?int $navigationSort = 5;
 
@@ -32,7 +38,7 @@ class OrderResource extends Resource
     {
         return $schema
             ->schema([
-                Section::make('Order Status')
+                Section::make('Order Information')
                     ->schema([
                         Forms\Components\Select::make('status')
                             ->options([
@@ -61,7 +67,21 @@ class OrderResource extends Resource
                         Forms\Components\Select::make('table_id')
                             ->relationship('table', 'name')
                             ->label('Table'),
-                    ])->columns(1),
+                        Forms\Components\Select::make('staff_id')
+                            ->relationship('staff.user', 'name')
+                            ->label('Assigned Staff')
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('Assign to staff (optional)')
+                            ->visible(fn() => auth()->user()->hasAnyRole(['owner', 'manager'])),
+                        Forms\Components\Select::make('branch_id')
+                            ->relationship('branch', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->default(fn() => \Illuminate\Support\Facades\Session::get('current_branch_id'))
+                            ->required()
+                            ->label('Branch'),
+                    ])->columns(2),
 
                 Section::make('Order Items')
                     ->schema([
@@ -112,8 +132,18 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('branch.name')
+                    ->sortable()
+                    ->searchable()
+                    ->label('Branch'),
                 Tables\Columns\TextColumn::make('id')
-                    ->label('#ID')
+                    ->label('Order #')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => 'ORD-' . str_pad($state, 5, '0', STR_PAD_LEFT)),
+                Tables\Columns\TextColumn::make('staff.user.name')
+                    ->label('Assigned To')
+                    ->placeholder('Unassigned')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('table.name')
@@ -148,6 +178,9 @@ class OrderResource extends Resource
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('branch_id')
+                    ->relationship('branch', 'name')
+                    ->label('Branch'),
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'pending' => 'Pending',
@@ -160,8 +193,13 @@ class OrderResource extends Resource
             ->recordActions([
                 EditAction::make(),
             ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(OrderExporter::class),
+            ])
             ->bulkActions([
-                //
+                ExportBulkAction::make()
+                    ->exporter(OrderExporter::class),
             ])
             ->defaultSort('created_at', 'desc');
     }

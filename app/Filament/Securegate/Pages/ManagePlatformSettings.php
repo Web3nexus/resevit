@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Pages;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Models\PlatformSetting;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\CheckboxList;
@@ -20,9 +23,9 @@ class ManagePlatformSettings extends Page implements HasSchemas
 {
     use InteractsWithSchemas;
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Platform Settings';
+    protected static string|UnitEnum|null $navigationGroup = 'Platform Settings';
 
     protected string $view = 'filament.securegate.pages.manage-platform-settings';
 
@@ -48,13 +51,15 @@ class ManagePlatformSettings extends Page implements HasSchemas
                             ->image()
                             ->directory('platform')
                             ->visibility('public')
-                            ->imageEditor(),
+                            ->imageEditor()
+                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->logo_path)),
 
                         FileUpload::make('favicon_path')
                             ->label('Favicon')
                             ->image()
                             ->directory('platform')
                             ->visibility('public')
+                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->favicon_path))
                             ->acceptedFileTypes(['image/x-icon', 'image/vnd.microsoft.icon', 'image/png', 'image/svg+xml']),
                     ])
                     ->columns(2),
@@ -93,6 +98,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                     ->image()
                                     ->directory('platform/landing')
                                     ->visibility('public')
+                                    ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->landing_settings['hero_image'] ?? null))
                                     ->columnSpanFull(),
                             ]),
                     ]),
@@ -119,26 +125,26 @@ class ManagePlatformSettings extends Page implements HasSchemas
                     ->description('Manage the official legal documents of the platform.')
                     ->icon('heroicon-o-scale')
                     ->schema([
-                        \Filament\Forms\Components\Tabs::make('Legal Documents')
+                        \Filament\Schemas\Components\Tabs::make('Legal Documents')
                             ->tabs([
-                                \Filament\Forms\Components\Tabs\Tab::make('Terms of Service')
+                                \Filament\Schemas\Components\Tabs\Tab::make('Terms of Service')
                                     ->schema([
                                         \Filament\Forms\Components\RichEditor::make('legal_settings.terms_of_service')
                                             ->label('Terms of Service')
                                             ->required(),
                                     ]),
-                                \Filament\Forms\Components\Tabs\Tab::make('Privacy Policy')
+                                \Filament\Schemas\Components\Tabs\Tab::make('Privacy Policy')
                                     ->schema([
                                         \Filament\Forms\Components\RichEditor::make('legal_settings.privacy_policy')
                                             ->label('Privacy Policy')
                                             ->required(),
                                     ]),
-                                \Filament\Forms\Components\Tabs\Tab::make('Cookie Policy')
+                                \Filament\Schemas\Components\Tabs\Tab::make('Cookie Policy')
                                     ->schema([
                                         \Filament\Forms\Components\RichEditor::make('legal_settings.cookie_policy')
                                             ->label('Cookie Policy'),
                                     ]),
-                                \Filament\Forms\Components\Tabs\Tab::make('GDPR / Data Processing')
+                                \Filament\Schemas\Components\Tabs\Tab::make('GDPR / Data Processing')
                                     ->schema([
                                         \Filament\Forms\Components\RichEditor::make('legal_settings.gdpr')
                                             ->label('GDPR & Data Protection'),
@@ -243,7 +249,8 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                             ->label('Image')
                                             ->image()
                                             ->directory('platform/errors')
-                                            ->visibility('public'),
+                                            ->visibility('public')
+                                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->error_pages['404']['image'] ?? null)),
                                     ])->columnSpan(1),
 
                                 Section::make('500 Page (Server Error)')
@@ -260,8 +267,30 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                             ->label('Image')
                                             ->image()
                                             ->directory('platform/errors')
-                                            ->visibility('public'),
+                                            ->visibility('public')
+                                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->error_pages['500']['image'] ?? null)),
                                     ])->columnSpan(1),
+                            ]),
+                    ]),
+
+                Section::make('Stripe Configuration')
+                    ->description('Manage your platform-wide Stripe API credentials.')
+                    ->icon('heroicon-o-credit-card')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('stripe_settings.publishable_key')
+                                    ->label('Stripe Publishable Key')
+                                    ->password()
+                                    ->placeholder('pk_test_...'),
+                                TextInput::make('stripe_settings.secret_key')
+                                    ->label('Stripe Secret Key')
+                                    ->password()
+                                    ->placeholder('sk_test_...'),
+                                TextInput::make('stripe_settings.webhook_secret')
+                                    ->label('Stripe Webhook Secret')
+                                    ->password()
+                                    ->placeholder('whsec_...'),
                             ]),
                     ]),
             ])

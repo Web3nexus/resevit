@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class StaffPayout extends Model
 {
     protected $connection = 'tenant';
-    
+
 
     protected $fillable = [
         'staff_id',
@@ -17,11 +17,14 @@ class StaffPayout extends Model
         'hours_worked',
         'notes',
         'status',
+        'transaction_id',
+        'paid_at',
     ];
 
     protected $casts = [
         'payout_date' => 'date',
         'amount' => 'decimal:2',
+        'paid_at' => 'datetime',
     ];
 
     /**

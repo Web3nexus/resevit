@@ -2,9 +2,11 @@
 
 namespace App\Filament\Securegate\Resources\Tickets;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\Tickets\Pages\ManageTickets;
 use App\Models\Ticket;
-use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -21,15 +23,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-use UnitEnum;
 
 class TicketResource extends Resource
 {
     protected static ?string $model = Ticket::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static UnitEnum|string|null $navigationGroup = 'External Users';
+    protected static string | UnitEnum | null $navigationGroup = 'External Users';
 
     public static function form(Schema $schema): Schema
     {

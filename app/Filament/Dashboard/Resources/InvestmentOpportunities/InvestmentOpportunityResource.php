@@ -2,13 +2,14 @@
 
 namespace App\Filament\Dashboard\Resources\InvestmentOpportunities;
 
+
+use BackedEnum;
 use App\Filament\Dashboard\Resources\InvestmentOpportunities\Pages\CreateInvestmentOpportunity;
 use App\Filament\Dashboard\Resources\InvestmentOpportunities\Pages\EditInvestmentOpportunity;
 use App\Filament\Dashboard\Resources\InvestmentOpportunities\Pages\ListInvestmentOpportunities;
 use App\Filament\Dashboard\Resources\InvestmentOpportunities\Schemas\InvestmentOpportunityForm;
 use App\Filament\Dashboard\Resources\InvestmentOpportunities\Tables\InvestmentOpportunitiesTable;
 use App\Models\InvestmentOpportunity;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -16,7 +17,7 @@ use Filament\Tables\Table;
 
 class InvestmentOpportunityResource extends Resource
 {
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
+    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

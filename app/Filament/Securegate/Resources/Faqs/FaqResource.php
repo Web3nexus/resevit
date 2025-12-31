@@ -2,13 +2,15 @@
 
 namespace App\Filament\Securegate\Resources\Faqs;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\Faqs\Pages\CreateFaq;
 use App\Filament\Securegate\Resources\Faqs\Pages\EditFaq;
 use App\Filament\Securegate\Resources\Faqs\Pages\ListFaqs;
 use App\Filament\Securegate\Resources\Faqs\Schemas\FaqForm;
 use App\Filament\Securegate\Resources\Faqs\Tables\FaqsTable;
 use App\Models\Faq;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,9 +20,9 @@ class FaqResource extends Resource
 {
     protected static ?string $model = Faq::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-question-mark-circle';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-question-mark-circle';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Landing Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Landing Management';
 
     protected static ?int $navigationSort = 16;
 

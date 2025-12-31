@@ -2,13 +2,15 @@
 
 namespace App\Filament\Securegate\Resources\StorageSettings;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\StorageSettings\Pages\CreateStorageSetting;
 use App\Filament\Securegate\Resources\StorageSettings\Pages\EditStorageSetting;
 use App\Filament\Securegate\Resources\StorageSettings\Pages\ListStorageSettings;
 use App\Filament\Securegate\Resources\StorageSettings\Schemas\StorageSettingForm;
 use App\Filament\Securegate\Resources\StorageSettings\Tables\StorageSettingsTable;
 use App\Models\StorageSetting;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,9 +20,9 @@ class StorageSettingResource extends Resource
 {
     protected static ?string $model = StorageSetting::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cloud';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cloud';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Platform Settings';
+    protected static string | UnitEnum | null $navigationGroup = 'Platform Settings';
 
     protected static ?string $navigationLabel = 'CDN & Storage';
 

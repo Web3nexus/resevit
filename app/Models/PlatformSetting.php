@@ -16,6 +16,8 @@ class PlatformSetting extends Model
         'promotion_settings',
         'landing_settings',
         'legal_settings',
+        'onboarding_settings',
+        'stripe_settings',
     ];
 
     protected $casts = [
@@ -25,6 +27,8 @@ class PlatformSetting extends Model
         'promotion_settings' => 'array',
         'landing_settings' => 'array',
         'legal_settings' => 'array',
+        'onboarding_settings' => 'array',
+        'stripe_settings' => 'array',
     ];
 
     public static function current(): self

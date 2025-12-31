@@ -2,6 +2,8 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
 use App\Filament\Dashboard\Resources\BusinessResource\Pages;
 use App\Models\Tenant;
 use Filament\Forms;
@@ -19,7 +21,7 @@ class BusinessResource extends Resource
 
     protected static ?string $modelLabel = 'Business';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-storefront';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-storefront';
 
     protected static ?int $navigationSort = 1;
 
@@ -39,28 +41,28 @@ class BusinessResource extends Resource
             ->schema([
                 \Filament\Schemas\Components\Section::make('Business Details')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        \Filament\Forms\Components\TextInput::make('name')
                             ->label('Business Name')
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(function (string $state, Forms\Set $set) {
+                            ->afterStateUpdated(function (string $state, \Filament\Schemas\Components\Utilities\Set $set) {
                                 $set('slug', \Illuminate\Support\Str::slug($state));
                             }),
-                        Forms\Components\TextInput::make('slug')
+                        \Filament\Forms\Components\TextInput::make('slug')
                             ->label('Subdomain')
                             ->prefix('https://')
                             ->suffix('.' . parse_url(config('app.url'), PHP_URL_HOST))
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
-                        Forms\Components\Select::make('plan_id')
+                        \Filament\Forms\Components\Select::make('plan_id')
                             ->label('Pricing Plan')
                             ->options(\App\Models\PricingPlan::where('is_active', true)->pluck('name', 'id'))
                             ->required()
                             ->hiddenOn('create')
                             ->helperText('Plan is inherited from your main business.'),
-                        Forms\Components\Select::make('business_category_id')
+                        \Filament\Forms\Components\Select::make('business_category_id')
                             ->label('Business Category')
                             ->relationship('businessCategory', 'name')
                             ->searchable()

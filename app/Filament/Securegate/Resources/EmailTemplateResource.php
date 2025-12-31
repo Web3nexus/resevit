@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Models\EmailTemplate;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -16,9 +19,9 @@ class EmailTemplateResource extends Resource
 {
     protected static ?string $model = EmailTemplate::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-envelope';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-envelope';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Marketing Tools';
+    protected static string | UnitEnum | null $navigationGroup = 'Marketing Tools';
 
     protected static ?int $navigationSort = 3;
 

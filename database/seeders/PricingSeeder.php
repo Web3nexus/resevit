@@ -36,6 +36,9 @@ class PricingSeeder extends Seeder
             ['name' => 'Directory Listing', 'feature_key' => 'directory_listing', 'category' => 'Marketing'],
             ['name' => 'AI Website Builder', 'feature_key' => 'website_builder', 'category' => 'Marketing'],
             ['name' => 'Custom Domain', 'feature_key' => 'custom_domain', 'category' => 'Marketing'],
+            ['name' => 'Whitelabeling', 'feature_key' => 'whitelabel', 'category' => 'Branding'],
+            ['name' => 'Wallet & Finance', 'feature_key' => 'finance', 'category' => 'Finance'],
+            ['name' => 'Staff Payouts', 'feature_key' => 'staff_payouts', 'category' => 'Finance'],
         ];
 
         foreach ($features as $f) {
@@ -95,7 +98,7 @@ class PricingSeeder extends Seeder
         }
 
         // Growth: Starter + Marketing + Analytics + Omnichannel + Investment + Rooms
-        $growthFeatures = array_merge($starterFeatures, ['marketing', 'analytics', 'messaging', 'omnichannel_reservations', 'investment_opportunities', 'rooms', 'website_builder']);
+        $growthFeatures = array_merge($starterFeatures, ['marketing', 'analytics', 'messaging', 'omnichannel_reservations', 'investment_opportunities', 'rooms', 'website_builder', 'finance', 'staff_payouts']);
         foreach ($allFeatures as $feature) {
             $isIncluded = in_array($feature->feature_key, $growthFeatures);
             $growth->features()->syncWithoutDetaching([

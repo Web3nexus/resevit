@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Pages;
 
+
+use BackedEnum;
+use UnitEnum;
 use Filament\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -13,7 +16,7 @@ use Filament\Tables\Contracts\HasTable;
 class TotalLog extends Page
 {
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     protected static ?string $navigationLabel = 'Total Log';
 
@@ -21,7 +24,7 @@ class TotalLog extends Page
 
     protected string $view = 'filament.dashboard.pages.total-log';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'System';
+    protected static string | UnitEnum | null $navigationGroup = 'System';
 
     public static function canAccess(): bool
     {

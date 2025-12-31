@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Pages;
 
+
+use BackedEnum;
+use UnitEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\KeyValue;
 use Filament\Schemas\Components\Section;
@@ -17,9 +20,9 @@ class ManageTranslations extends Page implements HasSchemas
 {
     use InteractsWithSchemas;
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-language';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-language';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Platform Settings';
+    protected static string | UnitEnum | null $navigationGroup = 'Platform Settings';
 
     protected string $view = 'filament.securegate.pages.manage-translations';
 

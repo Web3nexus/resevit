@@ -2,12 +2,17 @@
 
 namespace App\Filament\Securegate\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Actions\ExportAction;
+use App\Filament\Exports\UserExporter;
 use Illuminate\Support\Facades\Hash;
 use Filament\Schemas\Schema;
 
@@ -19,9 +24,9 @@ class UserResource extends Resource
 
     protected static ?string $modelLabel = 'Business Owner';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-storefront';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-building-storefront';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Internal Users';
+    protected static string | UnitEnum | null $navigationGroup = 'Internal Users';
 
     protected static ?int $navigationSort = 2;
 
@@ -109,6 +114,10 @@ class UserResource extends Resource
                     ->label('Date Created')
                     ->dateTime()
                     ->sortable(),
+            ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(UserExporter::class),
             ])
             ->filters([
                 //

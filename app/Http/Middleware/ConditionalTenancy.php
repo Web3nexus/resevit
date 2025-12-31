@@ -46,16 +46,18 @@ class ConditionalTenancy
             return $next($request);
         }
 
-        // Skip tenant initialization for central domains or ROOT landing page
+        // 3. Skip tenant initialization ONLY for central domains
+        // We removed $request->is('/') because tenant sites also have a root path
         $centralDomains = config('tenancy.central_domains', []);
         $host = $request->getHost();
-        if ($request->is('/') || in_array($host, $centralDomains)) {
-            \Illuminate\Support\Facades\Log::info("ConditionalTenancy: Global route detected, skipping tenancy for: " . $request->path());
+
+        if (in_array($host, $centralDomains)) {
+            \Illuminate\Support\Facades\Log::info("ConditionalTenancy: Central domain detected, skipping tenancy for: " . $request->path());
             return $next($request);
         }
 
-        \Illuminate\Support\Facades\Log::info("ConditionalTenancy: Initializing tenancy for: " . $request->path());
-        // Initialize tenancy for all other routes
+        \Illuminate\Support\Facades\Log::info("ConditionalTenancy: Initializing tenancy for host: " . $host . " path: " . $request->path());
+        // Initialize tenancy for all other domains (tenants)
         return app(\Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class)
             ->handle($request, $next);
     }

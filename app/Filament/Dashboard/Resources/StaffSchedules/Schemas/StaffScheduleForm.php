@@ -17,7 +17,14 @@ class StaffScheduleForm
                 \Filament\Schemas\Components\Section::make('Shift Details')
                     ->schema([
                         Select::make('staff_id')
-                            ->relationship('staff', 'user.name')
+                            ->label('Staff Member')
+                            ->options(function () {
+                                return \App\Models\Staff::query()
+                                    ->join('users', 'staff.user_id', '=', 'users.id')
+                                    ->where('staff.branch_id', \Illuminate\Support\Facades\Session::get('current_branch_id'))
+                                    ->orderBy('users.name')
+                                    ->pluck('users.name', 'staff.id');
+                            })
                             ->searchable()
                             ->preload()
                             ->required(),

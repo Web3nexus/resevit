@@ -25,7 +25,13 @@
                                 <div class="flex justify-between items-start">
                                     <div>
                                         <h3 class="font-medium text-gray-900 dark:text-white text-sm">
-                                            {{ $chat->customer_name ?? 'Unknown Customer' }}
+                                            @php
+                                                $name = $chat->customer_name ?? 'Unknown Customer';
+                                                if (!auth()->user()->hasAnyRole(['owner', 'manager'])) {
+                                                    $name = substr($name, 0, 1) . '****' . substr($name, -1);
+                                                }
+                                            @endphp
+                                            {{ $name }}
                                         </h3>
                                         <p class="text-xs text-gray-500 mt-1 truncate w-40">{{ $chat->uuid }}</p>
                                         <!-- In real app, show last message preview here -->
@@ -34,9 +40,8 @@
                                         <span
                                             class="text-[10px] text-gray-400">{{ $chat->last_message_at ? $chat->last_message_at->shortAbsoluteDiffForHumans() : '' }}</span>
                                         <div class="mt-1">
-                                            <span
-                                                class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium capitalize
-                                                                {{ $chat->source === 'whatsapp' ? 'bg-green-100 text-green-800' :
+                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium capitalize
+                                                                                        {{ $chat->source === 'whatsapp' ? 'bg-green-100 text-green-800' :
                     ($chat->source === 'facebook' ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800') }}">
                                                 @if($chat->source === 'whatsapp')
                                                     <x-heroicon-m-chat-bubble-left-ellipsis class="w-3 h-3" />
@@ -72,7 +77,15 @@
                 <div
                     class="p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center shadow-sm">
                     <div>
-                        <h2 class="font-bold text-gray-900 dark:text-white">{{ $this->activeChat->customer_name }}</h2>
+                        <h2 class="font-bold text-gray-900 dark:text-white">
+                            @php
+                                $name = $this->activeChat->customer_name;
+                                if (!auth()->user()->hasAnyRole(['owner', 'manager'])) {
+                                    $name = substr($name, 0, 1) . '****' . substr($name, -1);
+                                }
+                            @endphp
+                            {{ $name }}
+                        </h2>
                         <span class="text-xs text-gray-500">via {{ ucfirst($this->activeChat->source) }}</span>
                     </div>
                     <div class="flex gap-2">

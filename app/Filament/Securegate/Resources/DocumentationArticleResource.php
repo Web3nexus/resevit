@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\DocumentationArticleResource\Pages;
 use App\Models\DocumentationArticle;
 use Filament\Forms\Components\RichEditor;
@@ -21,9 +24,9 @@ class DocumentationArticleResource extends Resource
 {
     protected static ?string $model = DocumentationArticle::class;
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Landing Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Landing Management';
 
     protected static ?string $recordTitleAttribute = 'title';
 

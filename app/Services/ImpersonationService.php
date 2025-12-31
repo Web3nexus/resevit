@@ -14,14 +14,13 @@ class ImpersonationService
     {
         $tenant = $user->tenants->first();
 
-        if (! $tenant) {
+        if (!$tenant) {
             return null;
         }
 
-        // If the tenant model has domains relation loaded or available
-        $domain = $tenant->domains->first()?->domain ?? $tenant->domain;
+        $domain = \App\Helpers\DomainHelper::getPlatformSubdomain($tenant->slug);
 
-        if (! $domain) {
+        if (!$domain) {
             return null;
         }
 
@@ -34,10 +33,9 @@ class ImpersonationService
         ], now()->addMinutes(5));
 
         // Construct the URL manually to ensure protocol and domain are correct
-        $scheme = parse_url(config('app.url'), PHP_URL_SCHEME) ?? 'http';
+        $scheme = request()->secure() ? 'https' : 'http';
 
-        // If using standard Stancl Tenancy routing, we can try to use route() if domain routing is set up globally
-        // But manual construction is safer for cross-domain calls
+        // Use the platform subdomain for the entry point to ensure session is established on the correct domain
         return "{$scheme}://{$domain}/impersonate/enter?token={$token}";
     }
 }

@@ -2,15 +2,18 @@
 
 namespace App\Filament\Securegate\Pages;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Models\UptimePulse;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
 
 class SystemMonitor extends Page
 {
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-cpu-chip';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cpu-chip';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'System Management';
+    protected static string | UnitEnum | null $navigationGroup = 'System Management';
 
     protected string $view = 'filament.securegate.pages.system-monitor';
 

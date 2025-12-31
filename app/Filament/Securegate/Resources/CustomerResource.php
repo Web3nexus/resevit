@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\CustomerResource\Pages;
 use App\Models\Customer;
 use Filament\Forms;
@@ -19,9 +22,9 @@ class CustomerResource extends Resource
 
     protected static ?string $modelLabel = 'Customer';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'External Users';
+    protected static string | UnitEnum | null $navigationGroup = 'External Users';
 
     protected static ?int $navigationSort = 1;
 

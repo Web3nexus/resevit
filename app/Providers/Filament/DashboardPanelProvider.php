@@ -47,6 +47,7 @@ class DashboardPanelProvider extends PanelProvider
                 'Reservations',
                 'Menu Management',
                 'Staff Management',
+                'Finance',
             ])
             // ->spa()
             ->middleware([
@@ -60,6 +61,9 @@ class DashboardPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 \App\Http\Middleware\FilamentTenantGate::class,
+                \App\Http\Middleware\RedirectToOnboarding::class,
+                \App\Http\Middleware\ScopePermissionsByBranch::class,
+                \App\Http\Middleware\CheckStaffStatus::class,
                 \App\Http\Middleware\SetTenantTimezone::class,
                 DispatchServingFilamentEvent::class,
             ])
@@ -86,8 +90,24 @@ class DashboardPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->brandLogo(fn() => ($setting = \App\Models\PlatformSetting::current()) && $setting->logo_path ? \Illuminate\Support\Facades\Storage::url($setting->logo_path) : null)
-            ->favicon(fn() => ($setting = \App\Models\PlatformSetting::current()) && $setting->favicon_path ? \Illuminate\Support\Facades\Storage::url($setting->favicon_path) : null);
+            ->brandLogo(function () {
+                $tenant = tenant();
+                if ($tenant && $tenant->whitelabel_active && $tenant->whitelabel_logo) {
+                    return \App\Helpers\StorageHelper::getUrl($tenant->whitelabel_logo);
+                }
+
+                $setting = \App\Models\PlatformSetting::current();
+                return $setting && $setting->logo_path ? \App\Helpers\StorageHelper::getUrl($setting->logo_path) : null;
+            })
+            ->favicon(function () {
+                $tenant = tenant();
+                if ($tenant && $tenant->whitelabel_active && $tenant->whitelabel_logo) {
+                    return \App\Helpers\StorageHelper::getUrl($tenant->whitelabel_logo);
+                }
+
+                $setting = \App\Models\PlatformSetting::current();
+                return $setting && $setting->favicon_path ? \App\Helpers\StorageHelper::getUrl($setting->favicon_path) : null;
+            });
         // ->renderHook(
         //     'panels::user-menu.before',
         //     fn() => view('filament.components.language-switcher-hook')

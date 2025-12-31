@@ -2,26 +2,27 @@
 
 namespace App\Filament\Dashboard\Resources\StaffSchedules;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\StaffSchedules\Pages\CreateStaffSchedule;
 use App\Filament\Dashboard\Resources\StaffSchedules\Pages\EditStaffSchedule;
 use App\Filament\Dashboard\Resources\StaffSchedules\Pages\ListStaffSchedules;
 use App\Filament\Dashboard\Resources\StaffSchedules\Schemas\StaffScheduleForm;
 use App\Filament\Dashboard\Resources\StaffSchedules\Tables\StaffSchedulesTable;
 use App\Models\StaffSchedule;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class StaffScheduleResource extends Resource
 {
     protected static ?string $model = StaffSchedule::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-calendar-days';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Staff Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Staff Management';
 
     public static function canViewAny(): bool
     {

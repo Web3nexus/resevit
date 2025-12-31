@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\AdminResource\Pages;
 use App\Models\Admin;
 use Filament\Forms;
@@ -19,9 +22,9 @@ class AdminResource extends Resource
 
     protected static ?string $modelLabel = 'Admin User';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-shield-check';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Internal Users';
+    protected static string | UnitEnum | null $navigationGroup = 'Internal Users';
 
     protected static ?int $navigationSort = 1;
 

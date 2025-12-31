@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Traits\BelongsToBranch;
+
 class Table extends Model
 {
     protected $connection = 'tenant';
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToBranch;
 
-    
+
 
     protected $fillable = [
         'name',
@@ -26,6 +28,7 @@ class Table extends Model
         'width',
         'height',
         'rotation',
+        'branch_id',
     ];
 
     protected $casts = [

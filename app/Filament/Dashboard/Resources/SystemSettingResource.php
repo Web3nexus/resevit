@@ -2,6 +2,8 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
 use App\Filament\Dashboard\Resources\SystemSettingResource\Pages;
 use App\Models\ReservationSetting;
 use Filament\Forms;
@@ -13,7 +15,7 @@ class SystemSettingResource extends Resource
 {
     protected static ?string $model = ReservationSetting::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     // Hide from main navigation - will be accessible via user menu
     protected static bool $shouldRegisterNavigation = false;

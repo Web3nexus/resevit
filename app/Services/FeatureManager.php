@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Tenant;
 use App\Models\PricingFeature;
+use App\Services\FeaturePermissionManager;
 use Illuminate\Support\Facades\Cache;
 
 class FeatureManager
@@ -35,6 +36,27 @@ class FeatureManager
         \Illuminate\Support\Facades\Log::info("FeatureManager: Result for '{$featureKey}' is " . ($result ? 'TRUE' : 'FALSE'));
         return $result;
         // });
+    }
+
+    /**
+     * Get all enabled features for a tenant.
+     */
+    public function getEnabledFeatures(Tenant $tenant): array
+    {
+        $plan = $this->getTenantPlan($tenant);
+
+        if (!$plan) {
+            return [];
+        }
+
+        if ($plan->slug === 'enterprise') {
+            return array_keys(FeaturePermissionManager::getFeaturePermissions());
+        }
+
+        return $plan->features()
+            ->wherePivot('is_included', true)
+            ->pluck('feature_key')
+            ->toArray();
     }
 
     /**

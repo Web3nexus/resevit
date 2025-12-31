@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\MarketingCampaignResource\Pages;
 use App\Models\MarketingCampaign;
 use App\Services\AI\ContentGeneratorService;
@@ -16,9 +19,9 @@ class MarketingCampaignResource extends Resource
 {
     protected static ?string $model = MarketingCampaign::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-megaphone';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-megaphone';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Marketing';
+    protected static string|UnitEnum|null $navigationGroup = 'Marketing';
 
     public static function canViewAny(): bool
     {
@@ -57,6 +60,7 @@ class MarketingCampaignResource extends Resource
                     ->directory('marketing-images')
                     ->visibility('public')
                     ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === 'social')
+                    ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->image_path))
                     ->helperText('Upload an image for your social media post'),
                 Forms\Components\RichEditor::make('content')
                     ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === 'email')

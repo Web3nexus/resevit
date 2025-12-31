@@ -42,6 +42,35 @@ class Tenant extends BaseTenant implements TenantWithDatabase
                 $tenant->{$tenant->getKeyName()} = (string) Str::uuid();
             }
         });
+
+        static::saved(function (Tenant $tenant) {
+            $newCustomDomains = array_filter([
+                $tenant->website_custom_domain,
+                $tenant->dashboard_custom_domain,
+            ]);
+
+            // 1. Create/Update the new domains
+            foreach ($newCustomDomains as $domainName) {
+                $tenant->domains()->updateOrCreate(['domain' => $domainName]);
+            }
+
+            // 2. Cleanup old custom domains that are no longer selected
+            // We identify custom domains as those NOT ending with central domains
+            $centralDomains = config('tenancy.central_domains', []);
+            $tenant->domains()->get()->each(function ($d) use ($newCustomDomains, $centralDomains) {
+                $isSystemDomain = false;
+                foreach ($centralDomains as $central) {
+                    if (str_ends_with($d->domain, $central)) {
+                        $isSystemDomain = true;
+                        break;
+                    }
+                }
+
+                if (!$isSystemDomain && !in_array($d->domain, $newCustomDomains)) {
+                    $d->delete();
+                }
+            });
+        });
     }
     protected $fillable = [
         'name',
@@ -57,6 +86,8 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'currency',
         'trial_ends_at',
         'plan_id',
+        'influencer_id',
+        'subscription_interval',
         'is_public',
         'is_sponsored',
         'sponsored_ranking',
@@ -65,6 +96,10 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'cover_image',
         'seo_title',
         'seo_description',
+        'whitelabel_logo',
+        'whitelabel_active',
+        'website_custom_domain',
+        'dashboard_custom_domain',
     ];
 
     protected $casts = [
@@ -74,6 +109,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'is_public' => 'boolean',
         'is_sponsored' => 'boolean',
         'sponsored_ranking' => 'integer',
+        'whitelabel_active' => 'boolean',
     ];
 
     public function owner()
@@ -134,6 +170,10 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'cover_image',
             'seo_title',
             'seo_description',
+            'whitelabel_logo',
+            'whitelabel_active',
+            'website_custom_domain',
+            'dashboard_custom_domain',
         ];
     }
 }

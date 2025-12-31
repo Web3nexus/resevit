@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\ActivityLogResource\Pages;
 use Filament\Forms;
 // use Filament\Forms\Form; // Removed
@@ -10,17 +13,15 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Spatie\Activitylog\Models\Activity;
 
-use UnitEnum;
-use BackedEnum;
 use Filament\Schemas\Schema;
 
 class ActivityLogResource extends Resource
 {
     protected static ?string $model = Activity::class;
 
-    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static UnitEnum|string|null $navigationGroup = 'System';
+    protected static string | UnitEnum | null $navigationGroup = 'System';
 
     protected static ?string $label = 'Audit Log';
 

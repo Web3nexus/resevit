@@ -2,13 +2,15 @@
 
 namespace App\Filament\Securegate\Resources\ContactMessages;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\ContactMessages\Pages\CreateContactMessage;
 use App\Filament\Securegate\Resources\ContactMessages\Pages\EditContactMessage;
 use App\Filament\Securegate\Resources\ContactMessages\Pages\ListContactMessages;
 use App\Filament\Securegate\Resources\ContactMessages\Schemas\ContactMessageForm;
 use App\Filament\Securegate\Resources\ContactMessages\Tables\ContactMessagesTable;
 use App\Models\ContactMessage;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,9 +20,9 @@ class ContactMessageResource extends Resource
 {
     protected static ?string $model = ContactMessage::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-envelope';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-envelope';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Landing Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Landing Management';
 
     protected static ?int $navigationSort = 13;
 

@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\MarketingTemplateResource\Pages;
 use App\Models\MarketingTemplate;
 use Filament\Forms;
@@ -14,9 +17,9 @@ class MarketingTemplateResource extends Resource
 {
     protected static ?string $model = MarketingTemplate::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-duplicate';
-    
-    protected static string | \UnitEnum | null $navigationGroup = 'Marketing';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-duplicate';
+
+    protected static string | UnitEnum | null $navigationGroup = 'Marketing';
 
     public static function form(Schema $schema): Schema
     {
@@ -34,16 +37,16 @@ class MarketingTemplateResource extends Resource
                     ->required()
                     ->live(),
                 Forms\Components\TextInput::make('subject')
-                    ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === 'email')
-                    ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === 'email')
+                    ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === 'email')
+                    ->required(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === 'email')
                     ->maxLength(255),
                 Forms\Components\RichEditor::make('content')
-                    ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === 'email')
-                    ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === 'email')
+                    ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === 'email')
+                    ->required(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('type') === 'email')
                     ->columnSpanFull(),
                 Forms\Components\Textarea::make('content')
-                    ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('type') !== 'email')
-                    ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => $get('type') !== 'email')
+                    ->visible(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('type') !== 'email')
+                    ->required(fn(\Filament\Schemas\Components\Utilities\Get $get) => $get('type') !== 'email')
                     ->columnSpanFull(),
             ]);
     }

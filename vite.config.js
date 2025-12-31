@@ -14,7 +14,7 @@ export default defineConfig({
         host: '127.0.0.1',
         cors: true,
         hmr: {
-            host: 'resevit.test',
+            host: 'resevit-backend.test',
         },
     },
 });

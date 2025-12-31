@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\InvestorResource\Pages;
 use App\Models\Investor;
 use Filament\Forms;
@@ -19,9 +22,9 @@ class InvestorResource extends Resource
 
     protected static ?string $modelLabel = 'Investor';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'External Users';
+    protected static string | UnitEnum | null $navigationGroup = 'External Users';
 
     protected static ?int $navigationSort = 2;
 

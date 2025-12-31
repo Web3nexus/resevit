@@ -58,7 +58,8 @@
                             <!-- Cover Image -->
                             <div class="relative h-56 overflow-hidden">
                                 @if($business->cover_image)
-                                    <img src="{{ Storage::url($business->cover_image) }}" alt="{{ $business->name }}"
+                                    <img src="{{ \App\Helpers\StorageHelper::getUrl($business->cover_image) }}"
+                                        alt="{{ $business->name }}"
                                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                                 @else
                                     <div class="w-full h-full bg-slate-100 flex items-center justify-center">

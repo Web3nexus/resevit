@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\RoleResource\Pages;
 use Spatie\Permission\Models\Role;
 use Filament\Forms;
@@ -15,9 +18,9 @@ class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Staff Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Staff Management';
 
     public static function canViewAny(): bool
     {
@@ -43,7 +46,7 @@ class RoleResource extends Resource
                     ]),
 
                 \Filament\Schemas\Components\Section::make('Feature Access')
-                    ->description('Enable features this role can access.')
+                    ->description('Enable permissions for this role based on active features.')
                     ->schema([
                         Forms\Components\CheckboxList::make('permissions')
                             ->relationship('permissions', 'name')
@@ -52,20 +55,23 @@ class RoleResource extends Resource
                                 if (!$tenant)
                                     return [];
 
-                                $plan = $tenant->plan;
-                                if (!$plan)
-                                    return [];
+                                $enabledFeatures = app(\App\Services\FeatureManager::class)->getEnabledFeatures($tenant);
+                                $mapping = \App\Services\FeaturePermissionManager::getFeaturePermissions();
 
-                                return $plan->features()
-                                    ->wherePivot('is_included', true)
-                                    ->get()
-                                    ->mapWithKeys(fn($f) => [$f->feature_key => $f->name]);
+                                $allowedPermissionNames = [];
+                                foreach ($enabledFeatures as $feature) {
+                                    if (isset($mapping[$feature])) {
+                                        $allowedPermissionNames = array_merge($allowedPermissionNames, $mapping[$feature]);
+                                    }
+                                }
+
+                                return \Spatie\Permission\Models\Permission::whereIn('name', $allowedPermissionNames)
+                                    ->pluck('name', 'id');
                             })
                             ->columns(2),
                     ]),
             ]);
     }
-
     public static function table(Table $table): Table
     {
         return $table

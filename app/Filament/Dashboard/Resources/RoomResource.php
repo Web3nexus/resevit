@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\RoomResource\Pages;
 use App\Models\Room;
 use Filament\Forms;
@@ -14,9 +17,9 @@ class RoomResource extends Resource
 {
     protected static ?string $model = Room::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Reservations';
+    protected static string | UnitEnum | null $navigationGroup = 'Reservations';
 
     protected static ?int $navigationSort = 1;
 
@@ -36,6 +39,11 @@ class RoomResource extends Resource
                 Forms\Components\Textarea::make('description')
                     ->maxLength(500)
                     ->placeholder('Optional description of the area'),
+                Forms\Components\Select::make('branch_id')
+                    ->relationship('branch', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
             ]);
     }
 
@@ -43,6 +51,9 @@ class RoomResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('branch.name')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),

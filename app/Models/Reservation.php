@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 
+use App\Traits\BelongsToBranch;
+
 class Reservation extends Model
 {
     protected $connection = 'tenant';
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToBranch;
 
-    
+
 
     protected $fillable = [
         'table_id',
@@ -30,6 +32,8 @@ class Reservation extends Model
         'confirmed_at',
         'reminder_sent_at',
         'confirmation_code',
+        'branch_id',
+        'assigned_to_staff_id',
     ];
 
     protected $casts = [
@@ -39,11 +43,17 @@ class Reservation extends Model
         'confirmed_at' => 'datetime',
         'reminder_sent_at' => 'datetime',
         'customer_id' => 'integer',
+        'assigned_to_staff_id' => 'integer',
     ];
 
     public function table(): BelongsTo
     {
         return $this->belongsTo(Table::class);
+    }
+
+    public function assignedTo(): BelongsTo
+    {
+        return $this->belongsTo(Staff::class, 'assigned_to_staff_id');
     }
 
     /**

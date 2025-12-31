@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\TenantUser;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -14,39 +14,55 @@ class TenantUserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Ensure team ID is set for Spatie if teams are enabled
+        if (config('permission.teams')) {
+            $branch = \App\Models\Branch::first();
+            if ($branch) {
+                setPermissionsTeamId($branch->id);
+            }
+        }
+
         // Create Owner
-        $owner = User::create([
-            'name' => 'Business Owner',
-            'email' => 'owner@local.test',
-            'password' => Hash::make('password'),
-        ]);
+        $owner = TenantUser::updateOrCreate(
+            ['email' => 'owner@local.test'],
+            [
+                'name' => 'Business Owner',
+                'password' => Hash::make('password'),
+            ]
+        );
         $ownerRole = Role::firstOrCreate(['name' => 'owner', 'guard_name' => 'web']);
         $owner->assignRole($ownerRole);
 
         // Create Manager
-        $manager = User::create([
-            'name' => 'Manager',
-            'email' => 'manager@local.test',
-            'password' => Hash::make('password'),
-        ]);
+        $manager = TenantUser::updateOrCreate(
+            ['email' => 'manager@local.test'],
+            [
+                'name' => 'Manager',
+                'password' => Hash::make('password'),
+            ]
+        );
         $managerRole = Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'web']);
         $manager->assignRole($managerRole);
 
         // Create Staff
-        $staff = User::create([
-            'name' => 'Staff',
-            'email' => 'staff@local.test',
-            'password' => Hash::make('password'),
-        ]);
+        $staff = TenantUser::updateOrCreate(
+            ['email' => 'staff@local.test'],
+            [
+                'name' => 'Staff',
+                'password' => Hash::make('password'),
+            ]
+        );
         $staffRole = Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
         $staff->assignRole($staffRole);
 
         // Create Accountant
-        $accountant = User::create([
-            'name' => 'Accountant',
-            'email' => 'accountant@local.test',
-            'password' => Hash::make('password'),
-        ]);
+        $accountant = TenantUser::updateOrCreate(
+            ['email' => 'accountant@local.test'],
+            [
+                'name' => 'Accountant',
+                'password' => Hash::make('password'),
+            ]
+        );
         $accountantRole = Role::firstOrCreate(['name' => 'accountant', 'guard_name' => 'web']);
         $accountant->assignRole($accountantRole);
     }

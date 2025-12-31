@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\CategoryResource\Pages;
 use App\Models\Category;
 use Filament\Forms;
@@ -16,9 +19,9 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-tag';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-tag';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Menu Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Menu Management';
 
     protected static ?int $navigationSort = 1;
 

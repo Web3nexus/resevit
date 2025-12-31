@@ -2,13 +2,15 @@
 
 namespace App\Filament\Securegate\Resources\PricingFeatures;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\PricingFeatures\Pages\CreatePricingFeature;
 use App\Filament\Securegate\Resources\PricingFeatures\Pages\EditPricingFeature;
 use App\Filament\Securegate\Resources\PricingFeatures\Pages\ListPricingFeatures;
 use App\Filament\Securegate\Resources\PricingFeatures\Schemas\PricingFeatureForm;
 use App\Filament\Securegate\Resources\PricingFeatures\Tables\PricingFeaturesTable;
 use App\Models\PricingFeature;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,9 +20,9 @@ class PricingFeatureResource extends Resource
 {
     protected static ?string $model = PricingFeature::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-puzzle-piece';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-puzzle-piece';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Smart Access';
+    protected static string | UnitEnum | null $navigationGroup = 'Smart Access';
 
     protected static int|null $navigationSort = 14;
 

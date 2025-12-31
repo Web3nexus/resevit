@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Pages;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Models\Reservation;
 use App\Models\Table;
 use App\Services\TableOptimizationService;
@@ -18,9 +21,9 @@ class TableOptimization extends Page implements HasForms
 
     protected string $view = 'filament.dashboard.pages.table-optimization';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-sparkles';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-sparkles';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Operations';
+    protected static string | UnitEnum | null $navigationGroup = 'Operations';
 
     public ?string $date = null;
     public array $suggestions = [];

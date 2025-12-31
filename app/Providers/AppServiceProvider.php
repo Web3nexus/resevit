@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\View as ViewFacade;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,6 +43,8 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Table::class, \App\Policies\TablePolicy::class);
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Room::class, \App\Policies\RoomPolicy::class);
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Addon::class, \App\Policies\AddonPolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\Inventory::class, \App\Policies\InventoryPolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\Promotion::class, \App\Policies\PromotionPolicy::class);
 
         // Register policies
         \Illuminate\Support\Facades\Gate::policy(
@@ -87,12 +93,16 @@ class AppServiceProvider extends ServiceProvider
             \App\Policies\AddonPolicy::class
         );
 
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::GLOBAL_SEARCH_AFTER,
+            fn(): View => ViewFacade::make('filament.hooks.branch-switcher'),
+        );
+
         // Register global impersonation banner
-        // Register global impersonation banner
-        // \Filament\Support\Facades\FilamentView::registerRenderHook(
-        //     \Filament\View\PanelsRenderHook::BODY_END,
-        //     fn(): string => \Illuminate\Support\Facades\View::make('components.impersonation-banner')->render(),
-        // );
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::BODY_END,
+            fn(): string => ViewFacade::make('components.impersonation-banner')->render(),
+        );
 
 
 
@@ -118,5 +128,13 @@ class AppServiceProvider extends ServiceProvider
                 [\App\Listeners\SubscriptionSyncListener::class, 'handleSubscriptionDeleted']
             );
         }
+
+        // Global Permission Bypass for Business Owner
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            if (function_exists('tenant') && tenant() && $user->id === tenant()->owner_user_id) {
+                return true;
+            }
+            return null;
+        });
     }
 }

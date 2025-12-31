@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\SocialAccountResource\Pages;
 use App\Models\SocialAccount;
 use Filament\Forms;
@@ -14,9 +17,9 @@ class SocialAccountResource extends Resource
 {
     protected static ?string $model = SocialAccount::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-share';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-share';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Settings';
+    protected static string | UnitEnum | null $navigationGroup = 'Settings';
 
     protected static int|null $navigationSort = 10;
 

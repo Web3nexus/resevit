@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\AiSettingResource\Pages;
 use App\Models\AiSetting;
 use Filament\Forms;
@@ -14,9 +17,9 @@ class AiSettingResource extends Resource
 {
     protected static ?string $model = AiSetting::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-sparkles';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-sparkles';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'AI Management';
+    protected static string | UnitEnum | null $navigationGroup = 'AI Management';
 
     protected static ?string $navigationLabel = 'AI Configuration';
 

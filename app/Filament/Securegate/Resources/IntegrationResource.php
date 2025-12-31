@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\IntegrationResource\Pages;
 use App\Models\Integration;
 use Filament\Forms\Components\FileUpload;
@@ -21,9 +24,9 @@ class IntegrationResource extends Resource
 {
     protected static ?string $model = Integration::class;
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-puzzle-piece';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-puzzle-piece';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Landing Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Landing Management';
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -44,6 +47,7 @@ class IntegrationResource extends Resource
                             ->directory('integrations')
                             ->visibility('public')
                             ->imageEditor()
+                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->logo_path))
                             ->columnSpanFull(),
 
                         Textarea::make('description')
@@ -74,7 +78,8 @@ class IntegrationResource extends Resource
                 ImageColumn::make('logo_path')
                     ->label('Logo')
                     ->square()
-                    ->size(60),
+                    ->size(60)
+                    ->disk(fn($record) => str_contains($record->logo_path, '::') ? explode('::', $record->logo_path)[0] : config('filesystems.default')),
 
                 TextColumn::make('name')
                     ->searchable()

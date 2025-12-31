@@ -10,6 +10,11 @@
 
 @section('content')
     @foreach($sections as $section)
+        {{-- Skip hero sections on non-home pages to avoid duplicates --}}
+        @if($section->type === 'hero' && $page->slug !== 'home')
+            @continue
+        @endif
+
         @if(view()->exists("landing.sections.{$section->type}"))
             @include("landing.sections.{$section->type}", ['section' => $section])
         @else

@@ -13,6 +13,7 @@ class PricingPlan extends Model
         'description',
         'price_monthly',
         'price_yearly',
+        'yearly_discount_percentage',
         'trial_days',
         'is_trial_available',
         'is_free',
@@ -31,6 +32,7 @@ class PricingPlan extends Model
         'is_free' => 'boolean',
         'price_monthly' => 'decimal:2',
         'price_yearly' => 'decimal:2',
+        'yearly_discount_percentage' => 'decimal:2',
     ];
 
     public function features()

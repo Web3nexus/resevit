@@ -6,25 +6,33 @@ use Illuminate\Support\Facades\Route;
 
 // dd('Web routes loaded');
 
-Route::get('/', [LandingPageController::class, 'home'])->name('home');
-Route::get('/pricing', [LandingPageController::class, 'pricing'])->name('pricing');
+Route::get('/', [\App\Http\Controllers\SiteController::class, 'index'])->name('home');
+Route::middleware(['platform.protect'])->group(function () {
+    Route::get('/pricing', [LandingPageController::class, 'pricing'])->name('pricing');
 
-// Directory Routes
-Route::get('/directory', [\App\Http\Controllers\DirectoryController::class, 'index'])->name('directory.index');
-Route::get('/directory/{slug}', [\App\Http\Controllers\DirectoryController::class, 'show'])->name('directory.show');
-Route::get('/features', [LandingPageController::class, 'features'])->name('features');
-Route::get('/integrations', [LandingPageController::class, 'integrations'])->name('integrations');
-Route::get('/about', [LandingPageController::class, 'about'])->name('about');
-Route::get('/contact', [LandingPageController::class, 'contact'])->name('contact');
-Route::post('/contact/submit', [LandingPageController::class, 'submitContact'])->name('contact.submit');
-Route::post('/newsletter/subscribe', [LandingPageController::class, 'subscribeNewsletter'])->name('newsletter.subscribe');
-Route::get('/faq', [LandingPageController::class, 'faq'])->name('faq');
-Route::get('/legal/{slug}', [App\Http\Controllers\LegalController::class, 'show'])->name('legal.show');
-Route::get('/resources', [LandingPageController::class, 'resources'])->name('resources');
-Route::get('/resources/{slug}', [LandingPageController::class, 'resourceShow'])->name('resources.show');
-Route::get('/status', [App\Http\Controllers\StatusController::class, 'index'])->name('status');
-Route::get('/docs', [App\Http\Controllers\DocsController::class, 'index'])->name('docs.index');
-Route::get('/docs/{slug}', [App\Http\Controllers\DocsController::class, 'show'])->name('docs.show');
+    // Directory Routes
+    Route::get('/directory', [\App\Http\Controllers\DirectoryController::class, 'index'])->name('directory.index');
+    Route::get('/directory/{slug}', [\App\Http\Controllers\DirectoryController::class, 'show'])->name('directory.show');
+
+    // Food Ordering Directory
+    Route::get('/food', [\App\Http\Controllers\FoodOrderingController::class, 'index'])->name('food.index');
+    Route::get('/features', [LandingPageController::class, 'features'])->name('features');
+    Route::get('/integrations', [LandingPageController::class, 'integrations'])->name('integrations');
+    Route::get('/about', [LandingPageController::class, 'about'])->name('about');
+    Route::get('/contact', [LandingPageController::class, 'contact'])->name('contact');
+    Route::post('/contact/submit', [LandingPageController::class, 'submitContact'])->name('contact.submit');
+    Route::post('/newsletter/subscribe', [LandingPageController::class, 'subscribeNewsletter'])->name('newsletter.subscribe');
+    Route::get('/faq', [LandingPageController::class, 'faq'])->name('faq');
+    Route::get('/legal/{slug}', [App\Http\Controllers\LegalController::class, 'show'])->name('legal.show');
+    Route::get('/cookie-policy', function () {
+        return view('landing.cookie-policy');
+    })->name('landing.cookie-policy');
+    Route::get('/resources', [LandingPageController::class, 'resources'])->name('resources');
+    Route::get('/resources/{slug}', [LandingPageController::class, 'resourceShow'])->name('resources.show');
+    Route::get('/status', [App\Http\Controllers\StatusController::class, 'index'])->name('status');
+    Route::get('/docs', [App\Http\Controllers\DocsController::class, 'index'])->name('docs.index');
+    Route::get('/docs/{slug}', [App\Http\Controllers\DocsController::class, 'show'])->name('docs.show');
+});
 
 // Investor panel auth
 Route::prefix('investor')->name('investor.')->middleware('guest')->group(function () {
@@ -76,7 +84,12 @@ Route::middleware('guest')->group(function () {
 Route::get('oauth/{provider}/callback', [OAuthController::class, 'callback'])->name('oauth.callback');
 
 Route::middleware('auth')->group(function () {
+    Route::get('dashboard-redirect', \App\Http\Controllers\Auth\DashboardRedirectController::class)->name('dashboard.redirect');
     Route::post('logout', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    // Wallet Deposit
+    Route::get('wallet/deposit', [\App\Http\Controllers\Finance\WalletDepositController::class, 'deposit'])->name('wallet.deposit');
+    Route::get('wallet/deposit/success', [\App\Http\Controllers\Finance\WalletDepositController::class, 'success'])->name('wallet.deposit.success');
 });
 
 Route::get('/debug-auth', function () {
@@ -117,7 +130,7 @@ Route::get('/debug/seed-features', function () {
 
     // 3. Optional: Force logout by clearing current session if user requests it via ?reset=1
     if (request()->has('reset')) {
-        auth()->logout();
+        \Illuminate\Support\Facades\Auth::logout();
         session()->flush();
         session()->regenerate(true);
         return "System Deep-Cleaned! You have been logged out. <br><br> 

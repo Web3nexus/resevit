@@ -2,6 +2,8 @@
 
 namespace App\Filament\Dashboard\Pages;
 
+
+use BackedEnum;
 use App\Models\SitePage;
 use App\Models\Category;
 use App\Services\AI\WebsiteGeneratorService;
@@ -26,7 +28,7 @@ class WebsiteBuilder extends Page implements HasSchemas
 
     protected string $view = 'filament.dashboard.pages.website-builder';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-globe-alt';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-globe-alt';
 
     protected static ?string $navigationLabel = 'Website Builder';
 
@@ -45,32 +47,12 @@ class WebsiteBuilder extends Page implements HasSchemas
     {
         $page = SitePage::home()->first();
 
-        // Fetch existing custom domain (excluding subdomains of central domains)
-        $centralDomains = config('tenancy.central_domains');
-        $customDomain = tenant()->domains->filter(function ($domain) use ($centralDomains) {
-            foreach ($centralDomains as $central) {
-                if (str_ends_with($domain->domain, $central)) {
-                    return false;
-                }
-            }
-            return true;
-        })->first()?->domain;
-
-        if ($page) {
-            $this->data = [
-                'name' => $page->name,
-                'is_published' => $page->is_published,
-                'custom_domain' => $customDomain,
-                'blocks' => $page->config['blocks'] ?? [],
-            ];
-        } else {
-            $this->data = [
-                'name' => 'Home',
-                'is_published' => false,
-                'custom_domain' => $customDomain,
-                'blocks' => [],
-            ];
-        }
+        $this->data = [
+            'name' => $page->name ?? 'Home',
+            'is_published' => $page->is_published ?? false,
+            'custom_domain' => tenant()->website_custom_domain,
+            'blocks' => $page->config['blocks'] ?? [],
+        ];
     }
 
     protected function getActions(): array
@@ -111,7 +93,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                         ? TextInput::make('custom_domain')
                             ->label('Custom Domain')
                             ->placeholder('example.com')
-                            ->helperText('To use a custom domain, point its A record to your server IP or CNAME to resevit.test. Enter the domain without http:// or https://.')
+                            ->helperText('To use a custom domain, point its A record to your server IP or CNAME to ' . parse_url(config('app.url'), PHP_URL_HOST) . '. Enter the domain without http:// or https://.')
                             ->regex('/^(?!:\/\/)([a-zA-Z0-9-_]+\.)+[a-zA-Z0-9][a-zA-Z0-9-_]+$/')
                         : \Filament\Forms\Components\Placeholder::make('custom_domain_locked')
                             ->label('Custom Domain')
@@ -132,7 +114,10 @@ class WebsiteBuilder extends Page implements HasSchemas
                                         TextInput::make('subheadline'),
                                         TextInput::make('cta_text'),
                                         TextInput::make('cta_url'),
-                                        FileUpload::make('background_image')->image()->directory('website-images'),
+                                        FileUpload::make('background_image')
+                                            ->image()
+                                            ->directory('website-images')
+                                            ->getUploadedFileUrlUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
                                         ColorPicker::make('overlay_color')->label('Overlay Color')->rgba(),
                                         ColorPicker::make('text_color')->label('Text Color'),
                                     ]),
@@ -141,7 +126,10 @@ class WebsiteBuilder extends Page implements HasSchemas
                                     ->schema([
                                         TextInput::make('title')->required(),
                                         Textarea::make('content')->required(),
-                                        FileUpload::make('image')->image()->directory('website-images'),
+                                        FileUpload::make('image')
+                                            ->image()
+                                            ->directory('website-images')
+                                            ->getUploadedFileUrlUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
                                         ColorPicker::make('background_color')->label('Background Color'),
                                     ]),
                                 Block::make('dynamic_menu')
@@ -174,7 +162,10 @@ class WebsiteBuilder extends Page implements HasSchemas
                                     ->schema([
                                         TextInput::make('headline')->required(),
                                         TextInput::make('button_text')->required(),
-                                        FileUpload::make('background_image')->image()->directory('website-images'),
+                                        FileUpload::make('background_image')
+                                            ->image()
+                                            ->directory('website-images')
+                                            ->getUploadedFileUrlUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
                                         ColorPicker::make('text_color')->label('Text Color'),
                                         ColorPicker::make('button_color')->label('Button Color'),
                                     ]),
@@ -216,45 +207,10 @@ class WebsiteBuilder extends Page implements HasSchemas
         );
 
         // Handle Custom Domain Saving
-        if (has_feature('custom_domain') && isset($state['custom_domain'])) {
-            $domain = $state['custom_domain'];
-            $tenant = tenant();
-            $centralDomains = config('tenancy.central_domains');
-
-            // Find existing non-system domains to delete them
-            $toDelete = $tenant->domains->filter(function ($d) use ($centralDomains, $domain) {
-                // Never delete domains ending with central domains (system subdomains)
-                foreach ($centralDomains as $central) {
-                    if (str_ends_with($d->domain, $central)) {
-                        return false;
-                    }
-                }
-
-                // Keep the current custom domain if it's the same
-                if ($d->domain === $domain) {
-                    return false;
-                }
-
-                return true;
-            });
-
-            foreach ($toDelete as $d) {
-                $d->delete();
-            }
-
-            if (!empty($domain)) {
-                // Check if domain is already taken by another tenant
-                $existing = \App\Models\Domain::where('domain', $domain)->where('tenant_id', '!=', $tenant->id)->exists();
-                if ($existing) {
-                    Notification::make()->danger()->title('Domain already taken')->send();
-                    return;
-                }
-
-                // Check if already exists for this tenant
-                if (!$tenant->domains()->where('domain', $domain)->exists()) {
-                    $tenant->createDomain(['domain' => $domain]);
-                }
-            }
+        if (has_feature('custom_domain')) {
+            tenant()->update([
+                'website_custom_domain' => $state['custom_domain'] ?? null,
+            ]);
         }
 
         Notification::make()

@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Pages;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Services\AI\ContentGeneratorService;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -16,8 +19,8 @@ class AiImageGenerator extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-photo';
-    protected static string|\UnitEnum|null $navigationGroup = 'AI Management'; // slightly different group name for admin
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-photo';
+    protected static string | UnitEnum | null $navigationGroup = 'AI Management'; // slightly different group name for admin
     protected static ?string $navigationLabel = 'AI Image Studio';
     protected static ?string $title = 'AI Image Studio (Admin)';
 

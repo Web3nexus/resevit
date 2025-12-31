@@ -84,6 +84,7 @@ class InvestmentOpportunityForm
                     ->image()
                     ->directory('opportunities/images')
                     ->reorderable()
+                    ->getUploadedFileUrlUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file))
                     ->columnSpanFull(),
                 FileUpload::make('videos')
                     ->label('Pitch / Promo Video')
@@ -91,6 +92,7 @@ class InvestmentOpportunityForm
                     ->directory('opportunities/videos')
                     ->acceptedFileTypes(['video/mp4', 'video/quicktime', 'video/x-msvideo'])
                     ->maxSize(50240) // 50MB
+                    ->getUploadedFileUrlUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file))
                     ->columnSpanFull(),
                 DatePicker::make('expires_at'),
             ]);

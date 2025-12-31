@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\TableResource\Pages;
 use App\Models\Table;
 use Filament\Forms;
@@ -14,9 +17,9 @@ class TableResource extends Resource
 {
     protected static ?string $model = Table::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-table-cells';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-table-cells';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Reservations';
+    protected static string | UnitEnum | null $navigationGroup = 'Reservations';
 
     protected static ?int $navigationSort = 0;
 
@@ -55,6 +58,11 @@ class TableResource extends Resource
                     ])
                     ->default('available')
                     ->required(),
+                Forms\Components\Select::make('branch_id')
+                    ->relationship('branch', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
             ]);
     }
 
@@ -62,6 +70,9 @@ class TableResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('branch.name')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
@@ -88,6 +99,9 @@ class TableResource extends Resource
                     }),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('branch_id')
+                    ->relationship('branch', 'name')
+                    ->label('Branch'),
                 Tables\Filters\SelectFilter::make('location'),
                 Tables\Filters\SelectFilter::make('status'),
             ])

@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Securegate\Resources\LegalDocumentResource\Pages;
 use App\Models\LegalDocument;
 use Filament\Forms\Components\RichEditor;
@@ -19,9 +22,9 @@ class LegalDocumentResource extends Resource
 {
     protected static ?string $model = LegalDocument::class;
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-scale';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-scale';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Landing Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Landing Management';
 
     protected static ?string $recordTitleAttribute = 'title';
 

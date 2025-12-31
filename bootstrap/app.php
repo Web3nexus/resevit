@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'feature' => \App\Http\Middleware\CheckFeatureAccess::class,
+            'platform.protect' => \App\Http\Middleware\PreventPlatformAccessFromCustomDomains::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [

@@ -24,16 +24,28 @@ class StaffService
             $user = TenantUser::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => Hash::make($data['password'] ?? 'password123'), // Default password if not provided
+                'password' => Hash::make($data['password'] ?? 'password123'),
             ]);
 
-            // 2. Assign role via Spatie
-            $user->assignRole($role);
+            // 2. Set Team ID for Spatie
+            if (isset($data['branch_id'])) {
+                setPermissionsTeamId($data['branch_id']);
+            }
 
-            // 3. Create staff record
+            // 3. Assign roles
+            $roles = $data['roles'] ?? [$role];
+            $user->syncRoles($roles);
+
+            // 4. Assign permissions
+            if (isset($data['user']['permissions'])) {
+                $user->syncPermissions($data['user']['permissions']);
+            }
+
+            // 5. Create staff record
             $staff = Staff::create([
                 'user_id' => $user->id,
-                'position' => $role,
+                'branch_id' => $data['branch_id'],
+                'position' => $data['position'] ?? $role,
                 'phone' => $data['phone'] ?? null,
                 'emergency_contact' => $data['emergency_contact'] ?? null,
                 'hire_date' => $data['hire_date'] ?? now(),
@@ -47,11 +59,52 @@ class StaffService
     }
 
     /**
-     * Calculate payout amount based on hourly rate and hours worked.
+     * Update staff member details.
      *
      * @param Staff $staff
-     * @param int $hours
-     * @return float
+     * @param array $data
+     * @return Staff
+     */
+    public function updateStaff(Staff $staff, array $data): Staff
+    {
+        return DB::transaction(function () use ($staff, $data) {
+            // 1. Set Team ID for Spatie scoping
+            setPermissionsTeamId($staff->branch_id);
+
+            // 2. Update staff record
+            $staff->update($data);
+
+            // 3. Update user
+            if ($staff->user) {
+                $userData = [];
+                if (isset($data['name']))
+                    $userData['name'] = $data['name'];
+                if (isset($data['email']))
+                    $userData['email'] = $data['email'];
+                if (!empty($data['password']))
+                    $userData['password'] = Hash::make($data['password']);
+
+                if (!empty($userData)) {
+                    $staff->user->update($userData);
+                }
+
+                // 4. Sync roles
+                if (isset($data['roles'])) {
+                    $staff->user->syncRoles($data['roles']);
+                }
+
+                // 5. Sync permissions
+                if (isset($data['user']['permissions'])) {
+                    $staff->user->syncPermissions($data['user']['permissions']);
+                }
+            }
+
+            return $staff->fresh();
+        });
+    }
+
+    /**
+     * Calculate payout amount based on hourly rate and hours worked.
      */
     public function calculatePayout(Staff $staff, int $hours): float
     {
@@ -60,14 +113,9 @@ class StaffService
 
     /**
      * Record a payout for a staff member.
-     *
-     * @param Staff $staff
-     * @param array $data
-     * @return StaffPayout
      */
     public function recordPayout(Staff $staff, array $data): StaffPayout
     {
-        // Calculate amount if hours provided but amount not
         if (!isset($data['amount']) && isset($data['hours_worked'])) {
             $data['amount'] = $this->calculatePayout($staff, $data['hours_worked']);
         }
@@ -83,32 +131,7 @@ class StaffService
     }
 
     /**
-     * Update staff member details.
-     *
-     * @param Staff $staff
-     * @param array $data
-     * @return Staff
-     */
-    public function updateStaff(Staff $staff, array $data): Staff
-    {
-        $staff->update($data);
-
-        // Update user if name or email changed
-        if (isset($data['name']) || isset($data['email'])) {
-            $staff->user->update([
-                'name' => $data['name'] ?? $staff->user->name,
-                'email' => $data['email'] ?? $staff->user->email,
-            ]);
-        }
-
-        return $staff->fresh();
-    }
-
-    /**
      * Get staff statistics.
-     *
-     * @param Staff $staff
-     * @return array
      */
     public function getStaffStats(Staff $staff): array
     {

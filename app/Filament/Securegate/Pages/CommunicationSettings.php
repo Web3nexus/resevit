@@ -2,6 +2,9 @@
 
 namespace App\Filament\Securegate\Pages;
 
+
+use BackedEnum;
+use UnitEnum;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
@@ -14,11 +17,11 @@ use Filament\Notifications\Notification;
 
 class CommunicationSettings extends Page
 {
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-envelope';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-envelope';
 
     protected string $view = 'filament.securegate.pages.communication-settings';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Platform Settings';
+    protected static string | UnitEnum | null $navigationGroup = 'Platform Settings';
 
     protected static ?string $navigationLabel = 'Email & SMS Settings';
 

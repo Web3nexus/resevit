@@ -7,16 +7,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use App\Traits\BelongsToBranch;
+
 class Staff extends Model
 {
     protected $connection = 'tenant';
-    use SoftDeletes;
+    use SoftDeletes, BelongsToBranch;
 
-    
+
 
     protected $table = 'staff';
 
     protected $fillable = [
+        'branch_id',
         'user_id',
         'position',
         'phone',
@@ -25,6 +28,11 @@ class Staff extends Model
         'hourly_rate',
         'status',
         'availability',
+        'bank_name',
+        'account_holder_name',
+        'account_number',
+        'branch_code',
+        'swift_bic',
     ];
 
     protected $casts = [
@@ -67,5 +75,13 @@ class Staff extends Model
         return $this->payouts()
             ->where('status', 'pending')
             ->sum('amount');
+    }
+
+    /**
+     * Get all tasks assigned to this staff member.
+     */
+    public function receivedTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'assigned_to_staff_id');
     }
 }

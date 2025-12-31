@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\AddonResource\Pages;
 use App\Models\Addon;
 use Filament\Forms;
@@ -15,9 +18,9 @@ class AddonResource extends Resource
 {
     protected static ?string $model = Addon::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-plus-circle';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-plus-circle';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Menu Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Menu Management';
 
     protected static ?int $navigationSort = 3;
 

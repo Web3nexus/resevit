@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\CalendarEventResource\Pages;
 use App\Models\CalendarEvent;
 use Filament\Forms;
@@ -14,9 +17,9 @@ class CalendarEventResource extends Resource
 {
     protected static ?string $model = CalendarEvent::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-calendar';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-calendar';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Calendar';
+    protected static string | UnitEnum | null $navigationGroup = 'Calendar';
 
     protected static ?int $navigationSort = 0;
 

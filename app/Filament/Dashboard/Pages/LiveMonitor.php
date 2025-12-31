@@ -2,13 +2,16 @@
 
 namespace App\Filament\Dashboard\Pages;
 
+
+use BackedEnum;
+use UnitEnum;
 use Filament\Pages\Page;
 use App\Models\Room;
 use Filament\Actions\Action;
 
 class LiveMonitor extends Page
 {
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-presentation-chart-line';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-presentation-chart-line';
 
     protected string $view = 'filament.dashboard.pages.live-monitor';
 
@@ -16,7 +19,7 @@ class LiveMonitor extends Page
 
     protected static ?string $title = 'Live Floor Monitor';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Reservations';
+    protected static string | UnitEnum | null $navigationGroup = 'Reservations';
 
     public static function canAccess(): bool
     {

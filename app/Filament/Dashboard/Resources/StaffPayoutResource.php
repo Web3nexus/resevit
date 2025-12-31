@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\StaffPayoutResource\Pages;
 use App\Models\StaffPayout;
 use Filament\Forms;
@@ -9,19 +12,29 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Schemas\Schema;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Filament\Forms\Set;
+use Filament\Forms\Get;
 
 class StaffPayoutResource extends Resource
 {
     protected static ?string $model = StaffPayout::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Staff Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Finance';
 
     protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
     {
+        $user = auth()->user();
+        if ($user && method_exists($user, 'hasRole') && $user->hasRole('super_admin')) {
+            return true;
+        }
+
         return has_feature('staff');
     }
 
@@ -43,7 +56,7 @@ class StaffPayoutResource extends Resource
                     ->default(0)
                     ->required()
                     ->live(onBlur: true)
-                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
                         $staffId = $get('staff_id');
                         if ($staffId && $state) {
                             $staff = \App\Models\Staff::find($staffId);
@@ -125,9 +138,45 @@ class StaffPayoutResource extends Resource
                 \Filament\Actions\DeleteAction::make(),
                 \Filament\Actions\Action::make('mark_as_paid')
                     ->action(function (StaffPayout $record) {
-                        $record->update(['status' => 'paid', 'paid_at' => now()]);
-                        Notification::make()
-                            ->title('Payout marked as paid')
+                        $user = Auth::user();
+                        $amount = $record->amount;
+
+                        if ($user->wallet_balance < $amount) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Insufficient Balance')
+                                ->body('Your wallet balance is not enough to complete this payout.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        \Illuminate\Support\Facades\DB::transaction(function () use ($record, $user, $amount) {
+                            // 1. Deduct from wallet (Landlord)
+                            $user->decrement('wallet_balance', (float) $amount);
+
+                            // 2. Create Transaction (Landlord)
+                            $transaction = \App\Models\Transaction::create([
+                                'user_id' => $user->id,
+                                'amount' => -$amount,
+                                'type' => 'payout',
+                                'status' => 'completed',
+                                'description' => 'Staff Payout for ' . ($record->staff->user->name ?? 'Staff'),
+                                'transactionable_type' => StaffPayout::class,
+                                'transactionable_id' => $record->id,
+                                'metadata' => ['staff_id' => $record->staff_id]
+                            ]);
+
+                            // 3. Update Payout record (Tenant)
+                            $record->update([
+                                'status' => 'paid',
+                                'paid_at' => now(),
+                                'transaction_id' => $transaction->id
+                            ]);
+                        });
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Payout successful')
+                            ->body('The amount has been deducted from your wallet.')
                             ->success()
                             ->send();
                     })
@@ -141,9 +190,50 @@ class StaffPayoutResource extends Resource
                     \Filament\Actions\DeleteBulkAction::make(),
                     \Filament\Actions\BulkAction::make('mark_as_paid')
                         ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
-                            $records->each->update(['status' => 'paid', 'paid_at' => now()]);
+                            $user = Auth::user();
+                            $totalAmount = $records->sum('amount');
+
+                            if ($user->wallet_balance < $totalAmount) {
+                                Notification::make()
+                                    ->title('Insufficient Balance')
+                                    ->body("Your wallet balance ($" . number_format((float) $user->wallet_balance, 2) . ") is not enough to complete these payouts (Total: $" . number_format((float) $totalAmount, 2) . ").")
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+
+                            DB::transaction(function () use ($records, $user, $totalAmount) {
+                                // 1. Deduct total from wallet
+                                $user->decrement('wallet_balance', $totalAmount);
+
+                                // 2. Process each payout
+                                foreach ($records as $record) {
+                                    if ($record->status !== 'pending')
+                                        continue;
+
+                                    // Create Transaction for each
+                                    $transaction = \App\Models\Transaction::create([
+                                        'user_id' => $user->id,
+                                        'amount' => -$record->amount,
+                                        'type' => 'payout',
+                                        'status' => 'completed',
+                                        'description' => 'Staff Payout for ' . ($record->staff->user->name ?? 'Staff'),
+                                        'transactionable_type' => StaffPayout::class,
+                                        'transactionable_id' => $record->id,
+                                        'metadata' => ['staff_id' => $record->staff_id, 'bulk' => true]
+                                    ]);
+
+                                    $record->update([
+                                        'status' => 'paid',
+                                        'paid_at' => now(),
+                                        'transaction_id' => $transaction->id
+                                    ]);
+                                }
+                            });
+
                             Notification::make()
-                                ->title('Payouts marked as paid')
+                                ->title('Bulk payouts successful')
+                                ->body('The total amount has been deducted from your wallet.')
                                 ->success()
                                 ->send();
                         })

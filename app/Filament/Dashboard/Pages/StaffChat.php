@@ -2,6 +2,9 @@
 
 namespace App\Filament\Dashboard\Pages;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Models\StaffConversation;
 use App\Models\StaffMessage;
 use App\Models\User;
@@ -11,8 +14,8 @@ use Livewire\Attributes\Computed;
 
 class StaffChat extends Page
 {
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
-    protected static string|\UnitEnum|null $navigationGroup = 'Communication';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    protected static string | UnitEnum | null $navigationGroup = 'Communication';
     protected static ?string $title = 'Staff Chat';
     protected string $view = 'filament.dashboard.pages.staff-chat';
 

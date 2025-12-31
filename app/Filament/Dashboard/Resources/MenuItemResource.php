@@ -2,12 +2,18 @@
 
 namespace App\Filament\Dashboard\Resources;
 
+
+use BackedEnum;
+use UnitEnum;
 use App\Filament\Dashboard\Resources\MenuItemResource\Pages;
 use App\Models\MenuItem;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ExportBulkAction;
+use App\Filament\Exports\MenuItemExporter;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\FileUpload;
@@ -18,9 +24,9 @@ class MenuItemResource extends Resource
 {
     protected static ?string $model = MenuItem::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cake';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cake';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Menu Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Menu Management';
 
     protected static int|null $navigationSort = 2;
 
@@ -79,6 +85,7 @@ class MenuItemResource extends Resource
                             ->image()
                             ->directory('menu-items')
                             ->visibility('public')
+                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->image_path))
                             ->columnSpanFull(),
 
                     ])->columns(2),
@@ -119,7 +126,8 @@ class MenuItemResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image_path')
-                    ->label('Image'),
+                    ->label('Image')
+                    ->disk(fn($record) => str_contains($record->image_path, '::') ? explode('::', $record->image_path)[0] : config('filesystems.default')),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
@@ -142,9 +150,15 @@ class MenuItemResource extends Resource
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(MenuItemExporter::class),
+            ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
                     \Filament\Actions\DeleteBulkAction::make(),
+                    ExportBulkAction::make()
+                        ->exporter(MenuItemExporter::class),
                 ]),
             ]);
     }
