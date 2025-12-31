@@ -47,7 +47,7 @@ class IntegrationResource extends Resource
                             ->directory('integrations')
                             ->visibility('public')
                             ->imageEditor()
-                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->logo_path))
+                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->logo_path))
                             ->columnSpanFull(),
 
                         Textarea::make('description')

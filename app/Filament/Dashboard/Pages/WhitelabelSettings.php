@@ -70,7 +70,7 @@ class WhitelabelSettings extends Page implements HasForms
                             ->directory('whitelabel-logos')
                             ->visibility('public')
                             ->helperText('Replaces the platform logo on your dashboard.')
-                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->whitelabel_logo ?? $record->data['whitelabel_logo'] ?? null))
+                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->whitelabel_logo ?? $record->data['whitelabel_logo'] ?? null))
                             ->visible(fn($get) => $get('whitelabel_active'))
                             ->columnSpanFull(),
 

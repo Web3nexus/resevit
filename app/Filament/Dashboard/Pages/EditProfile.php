@@ -91,7 +91,7 @@ class EditProfile extends Page implements HasSchemas
                             ->avatar()
                             ->imageEditor()
                             ->directory('avatars')
-                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->avatar_url ?? $record->profileData['avatar_url'] ?? null)),
+                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->avatar_url ?? $record->profileData['avatar_url'] ?? null)),
                     ])
                     ->columns(2),
             ])

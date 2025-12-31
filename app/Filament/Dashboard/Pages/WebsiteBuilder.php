@@ -117,7 +117,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                                         FileUpload::make('background_image')
                                             ->image()
                                             ->directory('website-images')
-                                            ->getUploadedFileUrlUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
+                                            ->getUploadedFileUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
                                         ColorPicker::make('overlay_color')->label('Overlay Color')->rgba(),
                                         ColorPicker::make('text_color')->label('Text Color'),
                                     ]),
@@ -129,7 +129,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                                         FileUpload::make('image')
                                             ->image()
                                             ->directory('website-images')
-                                            ->getUploadedFileUrlUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
+                                            ->getUploadedFileUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
                                         ColorPicker::make('background_color')->label('Background Color'),
                                     ]),
                                 Block::make('dynamic_menu')
@@ -165,7 +165,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                                         FileUpload::make('background_image')
                                             ->image()
                                             ->directory('website-images')
-                                            ->getUploadedFileUrlUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
+                                            ->getUploadedFileUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
                                         ColorPicker::make('text_color')->label('Text Color'),
                                         ColorPicker::make('button_color')->label('Button Color'),
                                     ]),

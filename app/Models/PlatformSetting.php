@@ -42,6 +42,7 @@ class PlatformSetting extends Model
                 'hero_subtitle' => "Streamline reservations, optimize staff schedules, and delight customers with the world's most advanced restaurant management platform.",
                 'hero_cta_text' => 'Get Started Free',
                 'hero_cta_url' => '/register',
+                'active_theme' => 'default',
             ],
         ]);
 

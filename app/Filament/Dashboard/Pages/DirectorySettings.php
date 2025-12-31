@@ -95,7 +95,7 @@ class DirectorySettings extends Page implements HasSchemas
                             ->image()
                             ->directory('businesses/covers')
                             ->imageEditor()
-                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->cover_image ?? $record->profileData['cover_image'] ?? null)),
+                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->cover_image ?? $record->profileData['cover_image'] ?? null)),
                         Forms\Components\Textarea::make('description')
                             ->label('Profile Description')
                             ->rows(4)

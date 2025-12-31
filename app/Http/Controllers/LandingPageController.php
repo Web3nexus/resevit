@@ -129,35 +129,37 @@ class LandingPageController extends Controller
 
     protected function renderPage($slug)
     {
+        $settings = \App\Models\PlatformSetting::current();
+        $theme = $settings->landing_settings['active_theme'] ?? 'default';
+        $viewPrefix = $theme === 'modern' ? 'landing.themes.modern.' : 'landing.';
+        $layout = $theme === 'modern' ? 'layouts.landing-modern' : 'layouts.landing';
+
         $page = LandingPage::where('slug', $slug)
             ->where('is_active', true)
             ->first();
 
         if (!$page) {
-            // Check if it's a legal page that we have in PlatformSettings
-            $settings = \App\Models\PlatformSetting::current();
             $legal = $settings->legal_settings ?? [];
-
             $legalMapping = [
                 'terms' => 'terms_of_service',
                 'privacy' => 'privacy_policy',
                 'cookie-policy' => 'cookie_policy',
                 'gdpr' => 'gdpr',
+                'dmca' => 'dmca',
             ];
 
             if (isset($legalMapping[$slug]) && !empty($legal[$legalMapping[$slug]])) {
                 return view('landing.legal-simple', [
-                    'title' => ucwords(str_replace('-', ' ', $slug)),
+                    'title' => ucwords(str_replace(['-', '_'], ' ', $slug)),
                     'content' => $legal[$legalMapping[$slug]],
+                    'layout' => $layout,
                 ]);
             }
 
-            // Fallback to a static view if no DB entry exists, or 404
-            if (view()->exists("landing.{$slug}")) {
-                return view("landing.{$slug}");
+            if (view()->exists($viewPrefix . $slug)) {
+                return view($viewPrefix . $slug, compact('layout', 'theme'));
             }
 
-            // Only abort if NEITHER db record NOR static view exists
             abort(404);
         }
 
@@ -166,7 +168,6 @@ class LandingPageController extends Controller
             ->with('items')
             ->get();
 
-        // Inject global data for specific section types
         $testimonials = null;
         if ($sections->contains('type', 'testimonials')) {
             $testimonials = Testimonial::where('is_active', true)
@@ -189,6 +190,8 @@ class LandingPageController extends Controller
                 ->get();
         }
 
-        return view('landing.dynamic', compact('page', 'sections', 'testimonials', 'plans', 'pricing_features'));
+        $viewName = view()->exists($viewPrefix . 'dynamic') ? $viewPrefix . 'dynamic' : 'landing.dynamic';
+
+        return view($viewName, compact('page', 'sections', 'testimonials', 'plans', 'pricing_features', 'layout', 'theme'));
     }
 }

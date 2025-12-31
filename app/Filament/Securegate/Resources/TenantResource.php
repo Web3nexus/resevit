@@ -107,7 +107,7 @@ class TenantResource extends Resource
                         \Filament\Forms\Components\FileUpload::make('cover_image')
                             ->image()
                             ->directory('businesses/covers')
-                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->cover_image)),
+                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->cover_image)),
                         \Filament\Forms\Components\Textarea::make('description')
                             ->label('Directory Description')
                             ->rows(3),

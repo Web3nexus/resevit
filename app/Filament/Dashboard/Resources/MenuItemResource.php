@@ -85,7 +85,7 @@ class MenuItemResource extends Resource
                             ->image()
                             ->directory('menu-items')
                             ->visibility('public')
-                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->image_path))
+                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->image_path))
                             ->columnSpanFull(),
 
                     ])->columns(2),

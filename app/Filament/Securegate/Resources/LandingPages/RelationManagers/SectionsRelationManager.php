@@ -37,6 +37,7 @@ class SectionsRelationManager extends RelationManager
                         'resources_preview' => 'Resources Preview',
                         'testimonials' => 'Testimonials',
                         'cta_banner' => 'Final CTA Banner',
+                        'text_content' => 'Rich Text Content',
                     ])
                     ->required()
                     ->live(),

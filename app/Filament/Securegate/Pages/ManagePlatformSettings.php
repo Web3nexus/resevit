@@ -43,136 +43,157 @@ class ManagePlatformSettings extends Page implements HasSchemas
     {
         return $schema
             ->schema([
-                Section::make('Branding')
-                    ->description('Update the platform logo and favicon.')
+                Section::make('Public Presence & Landing Page')
+                    ->description('Manage your platform identity, landing page content, and legal documents in one place.')
+                    ->icon('heroicon-o-globe-alt')
                     ->schema([
-                        FileUpload::make('logo_path')
-                            ->label('Platform Logo')
-                            ->image()
-                            ->directory('platform')
-                            ->visibility('public')
-                            ->imageEditor()
-                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->logo_path)),
-
-                        FileUpload::make('favicon_path')
-                            ->label('Favicon')
-                            ->image()
-                            ->directory('platform')
-                            ->visibility('public')
-                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->favicon_path))
-                            ->acceptedFileTypes(['image/x-icon', 'image/vnd.microsoft.icon', 'image/png', 'image/svg+xml']),
-                    ])
-                    ->columns(2),
-
-                Section::make('Landing Page Management')
-                    ->description('Customize the visual content of your platform landing page.')
-                    ->icon('heroicon-o-home')
-                    ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                TextInput::make('landing_settings.hero_badge')
-                                    ->label('Hero Badge Text')
-                                    ->placeholder('e.g. THE FUTURE OF DINING'),
-                                TextInput::make('landing_settings.hero_title')
-                                    ->label('Hero Title')
-                                    ->placeholder('e.g. The Operating System for Restaurants')
-                                    ->columnSpanFull(),
-                                TextInput::make('landing_settings.hero_subtitle')
-                                    ->label('Hero Subtitle')
-                                    ->placeholder('e.g. Manage reservations, staff, and orders in one place.')
-                                    ->columnSpanFull(),
-                                TextInput::make('landing_settings.hero_cta_text')
-                                    ->label('CTA Button Text')
-                                    ->placeholder('e.g. Start Free Trial'),
-                                TextInput::make('landing_settings.hero_cta_url')
-                                    ->label('CTA Button URL')
-                                    ->placeholder('e.g. /register'),
-                                TextInput::make('landing_settings.hero_secondary_cta_text')
-                                    ->label('Secondary CTA Text')
-                                    ->placeholder('e.g. Watch Demo'),
-                                TextInput::make('landing_settings.hero_secondary_cta_url')
-                                    ->label('Secondary CTA URL')
-                                    ->placeholder('e.g. #'),
-                                FileUpload::make('landing_settings.hero_image')
-                                    ->label('Hero Background/Image')
-                                    ->image()
-                                    ->directory('platform/landing')
-                                    ->visibility('public')
-                                    ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->landing_settings['hero_image'] ?? null))
-                                    ->columnSpanFull(),
-                            ]),
-                    ]),
-
-                Section::make('Documents & Documentation')
-                    ->description('Set links for user documentation and technical support.')
-                    ->icon('heroicon-o-document-text')
-                    ->schema([
-                        Grid::make(3)
-                            ->schema([
-                                TextInput::make('landing_settings.docs_url')
-                                    ->label('Documentation URL')
-                                    ->placeholder('https://docs.resevit.com'),
-                                TextInput::make('landing_settings.help_center_url')
-                                    ->label('Help Center URL')
-                                    ->placeholder('https://support.resevit.com'),
-                                TextInput::make('landing_settings.status_page_url')
-                                    ->label('Status Page URL')
-                                    ->placeholder('https://status.resevit.com'),
-                            ]),
-                    ]),
-
-                Section::make('Legal & Compliance')
-                    ->description('Manage the official legal documents of the platform.')
-                    ->icon('heroicon-o-scale')
-                    ->schema([
-                        \Filament\Schemas\Components\Tabs::make('Legal Documents')
+                        \Filament\Schemas\Components\Tabs::make('Landing Page Setup')
                             ->tabs([
-                                \Filament\Schemas\Components\Tabs\Tab::make('Terms of Service')
+                                \Filament\Schemas\Components\Tabs\Tab::make('Identity & Theme')
+                                    ->icon('heroicon-o-user-circle')
                                     ->schema([
-                                        \Filament\Forms\Components\RichEditor::make('legal_settings.terms_of_service')
-                                            ->label('Terms of Service')
-                                            ->required(),
+                                        Grid::make(2)
+                                            ->schema([
+                                                FileUpload::make('logo_path')
+                                                    ->label('Platform Logo')
+                                                    ->image()
+                                                    ->directory('platform')
+                                                    ->visibility('public')
+                                                    ->imageEditor()
+                                                    ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->logo_path)),
+
+                                                FileUpload::make('favicon_path')
+                                                    ->label('Favicon')
+                                                    ->image()
+                                                    ->directory('platform')
+                                                    ->visibility('public')
+                                                    ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->favicon_path))
+                                                    ->acceptedFileTypes(['image/x-icon', 'image/vnd.microsoft.icon', 'image/png', 'image/svg+xml']),
+
+                                                \Filament\Forms\Components\Select::make('landing_settings.active_theme')
+                                                    ->label('Active Theme')
+                                                    ->options([
+                                                        'default' => 'Classic Elegance',
+                                                        'modern' => 'Modern Dark (GitHub Style)',
+                                                    ])
+                                                    ->default('default')
+                                                    ->required()
+                                                    ->columnSpanFull(),
+                                            ]),
+
+                                        Section::make('Hero Section')
+                                            ->compact()
+                                            ->schema([
+                                                TextInput::make('landing_settings.hero_badge')
+                                                    ->label('Hero Badge Text')
+                                                    ->placeholder('e.g. THE FUTURE OF DINING'),
+                                                TextInput::make('landing_settings.hero_title')
+                                                    ->label('Hero Title')
+                                                    ->placeholder('e.g. The Operating System for Restaurants')
+                                                    ->columnSpanFull(),
+                                                TextInput::make('landing_settings.hero_subtitle')
+                                                    ->label('Hero Subtitle')
+                                                    ->placeholder('e.g. Manage reservations, staff, and orders in one place.')
+                                                    ->columnSpanFull(),
+                                                Grid::make(2)
+                                                    ->schema([
+                                                        TextInput::make('landing_settings.hero_cta_text')
+                                                            ->label('CTA Button Text')
+                                                            ->placeholder('e.g. Start Free Trial'),
+                                                        TextInput::make('landing_settings.hero_cta_url')
+                                                            ->label('CTA Button URL')
+                                                            ->placeholder('e.g. /register'),
+                                                        TextInput::make('landing_settings.hero_secondary_cta_text')
+                                                            ->label('Secondary CTA Text')
+                                                            ->placeholder('e.g. Watch Demo'),
+                                                        TextInput::make('landing_settings.hero_secondary_cta_url')
+                                                            ->label('Secondary CTA URL')
+                                                            ->placeholder('e.g. #'),
+                                                    ]),
+                                                FileUpload::make('landing_settings.hero_image')
+                                                    ->label('Hero Background/Image')
+                                                    ->image()
+                                                    ->directory('platform/landing')
+                                                    ->visibility('public')
+                                                    ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->landing_settings['hero_image'] ?? null))
+                                                    ->columnSpanFull(),
+                                            ]),
                                     ]),
-                                \Filament\Schemas\Components\Tabs\Tab::make('Privacy Policy')
+
+                                \Filament\Schemas\Components\Tabs\Tab::make('Links & Socials')
+                                    ->icon('heroicon-o-link')
                                     ->schema([
-                                        \Filament\Forms\Components\RichEditor::make('legal_settings.privacy_policy')
-                                            ->label('Privacy Policy')
-                                            ->required(),
+                                        Section::make('Documentation & Support')
+                                            ->description('Set links for user documentation and technical support.')
+                                            ->compact()
+                                            ->schema([
+                                                Grid::make(3)
+                                                    ->schema([
+                                                        TextInput::make('landing_settings.docs_url')
+                                                            ->label('Documentation URL')
+                                                            ->placeholder('https://docs.resevit.com'),
+                                                        TextInput::make('landing_settings.help_center_url')
+                                                            ->label('Help Center URL')
+                                                            ->placeholder('https://support.resevit.com'),
+                                                        TextInput::make('landing_settings.status_page_url')
+                                                            ->label('Status Page URL')
+                                                            ->placeholder('https://status.resevit.com'),
+                                                    ]),
+                                            ]),
+
+                                        Section::make('Social Media Profiles')
+                                            ->description('Manage the platform social media profiles.')
+                                            ->compact()
+                                            ->schema([
+                                                Grid::make(2)
+                                                    ->schema([
+                                                        TextInput::make('landing_settings.social_facebook')
+                                                            ->label('Facebook URL')
+                                                            ->placeholder('https://facebook.com/resevit'),
+                                                        TextInput::make('landing_settings.social_twitter')
+                                                            ->label('Twitter / X URL')
+                                                            ->placeholder('https://twitter.com/resevit'),
+                                                        TextInput::make('landing_settings.social_instagram')
+                                                            ->label('Instagram URL')
+                                                            ->placeholder('https://instagram.com/resevit'),
+                                                        TextInput::make('landing_settings.social_linkedin')
+                                                            ->label('LinkedIn URL')
+                                                            ->placeholder('https://linkedin.com/company/resevit'),
+                                                    ]),
+                                            ]),
                                     ]),
-                                \Filament\Schemas\Components\Tabs\Tab::make('Cookie Policy')
+
+                                \Filament\Schemas\Components\Tabs\Tab::make('Legal Documents')
+                                    ->icon('heroicon-o-scale')
                                     ->schema([
-                                        \Filament\Forms\Components\RichEditor::make('legal_settings.cookie_policy')
-                                            ->label('Cookie Policy'),
-                                    ]),
-                                \Filament\Schemas\Components\Tabs\Tab::make('GDPR / Data Processing')
-                                    ->schema([
-                                        \Filament\Forms\Components\RichEditor::make('legal_settings.gdpr')
-                                            ->label('GDPR & Data Protection'),
+                                        \Filament\Schemas\Components\Tabs::make('Legal Tabs')
+                                            ->tabs([
+                                                \Filament\Schemas\Components\Tabs\Tab::make('Terms of Service')
+                                                    ->schema([
+                                                        \Filament\Forms\Components\RichEditor::make('legal_settings.terms_of_service')
+                                                            ->label('Terms of Service'),
+                                                    ]),
+                                                \Filament\Schemas\Components\Tabs\Tab::make('Privacy Policy')
+                                                    ->schema([
+                                                        \Filament\Forms\Components\RichEditor::make('legal_settings.privacy_policy')
+                                                            ->label('Privacy Policy'),
+                                                    ]),
+                                                \Filament\Schemas\Components\Tabs\Tab::make('Cookie Policy')
+                                                    ->schema([
+                                                        \Filament\Forms\Components\RichEditor::make('legal_settings.cookie_policy')
+                                                            ->label('Cookie Policy'),
+                                                    ]),
+                                                \Filament\Schemas\Components\Tabs\Tab::make('GDPR / Data Processing')
+                                                    ->schema([
+                                                        \Filament\Forms\Components\RichEditor::make('legal_settings.gdpr')
+                                                            ->label('GDPR & Data Protection'),
+                                                    ]),
+                                            ]),
                                     ]),
                             ])
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Social Media Links')
-                    ->description('Manage the platform social media profiles.')
-                    ->icon('heroicon-o-share')
-                    ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                TextInput::make('landing_settings.social_facebook')
-                                    ->label('Facebook URL')
-                                    ->placeholder('https://facebook.com/resevit'),
-                                TextInput::make('landing_settings.social_twitter')
-                                    ->label('Twitter / X URL')
-                                    ->placeholder('https://twitter.com/resevit'),
-                                TextInput::make('landing_settings.social_instagram')
-                                    ->label('Instagram URL')
-                                    ->placeholder('https://instagram.com/resevit'),
-                                TextInput::make('landing_settings.social_linkedin')
-                                    ->label('LinkedIn URL')
-                                    ->placeholder('https://linkedin.com/company/resevit'),
-                            ]),
-                    ]),
 
                 Section::make('Localization')
                     ->description('Select the languages available in the system.')
@@ -250,7 +271,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                             ->image()
                                             ->directory('platform/errors')
                                             ->visibility('public')
-                                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->error_pages['404']['image'] ?? null)),
+                                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->error_pages['404']['image'] ?? null)),
                                     ])->columnSpan(1),
 
                                 Section::make('500 Page (Server Error)')
@@ -268,7 +289,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                             ->image()
                                             ->directory('platform/errors')
                                             ->visibility('public')
-                                            ->getUploadedFileUrlUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->error_pages['500']['image'] ?? null)),
+                                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->error_pages['500']['image'] ?? null)),
                                     ])->columnSpan(1),
                             ]),
                     ]),
@@ -304,9 +325,121 @@ class ManagePlatformSettings extends Page implements HasSchemas
         $settings = PlatformSetting::current();
         $settings->update($data);
 
+        // Sync to Landing Page (Home > Hero)
+        $this->syncLandingPage($data);
+
+        // Sync Legal Pages
+        $this->syncLegalPages($data);
+
         Notification::make()
             ->success()
-            ->title('Settings updated successfully.')
+            ->title('Settings updated and synced to Landing Page.')
             ->send();
+    }
+
+    protected function syncLandingPage(array $data): void
+    {
+        try {
+            // 1. Find or Create Home Page
+            $homePage = \App\Models\LandingPage::firstOrCreate(
+                ['slug' => 'home'],
+                ['title' => 'Home', 'is_active' => true, 'meta_title' => 'Home']
+            );
+
+            // 2. Find or Create Hero Section
+            $heroSection = \App\Models\LandingSection::firstOrCreate(
+                ['landing_page_id' => $homePage->id, 'type' => 'hero'],
+                ['order' => 0, 'is_active' => true]
+            );
+
+            // 3. Prepare Content JSON
+            $content = $heroSection->content ?? [];
+            $landingSettings = $data['landing_settings'] ?? [];
+
+            $content['description'] = $landingSettings['hero_subtitle'] ?? $content['description'] ?? null;
+            $content['cta_text'] = $landingSettings['hero_cta_text'] ?? $content['cta_text'] ?? null;
+            $content['cta_url'] = $landingSettings['hero_cta_url'] ?? $content['cta_url'] ?? null;
+            $content['secondary_cta_text'] = $landingSettings['hero_secondary_cta_text'] ?? $content['secondary_cta_text'] ?? null;
+            $content['secondary_cta_url'] = $landingSettings['hero_secondary_cta_url'] ?? $content['secondary_cta_url'] ?? null;
+
+            // 4. Update Section Main Fields
+            $heroSection->update([
+                'title' => $landingSettings['hero_title'] ?? $heroSection->title,
+                'subtitle' => $landingSettings['hero_badge'] ?? $heroSection->subtitle, // Badge maps to subtitle
+                'content' => $content,
+            ]);
+
+            // 5. Sync Image to First Item (Icon field)
+            if (!empty($landingSettings['hero_image'])) {
+                $imageUrl = \App\Helpers\StorageHelper::getUrl($landingSettings['hero_image']);
+
+                $heroItem = \App\Models\LandingItem::firstOrCreate(
+                    ['landing_section_id' => $heroSection->id],
+                    ['order' => 0, 'is_active' => true]
+                );
+
+                $heroItem->update(['icon' => $imageUrl]);
+            }
+
+        } catch (\Exception $e) {
+            // Log error silently or notify admin - strictly for sync resilience
+            \Illuminate\Support\Facades\Log::error('Failed to sync Platform Settings to Landing Page: ' . $e->getMessage());
+        }
+    }
+
+    protected function syncLegalPages(array $data): void
+    {
+        $legalSettings = $data['legal_settings'] ?? [];
+        $mapping = [
+            'terms_of_service' => [
+                'slug' => 'terms',
+                'title' => 'Terms of Service',
+            ],
+            'privacy_policy' => [
+                'slug' => 'privacy',
+                'title' => 'Privacy Policy',
+            ],
+            'cookie_policy' => [
+                'slug' => 'cookie-policy',
+                'title' => 'Cookie Policy',
+            ],
+            'gdpr' => [
+                'slug' => 'gdpr',
+                'title' => 'GDPR Compliance',
+            ],
+        ];
+
+        foreach ($mapping as $settingKey => $pageInfo) {
+            if (empty($legalSettings[$settingKey])) {
+                continue;
+            }
+
+            try {
+                // 1. Find or Create Page
+                $page = \App\Models\LandingPage::firstOrCreate(
+                    ['slug' => $pageInfo['slug']],
+                    ['title' => $pageInfo['title'], 'is_active' => true, 'meta_title' => $pageInfo['title']]
+                );
+
+                // 2. Find or Create Text Content Section
+                $section = \App\Models\LandingSection::firstOrCreate(
+                    ['landing_page_id' => $page->id, 'type' => 'text_content'],
+                    ['order' => 0, 'is_active' => true]
+                );
+
+                // 3. Update Content
+                // Store the rich text content inside the 'content' JSON column under a 'body' key
+                $content = $section->content ?? [];
+                $content['body'] = $legalSettings[$settingKey];
+
+                $section->update([
+                    'title' => $pageInfo['title'],
+                    'content' => $content,
+                ]);
+
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to sync legal page {$pageInfo['slug']}: " . $e->getMessage());
+            }
+        }
     }
 }
