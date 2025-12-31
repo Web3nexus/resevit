@@ -106,8 +106,8 @@ Route::get('/debug-auth', function () {
 // Impersonation routes (Universal)
 Route::middleware([
     'web',
-    \Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class,
-    \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
+    // We removed strict tenancy middleware here to avoid crashes on tenant domains
+    // The Controller handles identifying the tenant context if needed, or we rely on the host
 ])->group(function () {
     Route::get('/impersonate/enter', [\App\Http\Controllers\ImpersonationController::class, 'enter'])->name('impersonate.enter');
     Route::get('/impersonate/leave', [\App\Http\Controllers\ImpersonationController::class, 'leave'])->name('impersonate.leave');

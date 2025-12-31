@@ -41,8 +41,8 @@ class ConditionalTenancy
             }
         }
 
-        // 2. Skip tenant initialization for Securegate panel
-        if ($request->is('securegate') || $request->is('securegate/*')) {
+        // 2. Skip tenant initialization for Securegate panel and Impersonation
+        if ($request->is('securegate') || $request->is('securegate/*') || $request->is('impersonate/*')) {
             return $next($request);
         }
 

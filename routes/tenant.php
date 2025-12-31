@@ -32,8 +32,7 @@ Route::middleware([
     //     return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id');
     // });
 
-    Route::get('/impersonate/enter', [\App\Http\Controllers\ImpersonationController::class, 'enter'])->name('impersonate.enter');
-    Route::get('/impersonate/leave', [\App\Http\Controllers\ImpersonationController::class, 'leave'])->name('impersonate.leave');
+
 
     Route::get('/menu', \App\Livewire\RestaurantMenu::class)->name('tenant.menu');
     Route::get('/checkout', \App\Livewire\RestaurantCheckout::class)->name('tenant.checkout');
