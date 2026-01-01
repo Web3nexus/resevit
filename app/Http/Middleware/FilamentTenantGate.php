@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Routing\Pipeline;
+use App\Http\Middleware\InitializeTenancyBySubdomainSlug;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
@@ -83,7 +84,7 @@ class FilamentTenantGate
             return app(Pipeline::class)
                 ->send($request)
                 ->through([
-                    InitializeTenancyByDomain::class,
+                    InitializeTenancyBySubdomainSlug::class,
                     PreventAccessFromCentralDomains::class,
                 ])
                 ->then($next);

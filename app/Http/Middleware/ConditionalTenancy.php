@@ -58,7 +58,7 @@ class ConditionalTenancy
 
         \Illuminate\Support\Facades\Log::info("ConditionalTenancy: Initializing tenancy for host: " . $host . " path: " . $request->path());
         // Initialize tenancy for all other domains (tenants)
-        return app(\Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class)
+        return app(\App\Http\Middleware\InitializeTenancyBySubdomainSlug::class)
             ->handle($request, $next);
     }
 }
