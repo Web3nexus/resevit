@@ -5,6 +5,7 @@ namespace App\Services\Communication;
 use App\Models\EmailSetting;
 use App\Models\DefaultEmailSetting;
 use App\Models\EmailTemplate;
+use App\Models\SmtpConfiguration;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -30,7 +31,19 @@ class EmailService
             $rendered = $template->render($data);
 
             // Get email configuration
-            $config = $this->getEmailConfig();
+            $config = null;
+
+            // 1. Check if template has specific configuration
+            if ($template->smtpConfiguration && $template->smtpConfiguration->is_active) {
+                $config = $template->smtpConfiguration->toArray();
+                // Ensure array structure matches what configureMailDriver expects
+                // The SmtpConfiguration model fields match, but we might need to map manual fields if not consistent
+            }
+
+            // 2. Fallback to Tenant/Default settings
+            if (!$config) {
+                $config = $this->getEmailConfig();
+            }
 
             if (!$config) {
                 Log::error('No email configuration available');

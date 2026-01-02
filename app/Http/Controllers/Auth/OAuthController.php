@@ -7,9 +7,11 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Exception;
+use App\Traits\HandlesReferrals;
 
 class OAuthController extends Controller
 {
+    use HandlesReferrals;
     /**
      * Redirect to OAuth provider
      */
@@ -68,6 +70,8 @@ class OAuthController extends Controller
             'terms_accepted' => true,
             'newsletter_subscribed' => false,
         ]);
+
+        $this->applyReferral($newUser);
 
         Auth::guard('web')->login($newUser);
 

@@ -43,6 +43,12 @@ return [
             'driver' => 'session',
             'provider' => 'customers',
         ],
+
+        // Influencer Panel (/influencer)
+        'influencer' => [
+            'driver' => 'session',
+            'provider' => 'influencers',
+        ],
     ],
 
     /*
@@ -73,6 +79,12 @@ return [
         'customers' => [
             'driver' => 'eloquent',
             'model' => App\Models\Customer::class,
+        ],
+
+        // Influencer provider
+        'influencers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Influencer::class,
         ],
     ],
 

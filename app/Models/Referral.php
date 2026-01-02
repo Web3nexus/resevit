@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Referral extends Model
 {
     protected $connection = 'landlord';
 
     protected $fillable = [
-        'influencer_id',
+        'referrer_id',
+        'referrer_type',
         'tenant_id',
         'referral_code',
         'ip_address',
@@ -23,9 +25,9 @@ class Referral extends Model
         'converted_at' => 'datetime',
     ];
 
-    public function influencer(): BelongsTo
+    public function referrer(): MorphTo
     {
-        return $this->belongsTo(Influencer::class);
+        return $this->morphTo();
     }
 
     public function tenant(): BelongsTo
@@ -35,6 +37,6 @@ class Referral extends Model
 
     public function earnings(): HasMany
     {
-        return $this->hasMany(InfluencerEarning::class);
+        return $this->hasMany(ReferralEarning::class, 'referral_id');
     }
 }

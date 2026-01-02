@@ -44,6 +44,10 @@ class PlatformSetting extends Model
                 'hero_cta_url' => '/register',
                 'active_theme' => 'default',
             ],
+            'promotion_settings' => [
+                'min_withdrawal_amount' => 50,
+                'affiliate_enabled' => true,
+            ],
         ]);
 
         return $settings;

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmailTemplate extends Model
 {
@@ -21,6 +22,11 @@ class EmailTemplate extends Model
         'variables' => 'array',
         'is_active' => 'boolean',
     ];
+
+    public function smtpConfiguration()
+    {
+        return $this->belongsTo(SmtpConfiguration::class);
+    }
 
     /**
      * Render the template with provided data

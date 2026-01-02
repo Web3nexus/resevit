@@ -12,6 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Laravel\Cashier\Billable;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -64,6 +65,12 @@ class User extends Authenticatable implements FilamentUser
         'timezone',
         'locale',
         'wallet_balance',
+        'referral_code',
+        'bank_name',
+        'account_name',
+        'account_number',
+        'iban',
+        'swift_code',
     ];
 
     /**
@@ -104,5 +111,34 @@ class User extends Authenticatable implements FilamentUser
         }
 
         return false;
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            if (!$user->referral_code) {
+                $user->referral_code = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(8));
+            }
+        });
+    }
+
+    public function referrals()
+    {
+        return $this->morphMany(Referral::class, 'referrer');
+    }
+
+    public function linkClicks()
+    {
+        return $this->morphMany(ReferralLinkClick::class, 'referrer');
+    }
+
+    public function referralEarnings(): MorphMany
+    {
+        return $this->morphMany(ReferralEarning::class, 'earner');
+    }
+
+    public function withdrawalRequests(): MorphMany
+    {
+        return $this->morphMany(WithdrawalRequest::class, 'requester');
     }
 }

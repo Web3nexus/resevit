@@ -25,11 +25,13 @@ use Filament\Pages\Concerns\InteractsWithFormActions;
 use Illuminate\Support\Facades\Log;
 use Filament\Actions\Action;
 use Illuminate\Contracts\Support\Htmlable;
+use App\Traits\HandlesReferrals;
 
 
 class Register extends BaseRegister
 {
     use InteractsWithFormActions;
+    use HandlesReferrals;
 
     protected ?string $redirectUrl = null;
 
@@ -269,6 +271,7 @@ class Register extends BaseRegister
         if ($role === 'business_owner') {
             Log::info('Registering business owner');
             $user = $this->handleRegistration($data);
+            $this->applyReferral($user);
 
             event(new Registered($user));
             // Email verification disabled
@@ -286,7 +289,8 @@ class Register extends BaseRegister
         }
 
         if ($role === 'customer') {
-            $this->registerCustomer($data);
+            $customer = $this->registerCustomer($data);
+            $this->applyReferral($customer);
 
             Notification::make()
                 ->title('Registration successful!')
@@ -302,7 +306,8 @@ class Register extends BaseRegister
         }
 
         if ($role === 'investor') {
-            $this->registerInvestor($data);
+            $investor = $this->registerInvestor($data);
+            $this->applyReferral($investor);
 
             Notification::make()
                 ->title('Application Submitted')

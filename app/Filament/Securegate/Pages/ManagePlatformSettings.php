@@ -231,6 +231,53 @@ class ManagePlatformSettings extends Page implements HasSchemas
                             ]),
                     ]),
 
+                Section::make('Global Referral & Affiliate Settings')
+                    ->description('Manage referral programs and commission thresholds for Influencers, Business Owners, and Customers.')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('promotion_settings.min_withdrawal_amount')
+                                    ->label('Min Withdrawal')
+                                    ->numeric()
+                                    ->prefix('$')
+                                    ->default(50)
+                                    ->required(),
+
+                                Toggle::make('promotion_settings.affiliate_enabled')
+                                    ->label('Influencer Program')
+                                    ->default(true),
+
+                                Toggle::make('promotion_settings.owner_referral_enabled')
+                                    ->label('Owner Referrals')
+                                    ->default(true),
+
+                                Toggle::make('promotion_settings.customer_referral_enabled')
+                                    ->label('Customer Referrals')
+                                    ->default(true),
+                            ]),
+
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('promotion_settings.influencer_commission')
+                                    ->label('Influencer Commission')
+                                    ->numeric()
+                                    ->prefix('$')
+                                    ->helperText('Fixed amount per successful referral'),
+
+                                TextInput::make('promotion_settings.owner_commission')
+                                    ->label('Owner Commission')
+                                    ->numeric()
+                                    ->prefix('$')
+                                    ->helperText('Fixed amount per successful referral'),
+
+                                TextInput::make('promotion_settings.customer_commission')
+                                    ->label('Customer Commission')
+                                    ->numeric()
+                                    ->prefix('$')
+                                    ->helperText('Fixed amount per successful referral'),
+                            ]),
+                    ]),
+
                 Section::make('Footer Management')
                     ->description('Organize and manage the links displayed in the site footer.')
                     ->icon('heroicon-o-link')

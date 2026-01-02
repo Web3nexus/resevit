@@ -90,6 +90,10 @@ Route::middleware('auth')->group(function () {
     // Wallet Deposit
     Route::get('wallet/deposit', [\App\Http\Controllers\Finance\WalletDepositController::class, 'deposit'])->name('wallet.deposit');
     Route::get('wallet/deposit/success', [\App\Http\Controllers\Finance\WalletDepositController::class, 'success'])->name('wallet.deposit.success');
+
+    // Web Setup Flow (Finish Setup)
+    Route::get('setup/finish', [\App\Http\Controllers\Web\SetupController::class, 'index'])->name('setup.finish.index');
+    Route::post('setup/finish', [\App\Http\Controllers\Web\SetupController::class, 'store'])->name('setup.finish.store');
 });
 
 Route::get('/debug-auth', function () {

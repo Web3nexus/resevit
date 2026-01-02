@@ -100,6 +100,8 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'whitelabel_active',
         'website_custom_domain',
         'dashboard_custom_domain',
+        'staff_range',
+        'onboarding_status',
     ];
 
     protected $casts = [
@@ -174,6 +176,8 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'whitelabel_active',
             'website_custom_domain',
             'dashboard_custom_domain',
+            'staff_range',
+            'onboarding_status',
         ];
     }
 }

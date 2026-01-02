@@ -4,13 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class InfluencerEarning extends Model
+class ReferralEarning extends Model
 {
+    protected $table = 'referral_earnings';
+
     protected $connection = 'landlord';
 
     protected $fillable = [
-        'influencer_id',
+        'earner_id',
+        'earner_type',
         'referral_id',
         'tenant_id',
         'amount',
@@ -25,9 +29,9 @@ class InfluencerEarning extends Model
         'paid_at' => 'datetime',
     ];
 
-    public function influencer(): BelongsTo
+    public function earner(): MorphTo
     {
-        return $this->belongsTo(Influencer::class);
+        return $this->morphTo();
     }
 
     public function referral(): BelongsTo

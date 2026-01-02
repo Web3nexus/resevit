@@ -230,6 +230,8 @@
                                 <li><a href="{{ $link['url'] }}" class="hover:text-brand-accent">{{ $link['label'] }}</a>
                                 </li>
                             @endforeach
+                            <li><a href="{{ route('filament.influencer.auth.register') }}"
+                                    class="hover:text-brand-accent">Influencer Program</a></li>
                             <li><a href="{{ route('directory.index') }}" class="hover:text-brand-accent">Directory</a>
                             </li>
                         </ul>

@@ -296,6 +296,8 @@
                                     class="hover:text-brand-modern-accent transition-colors">Order Food</a></li>
                             <li><a href="{{ route('features') }}"
                                     class="hover:text-brand-modern-accent transition-colors">Full Feature List</a></li>
+                            <li><a href="{{ route('filament.influencer.auth.register') }}"
+                                    class="hover:text-brand-modern-accent transition-colors">Influencer Program</a></li>
                             <li><a href="{{ route('faq') }}"
                                     class="hover:text-brand-modern-accent transition-colors">Support FAQ</a></li>
                         </ul>
