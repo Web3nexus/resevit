@@ -51,6 +51,7 @@ class PricingSeeder extends Seeder
             'description' => 'Perfect for small restaurants starting out.',
             'price_monthly' => 29.00,
             'price_yearly' => 290.00,
+            'monthly_ai_credits' => 5000,
             'trial_days' => 7,
             'stripe_id' => 'price_STARTER_PLACEHOLDER', // Replace with Stripe Price ID
             'order' => 1,
@@ -61,6 +62,7 @@ class PricingSeeder extends Seeder
             'description' => 'Scale your restaurant with marketing and AI.',
             'price_monthly' => 79.00,
             'price_yearly' => 790.00,
+            'monthly_ai_credits' => 25000,
             'stripe_id' => 'price_GROWTH_PLACEHOLDER', // Replace with Stripe Price ID
             'order' => 2,
         ]);
@@ -70,6 +72,7 @@ class PricingSeeder extends Seeder
             'description' => 'For busy restaurants that need advanced POS and analytics.',
             'price_monthly' => 149.00,
             'price_yearly' => 1490.00,
+            'monthly_ai_credits' => 75000,
             'stripe_id' => 'price_PRO_PLACEHOLDER', // Replace with Stripe Price ID
             'order' => 3,
         ]);
@@ -79,6 +82,7 @@ class PricingSeeder extends Seeder
             'description' => 'Custom solutions for high-volume establishments.',
             'price_monthly' => 499.00,
             'price_yearly' => 4990.00,
+            'monthly_ai_credits' => 300000,
             'order' => 4,
         ]);
 

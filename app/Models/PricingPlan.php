@@ -13,6 +13,7 @@ class PricingPlan extends Model
         'description',
         'price_monthly',
         'price_yearly',
+        'monthly_ai_credits',
         'yearly_discount_percentage',
         'trial_days',
         'is_trial_available',
@@ -33,6 +34,7 @@ class PricingPlan extends Model
         'is_free' => 'boolean',
         'price_monthly' => 'decimal:2',
         'price_yearly' => 'decimal:2',
+        'monthly_ai_credits' => 'decimal:6',
         'yearly_discount_percentage' => 'decimal:2',
     ];
 

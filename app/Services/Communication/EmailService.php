@@ -12,12 +12,11 @@ use Illuminate\Support\Facades\Log;
 class EmailService
 {
     /**
-     * Send an email using the configured provider
+     * Send an email using a template key
      */
-    public function send(string $to, string $templateKey, array $data = []): bool
+    public function sendTemplate(string $to, string $templateKey, array $data = []): bool
     {
         try {
-            // Get the email template
             $template = EmailTemplate::where('key', $templateKey)
                 ->where('is_active', true)
                 ->first();
@@ -27,48 +26,30 @@ class EmailService
                 return false;
             }
 
-            // Render the template with data
             $rendered = $template->render($data);
-
-            // Get email configuration
-            $config = null;
-
-            // 1. Check if template has specific configuration
-            if ($template->smtpConfiguration && $template->smtpConfiguration->is_active) {
-                $config = $template->smtpConfiguration->toArray();
-                // Ensure array structure matches what configureMailDriver expects
-                // The SmtpConfiguration model fields match, but we might need to map manual fields if not consistent
-            }
-
-            // 2. Fallback to Tenant/Default settings
-            if (!$config) {
-                $config = $this->getEmailConfig();
-            }
+            $config = $this->getEmailConfig();
 
             if (!$config) {
                 Log::error('No email configuration available');
                 return false;
             }
 
-            // Configure mail driver
             $this->configureMailDriver($config);
 
-            // Send the email
             Mail::send([], [], function ($message) use ($to, $rendered, $config) {
                 $message->to($to)
                     ->from($config['from_email'], $config['from_name'])
                     ->subject($rendered['subject'])
                     ->html($rendered['body_html']);
 
-                if ($rendered['body_text']) {
+                if (isset($rendered['body_text']) && $rendered['body_text']) {
                     $message->text($rendered['body_text']);
                 }
             });
 
             return true;
-
         } catch (\Exception $e) {
-            Log::error('Email sending failed: ' . $e->getMessage());
+            Log::error("EmailService: Failed to send template '{$templateKey}' to {$to}. Error: " . $e->getMessage());
             return false;
         }
     }

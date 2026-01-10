@@ -18,10 +18,40 @@
 
     <!-- Scripts and Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+    @livewireStyles
+
     @stack('styles')
+
+    @php
+        $platformSettings = \App\Models\PlatformSetting::current();
+        $plugins = $platformSettings->plugin_settings ?? [];
+    @endphp
+
+    {{-- Google Analytics --}}
+    @if(!empty($plugins['google_analytics_id']))
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $plugins['google_analytics_id'] }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+            gtag('config', '{{ $plugins['google_analytics_id'] }}');
+        </script>
+    @endif
+    @if(!empty($plugins['google_analytics_script']))
+        {!! $plugins['google_analytics_script'] !!}
+    @endif
+
+    {{-- Cloudflare Turnstile --}}
+    @if(!empty($plugins['cloudflare_turnstile_enabled']) && !empty($plugins['cloudflare_turnstile_site_key']))
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+    @endif
+
+    {{-- Google reCAPTCHA --}}
+    @if(!empty($plugins['recaptcha_enabled']) && !empty($plugins['recaptcha_site_key']))
+        <script src="https://www.google.com/recaptcha/api.js?render={{ $plugins['recaptcha_site_key'] }}"></script>
+    @endif
 </head>
 
 <body class="font-sans antialiased text-slate-900 bg-brand-offwhite">
@@ -267,6 +297,8 @@
         });
     </script>
     <x-cookie-consent />
+    <livewire:live-chat-widget />
+    @livewireScripts
 </body>
 
 </html>

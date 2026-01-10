@@ -16,11 +16,15 @@ class EmailTemplate extends Model
         'body_text',
         'variables',
         'is_active',
+        'use_layout',
+        'email_title',
+        'email_badge',
     ];
 
     protected $casts = [
         'variables' => 'array',
         'is_active' => 'boolean',
+        'use_layout' => 'boolean',
     ];
 
     public function smtpConfiguration()
@@ -37,11 +41,32 @@ class EmailTemplate extends Model
         $bodyHtml = $this->replaceVariables($this->body_html, $data);
         $bodyText = $this->body_text ? $this->replaceVariables($this->body_text, $data) : null;
 
+        // Wrap in branded layout if enabled
+        if ($this->use_layout) {
+            $bodyHtml = $this->wrapInLayout($bodyHtml, $data);
+        }
+
         return [
             'subject' => $subject,
             'body_html' => $bodyHtml,
             'body_text' => $bodyText,
         ];
+    }
+
+    /**
+     * Wrap content in the branded email layout
+     */
+    protected function wrapInLayout(string $content, array $data): string
+    {
+        $title = $this->email_title ? $this->replaceVariables($this->email_title, $data) : null;
+        $badge = $this->email_badge ? $this->replaceVariables($this->email_badge, $data) : null;
+
+        return view('emails.layout', [
+            'body' => $content,
+            'title' => $title,
+            'badge' => $badge,
+            'subject' => $this->replaceVariables($this->subject, $data),
+        ])->render();
     }
 
     /**

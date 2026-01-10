@@ -102,6 +102,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'dashboard_custom_domain',
         'staff_range',
         'onboarding_status',
+        'ai_credits',
     ];
 
     protected $casts = [
@@ -112,6 +113,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'is_sponsored' => 'boolean',
         'sponsored_ranking' => 'integer',
         'whitelabel_active' => 'boolean',
+        'ai_credits' => 'decimal:6',
     ];
 
     public function owner()

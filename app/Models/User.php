@@ -71,6 +71,9 @@ class User extends Authenticatable implements FilamentUser
         'account_number',
         'iban',
         'swift_code',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
     ];
 
     /**
@@ -96,7 +99,14 @@ class User extends Authenticatable implements FilamentUser
             'terms_accepted' => 'boolean',
             'newsletter_subscribed' => 'boolean',
             'wallet_balance' => 'decimal:2',
+            'two_factor_confirmed_at' => 'datetime',
+            'two_factor_recovery_codes' => 'array',
         ];
+    }
+
+    public function hasTwoFactorEnabled(): bool
+    {
+        return !is_null($this->two_factor_secret) && !is_null($this->two_factor_confirmed_at);
     }
 
     public function transactions()

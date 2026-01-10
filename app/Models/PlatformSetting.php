@@ -18,6 +18,7 @@ class PlatformSetting extends Model
         'legal_settings',
         'onboarding_settings',
         'stripe_settings',
+        'plugin_settings',
     ];
 
     protected $casts = [
@@ -29,6 +30,7 @@ class PlatformSetting extends Model
         'legal_settings' => 'array',
         'onboarding_settings' => 'array',
         'stripe_settings' => 'array',
+        'plugin_settings' => 'array',
     ];
 
     public static function current(): self

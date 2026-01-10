@@ -361,6 +361,49 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                     ->placeholder('whsec_...'),
                             ]),
                     ]),
+
+                Section::make('Third-Party Plugins & Security')
+                    ->description('Manage analytics, security, and tracking scripts.')
+                    ->icon('heroicon-o-puzzle-piece')
+                    ->schema([
+                        \Filament\Schemas\Components\Tabs::make('Plugins')
+                            ->tabs([
+                                \Filament\Schemas\Components\Tabs\Tab::make('Google Analytics')
+                                    ->icon('heroicon-o-presentation-chart-line')
+                                    ->schema([
+                                        TextInput::make('plugin_settings.google_analytics_id')
+                                            ->label('GA4 Measurement ID')
+                                            ->placeholder('G-XXXXXXXXXX'),
+                                        \Filament\Forms\Components\Textarea::make('plugin_settings.google_analytics_script')
+                                            ->label('Custom GA Script')
+                                            ->rows(5)
+                                            ->placeholder('<script>...</script>'),
+                                    ]),
+                                \Filament\Schemas\Components\Tabs\Tab::make('Cloudflare Turnstile')
+                                    ->icon('heroicon-o-shield-check')
+                                    ->schema([
+                                        Toggle::make('plugin_settings.cloudflare_turnstile_enabled')
+                                            ->label('Enable Turnstile'),
+                                        TextInput::make('plugin_settings.cloudflare_turnstile_site_key')
+                                            ->label('Site Key'),
+                                        TextInput::make('plugin_settings.cloudflare_turnstile_secret_key')
+                                            ->label('Secret Key')
+                                            ->password(),
+                                    ]),
+                                \Filament\Schemas\Components\Tabs\Tab::make('Google reCAPTCHA')
+                                    ->icon('heroicon-o-lock-closed')
+                                    ->schema([
+                                        Toggle::make('plugin_settings.recaptcha_enabled')
+                                            ->label('Enable reCAPTCHA v3'),
+                                        TextInput::make('plugin_settings.recaptcha_site_key')
+                                            ->label('Site Key'),
+                                        TextInput::make('plugin_settings.recaptcha_secret_key')
+                                            ->label('Secret Key')
+                                            ->password(),
+                                    ]),
+                            ])
+                            ->columnSpanFull(),
+                    ]),
             ])
             ->statePath('data');
     }

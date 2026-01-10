@@ -5,8 +5,13 @@ namespace App\Services;
 use App\Models\Staff;
 use App\Models\StaffPayout;
 use App\Models\TenantUser;
+use App\Notifications\StaffWelcomeNotification;
+use App\Notifications\StaffCredentialsNotification;
+use App\Notifications\StaffPromotionNotification;
+use App\Notifications\StaffTerminationNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class StaffService
 {
@@ -54,6 +59,28 @@ class StaffService
                 'availability' => $data['availability'] ?? null,
             ]);
 
+            // 6. Send welcome and credentials emails
+            $tempPassword = $data['password'] ?? 'password123';
+            $tenant = tenant();
+
+            // Welcome email
+            $user->notify(new StaffWelcomeNotification([
+                'staff_name' => $user->name,
+                'business_name' => $tenant?->name ?? config('app.name'),
+                'position' => $staff->position,
+                'hire_date' => $staff->hire_date->format('F j, Y'),
+                'branch_name' => $staff->branch?->name ?? 'Main Branch',
+            ]));
+
+            // Credentials email
+            $user->notify(new StaffCredentialsNotification([
+                'staff_name' => $user->name,
+                'business_name' => $tenant?->name ?? config('app.name'),
+                'staff_email' => $user->email,
+                'temp_password' => $tempPassword,
+                'login_url' => url('/login'),
+            ]));
+
             return $staff;
         });
     }
@@ -97,6 +124,35 @@ class StaffService
                 if (isset($data['user']['permissions'])) {
                     $staff->user->syncPermissions($data['user']['permissions']);
                 }
+            }
+
+            // 6. Check for promotions or terminations and send notifications
+            $originalStaff = $staff->getOriginal();
+
+            // Check for promotion (position or rate change)
+            if (
+                isset($data['position']) && $data['position'] !== $originalStaff['position'] ||
+                isset($data['hourly_rate']) && $data['hourly_rate'] > $originalStaff['hourly_rate']
+            ) {
+
+                $staff->user->notify(new StaffPromotionNotification([
+                    'staff_name' => $staff->user->name,
+                    'new_position' => $staff->position,
+                    'business_name' => tenant()?->name ?? config('app.name'),
+                    'effective_date' => now()->format('F j, Y'),
+                    'new_rate' => number_format($staff->hourly_rate, 2),
+                ]));
+            }
+
+            // Check for termination
+            if (isset($data['status']) && $data['status'] === 'terminated' && $originalStaff['status'] !== 'terminated') {
+                $staff->user->notify(new StaffTerminationNotification([
+                    'staff_name' => $staff->user->name,
+                    'business_name' => tenant()?->name ?? config('app.name'),
+                    'termination_date' => now()->format('F j, Y'),
+                    'termination_reason' => $data['termination_reason'] ?? 'Not specified',
+                    'hr_contact' => config('mail.from.address'),
+                ]));
             }
 
             return $staff->fresh();

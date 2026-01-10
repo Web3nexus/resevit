@@ -143,6 +143,15 @@ class TenantCreatorService
             tenancy()->end();
         }
 
+        // 6. Award Initial AI Credits
+        if ($tenant->plan && $tenant->plan->monthly_ai_credits > 0) {
+            app(\App\Services\AiCreditService::class)->addCredits(
+                $tenant,
+                (float) $tenant->plan->monthly_ai_credits,
+                "Initial credits for " . $tenant->plan->name . " plan"
+            );
+        }
+
         return $tenant;
     }
 }

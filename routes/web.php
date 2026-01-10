@@ -81,6 +81,8 @@ Route::middleware('guest')->group(function () {
     })->name('auth.apple');
 });
 
+Route::get('/2fa-challenge', \App\Livewire\Auth\TwoFactorChallenge::class)->name('2fa.challenge');
+
 Route::get('oauth/{provider}/callback', [OAuthController::class, 'callback'])->name('oauth.callback');
 
 Route::middleware('auth')->group(function () {

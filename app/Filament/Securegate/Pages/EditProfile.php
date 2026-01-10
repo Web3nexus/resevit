@@ -23,6 +23,7 @@ class EditProfile extends Page implements HasSchemas
 
     public ?array $profileData = [];
     public ?array $passwordData = [];
+    public ?array $twoFactorData = [];
 
     public function mount(): void
     {
@@ -40,6 +41,7 @@ class EditProfile extends Page implements HasSchemas
         return [
             'profileForm',
             'passwordForm',
+            'twoFactorForm',
         ];
     }
 
@@ -97,6 +99,22 @@ class EditProfile extends Page implements HasSchemas
             ->statePath('passwordData');
     }
 
+    public function twoFactorForm(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Section::make('Two-Factor Authentication')
+                    ->description('Add additional security to your account using two-factor authentication.')
+                    ->schema([
+                        Forms\Components\Toggle::make('two_factor_enabled')
+                            ->label('Enable Two-Factor Authentication')
+                            ->helperText('When two-factor authentication is enabled, you will be prompted for a secure, random token during authentication.')
+                            ->live(),
+                    ]),
+            ])
+            ->statePath('twoFactorData');
+    }
+
     public function updateProfile(): void
     {
         $data = $this->profileForm->getState();
@@ -124,6 +142,29 @@ class EditProfile extends Page implements HasSchemas
         Notification::make()
             ->success()
             ->title('Password updated')
+            ->send();
+    }
+
+    public function updateTwoFactor(): void
+    {
+        $enabled = $this->twoFactorData['two_factor_enabled'] ?? false;
+        $user = auth()->user();
+
+        if ($enabled) {
+            $user->update([
+                'two_factor_secret' => \Illuminate\Support\Str::random(32),
+                'two_factor_confirmed_at' => now(),
+            ]);
+        } else {
+            $user->update([
+                'two_factor_secret' => null,
+                'two_factor_confirmed_at' => null,
+            ]);
+        }
+
+        Notification::make()
+            ->success()
+            ->title($enabled ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled')
             ->send();
     }
 }

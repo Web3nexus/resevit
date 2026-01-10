@@ -45,6 +45,12 @@ class PricingPlanForm
                                     ->required()
                                     ->numeric()
                                     ->prefix('$'),
+                                TextInput::make('monthly_ai_credits')
+                                    ->required()
+                                    ->numeric()
+                                    ->label('Monthly AI Credits')
+                                    ->helperText('Credits awarded to the tenant each month.')
+                                    ->default(0),
                             ]),
                     ])->columnSpanFull(),
 

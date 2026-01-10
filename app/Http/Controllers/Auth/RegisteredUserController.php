@@ -52,6 +52,36 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
+        // Send Welcome Email
+        try {
+            $user->notify(new \App\Notifications\BaseNotificationImplementation('welcome_registration', [
+                'business_name' => $tenant->name,
+                'dashboard_url' => "http://{$tenant->domain}/dashboard",
+            ]));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send welcome email: ' . $e->getMessage());
+        }
+
+        // Notify Super Admins of new customer
+        try {
+            $superAdmins = \App\Models\Admin::whereHas('roles', function ($query) {
+                $query->where('name', 'super_admin');
+            })->get();
+
+            foreach ($superAdmins as $admin) {
+                $admin->notify(new \App\Notifications\SuperAdminNewCustomerNotification([
+                    'business_name' => $tenant->name,
+                    'owner_name' => $user->name,
+                    'owner_email' => $user->email,
+                    'registration_date' => now()->format('F j, Y g:i A'),
+                    'plan_name' => 'Free Trial',
+                    'admin_url' => config('app.url') . '/securegate/users',
+                ]));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send super admin notification: ' . $e->getMessage());
+        }
+
         return redirect()->to("http://{$tenant->domain}/dashboard");
     }
 }

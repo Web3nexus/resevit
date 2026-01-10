@@ -19,9 +19,9 @@ class EmailTemplateResource extends Resource
 {
     protected static ?string $model = EmailTemplate::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-envelope';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-envelope';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Marketing Tools';
+    protected static string|UnitEnum|null $navigationGroup = 'Marketing Tools';
 
     protected static ?int $navigationSort = 3;
 
@@ -98,6 +98,27 @@ class EmailTemplateResource extends Resource
                             ->placeholder('["customer_name", "order_number", "restaurant_name"]'),
                     ])
                     ->collapsible(),
+
+                Section::make('Layout Settings')
+                    ->schema([
+                        Forms\Components\Toggle::make('use_layout')
+                            ->label('Use Branded Layout')
+                            ->default(true)
+                            ->helperText('Wrap this email in the premium branded layout with header and footer')
+                            ->live(),
+
+                        Forms\Components\TextInput::make('email_title')
+                            ->label('Hero Title')
+                            ->helperText('Large title displayed in the hero section (supports variables)')
+                            ->visible(fn($get) => $get('use_layout')),
+
+                        Forms\Components\TextInput::make('email_badge')
+                            ->label('Hero Badge')
+                            ->helperText('Small badge text above the title (e.g., "NOTIFICATION", "ALERT")')
+                            ->visible(fn($get) => $get('use_layout')),
+                    ])
+                    ->collapsible()
+                    ->collapsed(),
             ]);
     }
 
@@ -138,6 +159,50 @@ class EmailTemplateResource extends Resource
                     ->falseLabel('Inactive only'),
             ])
             ->actions([
+                \Filament\Actions\Action::make('sendTest')
+                    ->label('Send Test')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('info')
+                    ->form([
+                        Forms\Components\TextInput::make('email')
+                            ->label('Recipient Email')
+                            ->email()
+                            ->required()
+                            ->default(fn() => auth()->user()->email),
+                    ])
+                    ->action(function (EmailTemplate $record, array $data) {
+                        try {
+                            // Configure mail dynamically
+                            \App\Services\MailConfigService::configureMail();
+
+                            // Prepare sample data based on variables
+                            $sampleData = [];
+                            foreach ($record->variables ?? [] as $var) {
+                                $sampleData[$var] = "[Test: {$var}]";
+                            }
+
+                            // Render the template
+                            $rendered = $record->render($sampleData);
+
+                            // Send the email
+                            \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($data, $rendered) {
+                                $message->to($data['email'])
+                                    ->subject($rendered['subject'])
+                                    ->html($rendered['body_html']);
+                            });
+
+                            \Filament\Notifications\Notification::make()
+                                ->title('Test email sent successfully!')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Error sending test email')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])
