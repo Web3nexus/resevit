@@ -41,8 +41,25 @@ class Register extends BaseRegister
 
     public function mount(): void
     {
-        Log::info('Register component mounted');
         parent::mount();
+
+        $planId = request()->query('plan');
+        $billingCycle = request()->query('cycle');
+
+        if ($planId) {
+            $plan = \App\Models\PricingPlan::find($planId);
+            if ($plan) {
+                $this->form->fill([
+                    'plan_id' => $plan->id,
+                    'billing_cycle' => $billingCycle === 'yearly' ? 'yearly' : 'monthly',
+                    'role' => 'business_owner', // Ensure role is business_owner for plan selection visibility
+                    'plan_description' => $plan->description,
+                    'plan_price_monthly' => $plan->price_monthly,
+                    'plan_price_yearly' => $plan->price_yearly,
+                    'plan_trial' => $plan->trial_days,
+                ]);
+            }
+        }
     }
 
     public function getHeading(): string|Htmlable
@@ -159,6 +176,21 @@ class Register extends BaseRegister
                     Wizard\Step::make('Select Plan')
                         ->visible(fn(Get $get) => $get('role') === 'business_owner')
                         ->schema([
+                            Select::make('billing_cycle')
+                                ->label('Billing Cycle')
+                                ->prefixIcon('heroicon-o-arrow-path')
+                                ->options(fn() => [
+                                    'monthly' => 'Monthly',
+                                    'yearly' => 'Yearly (Save ' . (
+                                        ($plan = \App\Models\PricingPlan::where('is_active', true)->where('is_free', false)->first())
+                                        ? round((($plan->price_monthly * 12) - $plan->price_yearly) / ($plan->price_monthly * 12) * 100)
+                                        : 17
+                                    ) . '%)',
+                                ])
+                                ->default('monthly')
+                                ->required()
+                                ->live(),
+
                             Select::make('plan_id')
                                 ->label('Choose a Pricing Plan')
                                 ->prefixIcon('heroicon-o-credit-card')
@@ -169,12 +201,15 @@ class Register extends BaseRegister
                                     $plan = \App\Models\PricingPlan::find($state);
                                     if ($plan) {
                                         $set('plan_description', $plan->description);
-                                        $set('plan_price', $plan->price_monthly);
+                                        $set('plan_price_monthly', $plan->price_monthly);
+                                        $set('plan_price_yearly', $plan->price_yearly);
                                         $set('plan_trial', $plan->trial_days);
                                     }
                                 }),
                             Forms\Components\Placeholder::make('plan_info')
-                                ->content(fn(Get $get) => $get('plan_description') ? "Price: $" . $get('plan_price') . "/mo - Includes " . $get('plan_trial') . " days trial." : "Select a plan to see details."),
+                                ->content(fn(Get $get) => $get('plan_description')
+                                    ? "Price: $" . ($get('billing_cycle') === 'yearly' ? $get('plan_price_yearly') . "/yr" : $get('plan_price_monthly') . "/mo") . " - Includes " . $get('plan_trial') . " days trial."
+                                    : "Select a plan to see details."),
                         ]),
 
                     Wizard\Step::make('Payment')
@@ -364,9 +399,8 @@ class Register extends BaseRegister
 
         try {
             $extraData = [
-                // Staff count is business data, pass it here
                 'staff_count' => $data['staff_count'] ?? null,
-                // mobile/country moved to user, so not passing them to tenant anymore
+                'billing_cycle' => $data['billing_cycle'] ?? 'monthly',
             ];
 
             $tenant = app(TenantCreatorService::class)

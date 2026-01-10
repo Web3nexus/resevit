@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CustomerMessage extends Model
 {
-    protected $connection = 'tenant';
     protected $connection = 'landlord';
 
     protected $fillable = ['customer_conversation_id', 'sender_type', 'sender_id', 'message', 'is_read'];

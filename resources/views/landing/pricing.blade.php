@@ -14,9 +14,35 @@
         </div>
     </section>
 
+    @php
+        $firstPlan = $plans->first();
+        $discount = $firstPlan && $firstPlan->price_monthly > 0
+            ? round((($firstPlan->price_monthly * 12) - $firstPlan->price_yearly) / ($firstPlan->price_monthly * 12) * 100)
+            : 17;
+    @endphp
+
     <!-- Pricing Grid -->
-    <section class="py-24 bg-brand-offwhite relative -mt-10">
+    <section class="py-24 bg-brand-offwhite relative -mt-10" x-data="{ billingCycle: 'monthly' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Refined Monthly/Yearly Toggle -->
+            <div class="flex flex-col items-center mb-16">
+                <div class="inline-flex p-1.5 bg-white border border-slate-200 rounded-2xl shadow-sm">
+                    <button @click="billingCycle = 'monthly'"
+                        class="px-8 py-3 text-sm font-bold rounded-xl transition-all duration-300"
+                        :class="billingCycle === 'monthly' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-600 hover:text-slate-900'">
+                        Monthly
+                    </button>
+                    <button @click="billingCycle = 'yearly'"
+                        class="px-8 py-3 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2"
+                        :class="billingCycle === 'yearly' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-600 hover:text-slate-900'">
+                        Yearly
+                        <span class="text-[10px] opacity-80"
+                            :class="billingCycle === 'yearly' ? 'text-white' : 'text-slate-500'">(Save
+                            {{ $discount }}%)</span>
+                    </button>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @foreach($plans as $plan)
                     <div
@@ -35,8 +61,14 @@
                         </div>
 
                         <div class="mb-8">
-                            <span class="text-5xl font-extrabold tracking-tight">${{ $plan->price_monthly }}</span>
-                            <span class="@if($plan->is_featured) text-slate-400 @else text-slate-500 @endif">/month</span>
+                            <div x-show="billingCycle === 'monthly'">
+                                <span class="text-5xl font-extrabold tracking-tight">${{ $plan->price_monthly }}</span>
+                                <span class="@if($plan->is_featured) text-slate-400 @else text-slate-500 @endif">/month</span>
+                            </div>
+                            <div x-show="billingCycle === 'yearly'" x-cloak>
+                                <span class="text-5xl font-extrabold tracking-tight">${{ $plan->price_yearly }}</span>
+                                <span class="@if($plan->is_featured) text-slate-400 @else text-slate-500 @endif">/year</span>
+                            </div>
                         </div>
 
                         <ul class="space-y-4 mb-10 flex-grow">
@@ -55,7 +87,7 @@
                             @endforeach
                         </ul>
 
-                        <a href="{{ $plan->cta_url ?? route('register') }}"
+                        <a :href="'{{ route('register') }}?plan={{ $plan->id }}&cycle=' + billingCycle"
                             class="w-full inline-flex justify-center items-center px-6 py-4 rounded-xl font-bold transition-all @if($plan->is_featured) bg-brand-accent text-brand-primary hover:opacity-90 @else bg-brand-primary text-white hover:bg-brand-secondary @endif">
                             {{ $plan->cta_text }}
                         </a>

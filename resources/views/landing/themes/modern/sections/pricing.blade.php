@@ -6,66 +6,102 @@
                 No hidden fees, just pure performance.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-            @foreach($plans as $plan)
-                <div class="relative group">
-                    @if($plan->is_featured)
-                        <div
-                            class="absolute -inset-1 bg-linear-to-r from-brand-modern-accent to-brand-modern-secondary rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200">
-                        </div>
-                    @endif
+        @php
+            $firstPlan = $plans->first();
+            $discount = $firstPlan && $firstPlan->price_monthly > 0
+                ? round((($firstPlan->price_monthly * 12) - $firstPlan->price_yearly) / ($firstPlan->price_monthly * 12) * 100)
+                : 17;
+        @endphp
 
-                    <div
-                        class="relative flex flex-col p-8 rounded-3xl bg-brand-modern-card border border-brand-modern-border hover:border-white/20 transition-all duration-300 @if($plan->is_featured) scale-105 shadow-2xl z-10 @endif">
-                        <div class="mb-8">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-xl font-bold">{{ $plan->name }}</h3>
-                                @if($plan->is_featured)
-                                    <span
-                                        class="px-3 py-1 rounded-full bg-brand-modern-accent/10 border border-brand-modern-accent/20 text-brand-modern-accent text-[10px] font-black uppercase tracking-widest">Most
-                                        Advanced</span>
-                                @endif
-                            </div>
-                            <p class="text-brand-modern-muted text-sm leading-relaxed">
-                                {{ $plan->description }}
-                            </p>
-                        </div>
-
-                        <div class="mb-8 flex items-baseline gap-1">
-                            <span class="text-5xl font-black text-white">${{ $plan->price_monthly }}</span>
-                            <span class="text-brand-modern-muted text-sm uppercase tracking-wider font-bold">/mo</span>
-                        </div>
-
-                        <div class="space-y-4 mb-10 grow">
-                            <p class="text-[10px] font-bold text-brand-modern-muted uppercase tracking-widest mb-4">What's
-                                included:</p>
-                            @foreach($plan->features->where('pivot.is_included', true) as $feature)
-                                <div class="flex items-start gap-3">
-                                    <div
-                                        class="mt-1 w-5 h-5 rounded-full @if($plan->is_featured) bg-brand-modern-accent @else bg-white/10 @endif flex items-center justify-center shrink-0">
-                                        <i
-                                            class="fa-solid fa-check text-[10px] @if($plan->is_featured) text-white @else text-brand-modern-text @endif"></i>
-                                    </div>
-                                    <span class="text-sm text-brand-modern-text">
-                                        {{ $feature->pivot->value ? $feature->pivot->value . ' ' : '' }}{{ $feature->name }}
-                                    </span>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <a href="{{ $plan->cta_url ?? route('register') }}"
-                            class="w-full inline-flex justify-center items-center px-6 py-4 rounded-xl font-bold text-white transition-all @if($plan->is_featured) bg-brand-modern-accent shadow-[0_0_20px_rgba(125,64,255,0.3)] hover:bg-opacity-90 @else bg-white/5 border border-white/10 hover:bg-white/10 @endif">
-                            {{ $plan->cta_text }}
-                        </a>
-                    </div>
+        <div class="flex flex-col items-center mb-16" x-data="{ billingCycle: 'monthly' }">
+            <!-- Refined Monthly/Yearly Toggle -->
+            <div class="flex items-center space-x-6 mb-12">
+                <div class="inline-flex p-1.5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+                    <button @click="billingCycle = 'monthly'"
+                        class="px-8 py-3 text-sm font-bold rounded-xl transition-all duration-300"
+                        :class="billingCycle === 'monthly' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'text-brand-modern-muted hover:text-white'">
+                        Monthly
+                    </button>
+                    <button @click="billingCycle = 'yearly'"
+                        class="px-8 py-3 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2"
+                        :class="billingCycle === 'yearly' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'text-brand-modern-muted hover:text-white'">
+                        Yearly
+                        <span class="text-[10px] opacity-80"
+                            :class="billingCycle === 'yearly' ? 'text-white' : 'text-brand-modern-muted'">(Save
+                            {{ $discount }}%)</span>
+                    </button>
                 </div>
-            @endforeach
-        </div>
+            </div>
 
-        <div class="mt-20 text-center">
-            <p class="text-brand-modern-muted text-sm">Need a custom plan for 50+ locations? <a href="#"
-                    class="text-white hover:text-brand-modern-accent font-bold underline decoration-brand-modern-accent/50">Contact
-                    our Enterprise team</a></p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center w-full mt-12">
+                @foreach($plans as $plan)
+                    <div class="relative group">
+                        @if($plan->is_featured)
+                            <div
+                                class="absolute -inset-1 bg-linear-to-r from-brand-modern-accent to-brand-modern-secondary rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200">
+                            </div>
+                        @endif
+
+                        <div
+                            class="relative flex flex-col p-8 rounded-3xl bg-brand-modern-card border border-brand-modern-border hover:border-white/20 transition-all duration-300 @if($plan->is_featured) scale-105 shadow-2xl z-10 @endif">
+                            <div class="mb-8">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl font-bold">{{ $plan->name }}</h3>
+                                    @if($plan->is_featured)
+                                        <span
+                                            class="px-3 py-1 rounded-full bg-brand-modern-accent/10 border border-brand-modern-accent/20 text-brand-modern-accent text-[10px] font-black uppercase tracking-widest">Most
+                                            Advanced</span>
+                                    @endif
+                                </div>
+                                <p class="text-brand-modern-muted text-sm leading-relaxed">
+                                    {{ $plan->description }}
+                                </p>
+                            </div>
+
+                            <div class="mb-8">
+                                <div x-show="billingCycle === 'monthly'" class="flex items-baseline gap-1">
+                                    <span class="text-5xl font-black text-white">${{ $plan->price_monthly }}</span>
+                                    <span
+                                        class="text-brand-modern-muted text-sm uppercase tracking-wider font-bold">/mo</span>
+                                </div>
+                                <div x-show="billingCycle === 'yearly'" x-cloak class="flex items-baseline gap-1">
+                                    <span class="text-5xl font-black text-white">${{ $plan->price_yearly }}</span>
+                                    <span
+                                        class="text-brand-modern-muted text-sm uppercase tracking-wider font-bold">/yr</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4 mb-10 grow">
+                                <p class="text-[10px] font-bold text-brand-modern-muted uppercase tracking-widest mb-4">
+                                    What's
+                                    included:</p>
+                                @foreach($plan->features->where('pivot.is_included', true) as $feature)
+                                    <div class="flex items-start gap-3">
+                                        <div
+                                            class="mt-1 w-5 h-5 rounded-full @if($plan->is_featured) bg-brand-modern-accent @else bg-white/10 @endif flex items-center justify-center shrink-0">
+                                            <i
+                                                class="fa-solid fa-check text-[10px] @if($plan->is_featured) text-white @else text-brand-modern-text @endif"></i>
+                                        </div>
+                                        <span class="text-sm text-brand-modern-text">
+                                            {{ $feature->pivot->value ? $feature->pivot->value . ' ' : '' }}{{ $feature->name }}
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <a :href="'{{ route('register') }}?plan={{ $plan->id }}&cycle=' + billingCycle"
+                                class="w-full inline-flex justify-center items-center px-6 py-4 rounded-xl font-bold text-white transition-all @if($plan->is_featured) bg-brand-modern-accent shadow-[0_0_20px_rgba(125,64,255,0.3)] hover:bg-opacity-90 @else bg-white/5 border border-white/10 hover:bg-white/10 @endif">
+                                {{ $plan->cta_text }}
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-20 text-center">
+                <p class="text-brand-modern-muted text-sm">Need a custom plan for 50+ locations? <a href="#"
+                        class="text-white hover:text-brand-modern-accent font-bold underline decoration-brand-modern-accent/50">Contact
+                        our Enterprise team</a></p>
+            </div>
         </div>
-    </div>
 </section>

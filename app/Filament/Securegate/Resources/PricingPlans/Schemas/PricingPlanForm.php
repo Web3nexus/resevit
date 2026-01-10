@@ -25,9 +25,15 @@ class PricingPlanForm
                         TextInput::make('slug')
                             ->required()
                             ->unique(ignoreRecord: true),
-                        TextInput::make('stripe_id')
-                            ->label('Stripe Price ID')
-                            ->placeholder('price_H5v6pLQY6ax9js'),
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('stripe_id')
+                                    ->label('Stripe Price ID (Monthly)')
+                                    ->placeholder('price_H5v6pLQY6ax9js'),
+                                TextInput::make('stripe_yearly_id')
+                                    ->label('Stripe Price ID (Yearly)')
+                                    ->placeholder('price_H5v6pLQY6ax9js_yearly'),
+                            ]),
                         TextInput::make('description'),
                         Grid::make(2)
                             ->schema([

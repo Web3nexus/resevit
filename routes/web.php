@@ -56,7 +56,7 @@ Route::prefix('customer')->name('customer.')->middleware('guest')->group(functio
 Route::middleware('guest')->group(function () {
     // Unified Registration (Business Owner, Customer, Investor)
     Route::get('register', function () {
-        return redirect()->route('filament.dashboard.auth.register');
+        return redirect()->route('filament.dashboard.auth.register', request()->query());
     })->name('register');
 
     // Central Login (Redirects to Tenant Dashboard)

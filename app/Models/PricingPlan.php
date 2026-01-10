@@ -18,6 +18,7 @@ class PricingPlan extends Model
         'is_trial_available',
         'is_free',
         'stripe_id',
+        'stripe_yearly_id',
         'cta_text',
         'cta_url',
         'is_featured',

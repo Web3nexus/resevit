@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CustomerConversation extends Model
 {
-    protected $connection = 'tenant';
     protected $connection = 'landlord';
 
     protected $fillable = ['customer_id', 'tenant_id', 'status'];

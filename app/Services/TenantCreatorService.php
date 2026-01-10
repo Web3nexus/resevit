@@ -115,18 +115,25 @@ class TenantCreatorService
             // 5. Handle Stripe Subscription if plan and payment method provided
             if ($paymentMethodId && $planId) {
                 $plan = \App\Models\PricingPlan::find($planId);
-                if ($plan && $plan->stripe_id) {
-                    \Log::info("Initiating Stripe Subscription for Tenant: " . $tenant->id . " Plan: " . $plan->slug);
+                if ($plan) {
+                    $billingCycle = $extraData['billing_cycle'] ?? 'monthly';
+                    $stripeId = $billingCycle === 'yearly' ? $plan->stripe_yearly_id : $plan->stripe_id;
 
-                    $subscription = $tenant->newSubscription('default', $plan->stripe_id);
+                    if ($stripeId) {
+                        \Log::info("Initiating Stripe Subscription for Tenant: " . $tenant->id . " Plan: " . $plan->slug . " Cycle: " . $billingCycle);
 
-                    if ($plan->trial_days > 0) {
-                        $subscription->trialDays($plan->trial_days);
+                        $subscription = $tenant->newSubscription('default', $stripeId);
+
+                        if ($plan->trial_days > 0) {
+                            $subscription->trialDays($plan->trial_days);
+                        }
+
+                        $subscription->create($paymentMethodId);
+
+                        \Log::info("Stripe Subscription Created.");
+                    } else {
+                        \Log::error("Stripe Price ID missing for plan " . $plan->name . " and cycle " . $billingCycle);
                     }
-
-                    $subscription->create($paymentMethodId);
-
-                    \Log::info("Stripe Subscription Created.");
                 }
             }
         } catch (\Exception $e) {

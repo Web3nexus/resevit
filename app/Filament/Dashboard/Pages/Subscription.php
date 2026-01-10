@@ -13,38 +13,46 @@ use Illuminate\Support\Facades\Auth;
 
 class Subscription extends Page
 {
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-credit-card';
 
     protected string $view = 'filament.dashboard.pages.subscription';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
 
     protected static int|null $navigationSort = 100;
 
     public $plans;
     public $currentPlan;
+    public $billingCycle = 'monthly';
 
     public function mount()
     {
         $this->plans = PricingPlan::where('is_active', true)->orderBy('order')->get();
         $this->currentPlan = tenant() ? tenant()->plan : null;
+
+        // Try to detect current interval from tenant if available
+        if (tenant() && tenant()->subscription_interval) {
+            $this->billingCycle = tenant()->subscription_interval;
+        }
     }
 
     public function upgrade($planSlug)
     {
         $plan = PricingPlan::where('slug', $planSlug)->first();
 
-        if (!$plan || !$plan->stripe_id) {
+        $priceId = $this->billingCycle === 'yearly' ? $plan->stripe_yearly_id : $plan->stripe_id;
+
+        if (!$plan || !$priceId) {
             Notification::make()
                 ->danger()
-                ->title('Invalid Plan')
-                ->body('The selected plan is not correctly configured for billing.')
+                ->title('Invalid Plan Configuration')
+                ->body('The selected plan or billing cycle (' . $this->billingCycle . ') is not correctly configured for billing.')
                 ->send();
             return;
         }
 
         try {
-            return tenant()->checkout($plan->stripe_id, [
+            return tenant()->checkout($priceId, [
                 'success_url' => route('filament.dashboard.pages.subscription'),
                 'cancel_url' => route('filament.dashboard.pages.subscription'),
             ]);
