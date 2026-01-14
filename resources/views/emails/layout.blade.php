@@ -124,7 +124,7 @@
         @endif
 
         <div class="content">
-            {!! $body !!}
+            {!! clean($body) !!}
         </div>
 
         <div class="footer">

@@ -26,10 +26,10 @@ class InvestmentPerformanceChart extends ChartWidget
         $results = Investment::query()
             ->where('investor_id', $investor->id)
             ->where('created_at', '>=', now()->subMonths(6)->startOfMonth())
-            ->select(
+            ->select([
                 DB::raw('SUM(amount) as aggregate'),
                 DB::raw("DATE_FORMAT(created_at, '%Y-%m') as date")
-            )
+            ])
             ->groupBy('date')
             ->orderBy('date')
             ->get();

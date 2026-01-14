@@ -66,7 +66,7 @@
                         </a>
                     </div>
 
-                    <div class="hidden md:ml-10 md:flex space-x-6 items-center">
+                    <div class="hidden lg:ml-10 lg:flex space-x-6 items-center">
                         @php
                             $currentRoute = Route::currentRouteName();
                             $navItems = [
@@ -156,7 +156,7 @@
                         @endforeach
                     </div>
 
-                    <div class="hidden md:flex items-center space-x-3">
+                    <div class="hidden lg:flex items-center space-x-3">
                         @guest
                             <a href="{{ route('login') }}"
                                 class="text-sm text-slate-600 hover:text-brand-primary font-medium transition-colors px-4 py-2">Log
@@ -174,7 +174,7 @@
                     </div>
 
                     <!-- Mobile menu button -->
-                    <div class="md:hidden flex items-center">
+                    <div class="lg:hidden flex items-center">
                         <button type="button" class="text-slate-600 hover:text-brand-primary" id="mobile-menu-button">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -186,7 +186,7 @@
             </nav>
 
             <!-- Mobile menu -->
-            <div class="hidden md:hidden" id="mobile-menu">
+            <div class="hidden lg:hidden" id="mobile-menu">
                 <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-b border-slate-100">
                     @foreach($navItems as $item)
                         @php
@@ -223,7 +223,7 @@
         <!-- Footer -->
         <footer class="bg-brand-primary text-white py-16">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
                     <div class="col-span-1 md:col-span-1">
                         <a href="{{ route('home') }}" class="text-3xl font-extrabold tracking-tight">
                             RESE<span class="text-brand-accent">VIT</span>
@@ -267,15 +267,16 @@
                         </ul>
                     </div>
 
-                    <div>
+                    <div class="max-w-full overflow-hidden">
                         <h4 class="text-lg font-semibold mb-6">Stay Updated</h4>
                         <p class="text-slate-400 mb-4">Subscribe to our newsletter for the latest updates.</p>
-                        <form action="{{ route('newsletter.subscribe') }}" method="POST" class="flex">
+                        <form action="{{ route('newsletter.subscribe') }}" method="POST"
+                            class="flex flex-col sm:flex-row gap-2">
                             @csrf
                             <input type="email" name="email" required placeholder="Enter your email"
-                                class="flex-grow px-4 py-2 rounded-l-md bg-brand-secondary text-white border-none focus:ring-2 focus:ring-brand-accent">
+                                class="flex-grow px-4 py-2 rounded-lg sm:rounded-l-md sm:rounded-r-none bg-brand-secondary text-white border-none focus:ring-2 focus:ring-brand-accent">
                             <button type="submit"
-                                class="bg-brand-accent text-brand-primary font-bold px-4 py-2 rounded-r-md hover:opacity-90 transition-opacity">
+                                class="bg-brand-accent text-brand-primary font-bold px-4 py-2 rounded-lg sm:rounded-r-md sm:rounded-l-none hover:opacity-90 transition-opacity whitespace-nowrap">
                                 Join
                             </button>
                         </form>

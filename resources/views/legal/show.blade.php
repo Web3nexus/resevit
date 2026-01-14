@@ -4,10 +4,10 @@
     <div class="bg-white min-h-screen py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <article class="prose prose-slate prose-lg max-w-none 
-                prose-headings:text-slate-900 prose-headings:font-bold
-                prose-a:text-brand-accent prose-a:no-underline hover:prose-a:underline
-                prose-strong:text-slate-900 prose-code:text-brand-accent prose-code:bg-slate-50 
-                prose-code:px-1 prose-code:rounded">
+                    prose-headings:text-slate-900 prose-headings:font-bold
+                    prose-a:text-brand-accent prose-a:no-underline hover:prose-a:underline
+                    prose-strong:text-slate-900 prose-code:text-brand-accent prose-code:bg-slate-50 
+                    prose-code:px-1 prose-code:rounded">
 
                 <header class="mb-12 not-prose">
                     <nav class="flex mb-4 text-sm text-slate-500 font-medium" aria-label="Breadcrumb">
@@ -21,7 +21,7 @@
                     <p class="mt-4 text-sm text-slate-400">Last updated {{ $document->updated_at->format('F d, Y') }}</p>
                 </header>
 
-                {!! $document->content !!}
+                {!! clean($document->content) !!}
             </article>
 
             <footer class="mt-16 pt-8 border-t border-slate-100">

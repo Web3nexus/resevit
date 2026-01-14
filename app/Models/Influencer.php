@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 
 class Influencer extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, TenantAuthenticatable;
 
     protected $connection = 'landlord';
 

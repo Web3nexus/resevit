@@ -18,6 +18,7 @@ class PlatformSetting extends Model
         'legal_settings',
         'onboarding_settings',
         'stripe_settings',
+        'stripe_mode',
         'plugin_settings',
     ];
 
@@ -29,7 +30,8 @@ class PlatformSetting extends Model
         'landing_settings' => 'array',
         'legal_settings' => 'array',
         'onboarding_settings' => 'array',
-        'stripe_settings' => 'array',
+        'stripe_settings' => 'encrypted:array',
+        'stripe_mode' => 'string',
         'plugin_settings' => 'array',
     ];
 
@@ -82,5 +84,63 @@ class PlatformSetting extends Model
     {
         $settings = $this->footer_settings ?? self::getDefaultFooterSettings();
         return array_filter($settings[$section] ?? [], fn($link) => $link['is_visible'] ?? true);
+    }
+
+    /**
+     * Get the active Stripe configuration based on current mode
+     */
+    public function getActiveStripeConfig(): array
+    {
+        $mode = $this->stripe_mode ?? 'test';
+        $settings = $this->stripe_settings ?? [];
+
+        return $settings[$mode] ?? [
+            'publishable_key' => '',
+            'secret_key' => '',
+            'webhook_secret' => '',
+        ];
+    }
+
+    /**
+     * Get the Stripe publishable key for the current environment
+     */
+    public function getStripePublishableKey(): ?string
+    {
+        $config = $this->getActiveStripeConfig();
+        return $config['publishable_key'] ?? null;
+    }
+
+    /**
+     * Get the Stripe secret key for the current environment
+     */
+    public function getStripeSecretKey(): ?string
+    {
+        $config = $this->getActiveStripeConfig();
+        return $config['secret_key'] ?? null;
+    }
+
+    /**
+     * Get the Stripe webhook secret for the current environment
+     */
+    public function getStripeWebhookSecret(): ?string
+    {
+        $config = $this->getActiveStripeConfig();
+        return $config['webhook_secret'] ?? null;
+    }
+
+    /**
+     * Check if Stripe is in test mode
+     */
+    public function isStripeTestMode(): bool
+    {
+        return ($this->stripe_mode ?? 'test') === 'test';
+    }
+
+    /**
+     * Check if Stripe is in live mode
+     */
+    public function isStripeLiveMode(): bool
+    {
+        return ($this->stripe_mode ?? 'test') === 'live';
     }
 }

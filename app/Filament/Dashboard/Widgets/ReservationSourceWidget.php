@@ -15,7 +15,7 @@ class ReservationSourceWidget extends ChartWidget
     protected function getData(): array
     {
         $data = Reservation::query()
-            ->select('source', DB::raw('count(*) as total'))
+            ->select(['source', DB::raw('count(*) as total')])
             ->groupBy('source')
             ->get();
 

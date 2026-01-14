@@ -17,11 +17,11 @@ use App\Http\Controllers\Api\V1\PlatformAuthController;
 
 Route::prefix('v1')->group(function () {
     // Public Config / Branding
-    Route::get('/bootstrap', [PlatformAuthController::class, 'bootstrap']);
+    Route::get('/bootstrap', [PlatformAuthController::class, 'bootstrap'])->middleware('throttle:60,1');
 
     // Unified Auth
-    Route::post('/auth/register', [PlatformAuthController::class, 'register']);
-    Route::post('/auth/login', [PlatformAuthController::class, 'login']);
+    Route::post('/auth/register', [PlatformAuthController::class, 'register'])->middleware('throttle:registration');
+    Route::post('/auth/login', [PlatformAuthController::class, 'login'])->middleware('throttle:login');
 
     // Protected User Info
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

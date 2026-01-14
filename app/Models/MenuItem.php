@@ -10,9 +10,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MenuItem extends Model
 {
     protected $connection = 'tenant';
-    
 
-    protected $guarded = [];
+
+    protected $fillable = [
+        'category_id',
+        'name',
+        'description',
+        'image_path',
+        'base_price',
+        'is_available',
+        'is_active',
+        'sort_order',
+    ];
+
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
+    ];
 
     protected $casts = [
         'base_price' => 'decimal:2',

@@ -8,9 +8,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Payment extends Model
 {
     protected $connection = 'tenant';
-    
 
-    protected $guarded = [];
+
+    protected $fillable = [
+        'order_id',
+        'payment_method',
+        'transaction_id',
+        'notes',
+    ];
+
+    protected $guarded = [
+        'id',
+        'amount',      // Should match order total
+        'status',      // Controlled by payment gateway
+        'created_at',
+        'updated_at',
+    ];
 
     protected $casts = [
         'amount' => 'decimal:2',

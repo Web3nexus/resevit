@@ -18,10 +18,7 @@ class TenantsGrowthChart extends ChartWidget
         $driver = DB::connection()->getDriverName();
 
         if ($driver === 'sqlite') {
-            $data = Tenant::select(
-                DB::raw('strftime("%Y-%m", created_at) as month'),
-                DB::raw('count(*) as count')
-            )
+            $data = Tenant::selectRaw('strftime("%Y-%m", created_at) as month, count(*) as count')
                 ->whereNotNull('owner_user_id')
                 ->where('status', 'active')
                 ->where('created_at', '>=', now()->subMonths(11)->startOfMonth())
@@ -30,10 +27,7 @@ class TenantsGrowthChart extends ChartWidget
                 ->get();
         } else {
             // MySQL / Postgres (Standard)
-            $data = Tenant::select(
-                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
-                DB::raw('count(*) as count')
-            )
+            $data = Tenant::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, count(*) as count')
                 ->whereNotNull('owner_user_id')
                 ->where('status', 'active')
                 ->where('created_at', '>=', now()->subMonths(11)->startOfMonth())

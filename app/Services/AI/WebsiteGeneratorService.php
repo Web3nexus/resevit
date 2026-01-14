@@ -2,26 +2,14 @@
 
 namespace App\Services\AI;
 
-use App\Models\AiSetting;
 use OpenAI;
 use Illuminate\Support\Facades\Log;
 use App\Models\MenuItem;
 use App\Models\ReservationSetting;
+use App\Services\AI\BaseAiService;
 
-class WebsiteGeneratorService
+class WebsiteGeneratorService extends BaseAiService
 {
-    protected $client;
-    protected $settings;
-
-    public function __construct()
-    {
-        $this->settings = AiSetting::where('is_active', true)->first();
-
-        if ($this->settings && $this->settings->api_key) {
-            $this->client = OpenAI::client($this->settings->api_key);
-        }
-    }
-
     public function generateLayout(): array
     {
         $tenant = tenant();

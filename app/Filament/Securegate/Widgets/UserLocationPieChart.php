@@ -15,7 +15,7 @@ class UserLocationPieChart extends ChartWidget
     protected function getData(): array
     {
         // Group users by country. Requires 'country' column on users table.
-        $locations = User::select('country', DB::raw('count(*) as total'))
+        $locations = User::select(['country', DB::raw('count(*) as total')])
             ->whereNotNull('country')
             ->groupBy('country')
             ->orderByDesc('total')

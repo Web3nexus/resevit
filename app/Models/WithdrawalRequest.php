@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class WithdrawalRequest extends Model
+class WithdrawalRequest extends TenantModel
 {
     protected $connection = 'landlord';
 
@@ -29,5 +30,14 @@ class WithdrawalRequest extends Model
     public function requester(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Relationship for when the requester is an Influencer
+     * This is used by Filament forms
+     */
+    public function influencer(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Influencer::class, 'requester_id');
     }
 }

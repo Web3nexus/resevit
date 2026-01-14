@@ -22,3 +22,19 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Debug scripts
+*_debug.php
+debug_*.php
+inspect_*.php
+check-*.php
+reset_*.php
+cli_*.php
+
+# Temporary research/prompt files
+promot*.txt
+prompt*.txt
+promt*.txt
+methods.txt
+seed_error*.txt
+*.log

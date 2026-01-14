@@ -57,6 +57,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                                 FileUpload::make('logo_path')
                                                     ->label('Platform Logo')
                                                     ->image()
+                                                    ->maxSize(1024)
                                                     ->directory('platform')
                                                     ->visibility('public')
                                                     ->imageEditor()
@@ -65,6 +66,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                                 FileUpload::make('favicon_path')
                                                     ->label('Favicon')
                                                     ->image()
+                                                    ->maxSize(512)
                                                     ->directory('platform')
                                                     ->visibility('public')
                                                     ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->favicon_path))
@@ -113,6 +115,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                                 FileUpload::make('landing_settings.hero_image')
                                                     ->label('Hero Background/Image')
                                                     ->image()
+                                                    ->maxSize(2048)
                                                     ->directory('platform/landing')
                                                     ->visibility('public')
                                                     ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->landing_settings['hero_image'] ?? null))
@@ -342,24 +345,101 @@ class ManagePlatformSettings extends Page implements HasSchemas
                     ]),
 
                 Section::make('Stripe Configuration')
-                    ->description('Manage your platform-wide Stripe API credentials.')
+                    ->description('Manage your platform-wide Stripe API credentials and switch between test and live environments.')
                     ->icon('heroicon-o-credit-card')
                     ->schema([
-                        Grid::make(3)
+                        // Environment Mode Toggle
+                        Grid::make(2)
                             ->schema([
-                                TextInput::make('stripe_settings.publishable_key')
-                                    ->label('Stripe Publishable Key')
-                                    ->password()
-                                    ->placeholder('pk_test_...'),
-                                TextInput::make('stripe_settings.secret_key')
-                                    ->label('Stripe Secret Key')
-                                    ->password()
-                                    ->placeholder('sk_test_...'),
-                                TextInput::make('stripe_settings.webhook_secret')
-                                    ->label('Stripe Webhook Secret')
-                                    ->password()
-                                    ->placeholder('whsec_...'),
+                                Toggle::make('stripe_mode')
+                                    ->label('Use Live Mode')
+                                    ->helperText('⚠️ WARNING: Switching to live mode will process real payments. Ensure live keys are configured correctly.')
+                                    ->onColor('danger')
+                                    ->offColor('warning')
+                                    ->inline(false)
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        // Update the mode in stripe_settings as well for consistency
+                                        $set('stripe_settings.mode', $state ? 'live' : 'test');
+                                    })
+                                    ->formatStateUsing(fn($state) => $state === 'live'),
+
+                                \Filament\Forms\Components\Placeholder::make('current_mode_indicator')
+                                    ->label('Current Mode')
+                                    ->content(function ($get) {
+                                        $mode = $get('stripe_mode');
+                                        $isLive = $mode === 'live';
+                                        $badge = $isLive
+                                            ? '🔴 LIVE MODE - Real payments will be processed'
+                                            : '🟡 TEST MODE - Safe for testing';
+                                        return $badge;
+                                    }),
                             ]),
+
+                        // Tabbed interface for Test and Live keys
+                        \Filament\Schemas\Components\Tabs::make('Stripe Keys')
+                            ->tabs([
+                                \Filament\Schemas\Components\Tabs\Tab::make('Test Environment')
+                                    ->icon('heroicon-o-beaker')
+                                    ->badge('Safe')
+                                    ->badgeColor('success')
+                                    ->schema([
+                                        Grid::make(3)
+                                            ->schema([
+                                                TextInput::make('stripe_settings.test.publishable_key')
+                                                    ->label('Test Publishable Key')
+                                                    ->password()
+                                                    ->revealable()
+                                                    ->placeholder('pk_test_...')
+                                                    ->helperText('Starts with pk_test_'),
+                                                TextInput::make('stripe_settings.test.secret_key')
+                                                    ->label('Test Secret Key')
+                                                    ->password()
+                                                    ->revealable()
+                                                    ->placeholder('sk_test_...')
+                                                    ->helperText('Starts with sk_test_'),
+                                                TextInput::make('stripe_settings.test.webhook_secret')
+                                                    ->label('Test Webhook Secret')
+                                                    ->password()
+                                                    ->revealable()
+                                                    ->placeholder('whsec_...')
+                                                    ->helperText('Optional - for webhook verification'),
+                                            ]),
+                                    ]),
+
+                                \Filament\Schemas\Components\Tabs\Tab::make('Live Environment')
+                                    ->icon('heroicon-o-bolt')
+                                    ->badge('Production')
+                                    ->badgeColor('danger')
+                                    ->schema([
+                                        \Filament\Forms\Components\Placeholder::make('live_warning')
+                                            ->content('⚠️ These keys will process REAL payments. Double-check before saving.')
+                                            ->columnSpanFull(),
+
+                                        Grid::make(3)
+                                            ->schema([
+                                                TextInput::make('stripe_settings.live.publishable_key')
+                                                    ->label('Live Publishable Key')
+                                                    ->password()
+                                                    ->revealable()
+                                                    ->placeholder('pk_live_...')
+                                                    ->helperText('Starts with pk_live_'),
+                                                TextInput::make('stripe_settings.live.secret_key')
+                                                    ->label('Live Secret Key')
+                                                    ->password()
+                                                    ->revealable()
+                                                    ->placeholder('sk_live_...')
+                                                    ->helperText('Starts with sk_live_'),
+                                                TextInput::make('stripe_settings.live.webhook_secret')
+                                                    ->label('Live Webhook Secret')
+                                                    ->password()
+                                                    ->revealable()
+                                                    ->placeholder('whsec_...')
+                                                    ->helperText('Optional - for webhook verification'),
+                                            ]),
+                                    ]),
+                            ])
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('Third-Party Plugins & Security')

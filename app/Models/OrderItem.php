@@ -9,9 +9,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class OrderItem extends Model
 {
     protected $connection = 'tenant';
-    
 
-    protected $guarded = [];
+
+    protected $fillable = [
+        'order_id',
+        'menu_item_id',
+        'variant_id',
+        'quantity',
+        'special_instructions',
+    ];
+
+    protected $guarded = [
+        'id',
+        'unit_price',  // Should come from menu item
+        'subtotal',    // Calculated field
+        'created_at',
+        'updated_at',
+    ];
 
     protected $casts = [
         'unit_price' => 'decimal:2',

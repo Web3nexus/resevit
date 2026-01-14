@@ -8,9 +8,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OrderItemAddon extends Model
 {
     protected $connection = 'tenant';
-    
 
-    protected $guarded = [];
+
+    protected $fillable = [
+        'order_item_id',
+        'addon_id',
+        'price',
+    ];
+
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
+    ];
 
     protected $casts = [
         'price' => 'decimal:2',

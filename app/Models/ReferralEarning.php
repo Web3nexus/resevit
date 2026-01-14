@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class ReferralEarning extends Model
+class ReferralEarning extends TenantModel
 {
     protected $table = 'referral_earnings';
 

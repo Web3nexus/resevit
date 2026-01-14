@@ -7,7 +7,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Get;
 use Filament\Schemas\Schema;
 
 class MarketingMaterialForm
@@ -33,12 +32,14 @@ class MarketingMaterialForm
                 FileUpload::make('file_path')
                     ->label('File')
                     ->image()
-                    ->visible(fn(Get $get) => $get('type') === 'image')
+                    ->maxSize(5120) // 5MB limit
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+                    ->visible(fn($get) => $get('type') === 'image')
                     ->directory('marketing-materials'),
                 TextInput::make('url')
                     ->label('URL')
                     ->url()
-                    ->visible(fn(Get $get) => $get('type') === 'link')
+                    ->visible(fn($get) => $get('type') === 'link')
                     ->maxLength(255),
                 Toggle::make('is_active')
                     ->required(),

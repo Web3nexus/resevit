@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetUserLocalization::class,
             \App\Http\Middleware\TrackReferralClicks::class,
+            \App\Http\Middleware\SecureHeaders::class,
         ]);
 
         $middleware->alias([
@@ -34,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             'webhooks/social/*',
+            'stripe/webhook',
         ]);
     })
     ->withSchedule(function (Schedule $schedule): void {

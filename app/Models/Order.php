@@ -13,7 +13,24 @@ class Order extends Model
     protected $connection = 'tenant';
     use BelongsToBranch;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'table_id',
+        'staff_id',
+        'branch_id',
+        'customer_name',
+        'customer_phone',
+        'customer_email',
+        'order_type',
+        'status',
+        'notes',
+    ];
+
+    protected $guarded = [
+        'id',
+        'total_amount',  // Calculated from items
+        'created_at',
+        'updated_at',
+    ];
 
     protected $casts = [
         'total_amount' => 'decimal:2',

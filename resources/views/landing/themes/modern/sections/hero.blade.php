@@ -27,7 +27,7 @@
 
             <!-- Title -->
             <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1] mb-8 text-white">
-                {!! $section->title ?? 'The OS for <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-modern-accent to-brand-modern-secondary">Elite Restaurants</span>' !!}
+                {!! clean($section->title ?? 'The OS for <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-modern-accent to-brand-modern-secondary">Elite Restaurants</span>') !!}
             </h1>
 
             <!-- Subtitle -->

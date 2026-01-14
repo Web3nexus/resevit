@@ -53,7 +53,9 @@ class PricingSeeder extends Seeder
             'price_yearly' => 290.00,
             'monthly_ai_credits' => 5000,
             'trial_days' => 7,
-            'stripe_id' => 'price_STARTER_PLACEHOLDER', // Replace with Stripe Price ID
+            'stripe_id' => 'price_STARTER_PLACEHOLDER', // Legacy - kept for backward compatibility
+            'stripe_price_id_test' => 'price_STARTER_TEST_PLACEHOLDER',
+            'stripe_price_id_live' => null, // To be configured in production
             'order' => 1,
         ]);
 
@@ -63,7 +65,9 @@ class PricingSeeder extends Seeder
             'price_monthly' => 79.00,
             'price_yearly' => 790.00,
             'monthly_ai_credits' => 25000,
-            'stripe_id' => 'price_GROWTH_PLACEHOLDER', // Replace with Stripe Price ID
+            'stripe_id' => 'price_GROWTH_PLACEHOLDER', // Legacy - kept for backward compatibility
+            'stripe_price_id_test' => 'price_GROWTH_TEST_PLACEHOLDER',
+            'stripe_price_id_live' => null, // To be configured in production
             'order' => 2,
         ]);
 
@@ -73,7 +77,9 @@ class PricingSeeder extends Seeder
             'price_monthly' => 149.00,
             'price_yearly' => 1490.00,
             'monthly_ai_credits' => 75000,
-            'stripe_id' => 'price_PRO_PLACEHOLDER', // Replace with Stripe Price ID
+            'stripe_id' => 'price_PRO_PLACEHOLDER', // Legacy - kept for backward compatibility
+            'stripe_price_id_test' => 'price_PRO_TEST_PLACEHOLDER',
+            'stripe_price_id_live' => null, // To be configured in production
             'order' => 3,
         ]);
 

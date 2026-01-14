@@ -17,7 +17,7 @@ if (!function_exists('has_feature')) {
 
         $result = app(FeatureManager::class)->hasFeature($tenant, $featureKey);
 
-        \Log::info("has_feature check: {$featureKey} = " . ($result ? 'TRUE' : 'FALSE'));
+        \Log::debug("has_feature check: {$featureKey} = " . ($result ? 'TRUE' : 'FALSE'));
 
         return $result;
     }

@@ -20,6 +20,12 @@ class PricingPlan extends Model
         'is_free',
         'stripe_id',
         'stripe_yearly_id',
+        'stripe_product_id_test',
+        'stripe_product_id_live',
+        'stripe_price_id_test',
+        'stripe_price_id_live',
+        'stripe_yearly_price_id_test',
+        'stripe_yearly_price_id_live',
         'cta_text',
         'cta_url',
         'is_featured',
@@ -48,5 +54,40 @@ class PricingPlan extends Model
     public function planFeatures()
     {
         return $this->hasMany(PricingPlanFeature::class, 'pricing_plan_id');
+    }
+
+    /**
+     * Get the Stripe product ID for the current environment
+     */
+    public function getStripeProductId(): ?string
+    {
+        $settings = \App\Models\PlatformSetting::current();
+        $mode = $settings->stripe_mode ?? 'test';
+
+        return $mode === 'live'
+            ? $this->stripe_product_id_live
+            : $this->stripe_product_id_test;
+    }
+
+    /**
+     * Get the Stripe price ID for the current environment and billing cycle
+     * 
+     * @param string $billingCycle 'monthly' or 'yearly'
+     * @return string|null
+     */
+    public function getStripePriceId(string $billingCycle = 'monthly'): ?string
+    {
+        $settings = \App\Models\PlatformSetting::current();
+        $mode = $settings->stripe_mode ?? 'test';
+
+        if ($billingCycle === 'yearly') {
+            return $mode === 'live'
+                ? $this->stripe_yearly_price_id_live
+                : ($this->stripe_yearly_price_id_test ?? $this->stripe_yearly_id);
+        }
+
+        return $mode === 'live'
+            ? $this->stripe_price_id_live
+            : ($this->stripe_price_id_test ?? $this->stripe_id);
     }
 }

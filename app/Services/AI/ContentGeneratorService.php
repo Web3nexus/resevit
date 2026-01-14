@@ -2,32 +2,15 @@
 
 namespace App\Services\AI;
 
-use App\Models\AiSetting;
-use OpenAI;
-use Illuminate\Support\Facades\Log;
-
-class ContentGeneratorService
+class ContentGeneratorService extends BaseAiService
 {
-    protected $client;
-    protected $settings;
-
-    public function __construct()
-    {
-        // Get active AI settings from landlord DB
-        $this->settings = AiSetting::where('is_active', true)->first();
-
-        if ($this->settings && $this->settings->api_key) {
-            $this->client = OpenAI::client($this->settings->api_key);
-        }
-    }
-
     /**
      * Generate content based on a prompt and type.
      * Respects tenant context and uses appropriate model.
      */
     public function generate(string $prompt, string $type, bool $premium = false): string
     {
-        if (!$this->client) {
+        if (!$this->ensureClient()) {
             return $this->getFallbackContent($prompt, $type);
         }
 

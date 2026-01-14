@@ -18,7 +18,7 @@
             prose-a:text-brand-modern-accent prose-a:no-underline hover:prose-a:underline
             prose-strong:text-white prose-code:text-brand-modern-accent prose-code:bg-white/5 prose-code:px-1 prose-code:rounded
             prose-blockquote:border-l-brand-modern-accent prose-blockquote:bg-white/5 prose-blockquote:py-2 prose-blockquote:pr-4">
-            {!! $section->content['body'] ?? '' !!}
+            {!! clean($section->content['body'] ?? '') !!}
         </div>
     </div>
 </section>

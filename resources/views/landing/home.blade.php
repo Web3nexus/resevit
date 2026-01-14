@@ -24,7 +24,7 @@
                         {{ $landing['hero_badge'] ?? 'THE FUTURE OF DINING' }}
                     </span>
                     <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] mb-8">
-                        {!! $landing['hero_title'] ?? 'Maximize Your Restaurant’s <span class="text-brand-accent">Potential</span>' !!}
+                        {!! clean($landing['hero_title'] ?? 'Maximize Your Restaurant’s <span class="text-brand-accent">Potential</span>') !!}
                     </h1>
                     <p class="text-xl text-slate-300 mb-10 leading-relaxed max-w-xl">
                         {{ $landing['hero_subtitle'] ?? "Streamline reservations, optimize staff schedules, and delight customers with the world's most advanced restaurant management platform." }}

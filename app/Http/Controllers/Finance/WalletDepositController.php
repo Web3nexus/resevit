@@ -16,17 +16,15 @@ class WalletDepositController extends Controller
     {
         $user = Auth::user();
 
-        // Load platform Stripe settings if available
-        $settings = \App\Models\PlatformSetting::current()->stripe_settings;
-        if ($settings && !empty($settings['secret_key'])) {
-            config(['cashier.secret' => $settings['secret_key']]);
-            config(['cashier.key' => $settings['publishable_key'] ?? '']);
-        }
+        // Set Stripe configuration for current environment
+        \App\Services\StripeConfigService::setStripeConfig();
 
         // In a real application, you would ask for the amount.
         // For now, we'll use a fixed amount or a query param.
         $amount = $request->query('amount', 500); // Default to $500
         $amountCents = $amount * 100;
+
+        $mode = \App\Services\StripeConfigService::getModeLabel();
 
         try {
             return $user->checkout([
@@ -46,10 +44,10 @@ class WalletDepositController extends Controller
             ]);
         } catch (\Stripe\Exception\AuthenticationException $e) {
             return redirect()->route('filament.dashboard.pages.wallet')
-                ->with('error', 'Stripe authentication failed. Administrators: Please verify the API keys in **Securegate > Platform Settings > Stripe Configuration**. Users: Please contact the platform administrator.');
+                ->with('error', "Stripe authentication failed ({$mode}). Administrators: Please verify the API keys in **Securegate > Platform Settings > Stripe Configuration**. Users: Please contact the platform administrator.");
         } catch (\Exception $e) {
             return redirect()->route('filament.dashboard.pages.wallet')
-                ->with('error', 'An error occurred while processing your payment. Administrators: Please check the Stripe configuration in the **Securegate** panel. Error: ' . $e->getMessage());
+                ->with('error', "An error occurred while processing your payment ({$mode}). Administrators: Please check the Stripe configuration in the **Securegate** panel. Error: " . $e->getMessage());
         }
     }
 

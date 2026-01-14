@@ -62,11 +62,11 @@ Route::middleware('guest')->group(function () {
     // Central Login (Redirects to Tenant Dashboard)
     // Central Login (Redirects to Tenant Dashboard)
     Route::get('login', [\App\Http\Controllers\Auth\CentralLoginController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [\App\Http\Controllers\Auth\CentralLoginController::class, 'login']);
+    Route::post('login', [\App\Http\Controllers\Auth\CentralLoginController::class, 'login'])->middleware('throttle:login');
 
     // Password Reset - utilizing standard controller for now, could be replaced with Filament/Livewire later
     Route::get('forgot-password', [\App\Http\Controllers\Auth\PasswordResetLinkController::class, 'create'])->name('password.request');
-    Route::post('forgot-password', [\App\Http\Controllers\Auth\PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::post('forgot-password', [\App\Http\Controllers\Auth\PasswordResetLinkController::class, 'store'])->name('password.email')->middleware('throttle:5,1');
 
     // OAuth Routes
     Route::get('oauth/{provider}', [OAuthController::class, 'redirect'])->name('oauth.redirect');
@@ -120,6 +120,10 @@ Route::middleware([
 });
 
 // Temporary Seed/Fix Route
+// Stripe Webhooks
+Route::post('/stripe/webhook', [\App\Http\Controllers\Stripe\StripeWebhookController::class, 'handle'])
+    ->name('stripe.webhook');
+
 Route::get('/debug/seed-features', function () {
     // 1. Run Seeder
     try {

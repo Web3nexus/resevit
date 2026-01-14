@@ -18,7 +18,7 @@
             @endif
 
             <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight mb-8">
-                {!! $section->title !!}
+                {!! clean($section->title) !!}
             </h1>
 
             @if(isset($section->content['description']))

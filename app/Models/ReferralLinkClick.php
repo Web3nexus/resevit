@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class ReferralLinkClick extends Model
+class ReferralLinkClick extends TenantModel
 {
     protected $connection = 'landlord';
 
