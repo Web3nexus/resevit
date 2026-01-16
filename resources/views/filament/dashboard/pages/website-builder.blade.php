@@ -17,9 +17,9 @@
             </div>
         </div>
 
-        <form wire:submit.prevent="save">
+        <x-filament-schemas::form wire:submit.prevent="save">
             {{ $this->form }}
-        </form>
+        </x-filament-schemas::form>
 
         <div class="bg-brand-primary/5 border border-brand-primary/10 rounded-2xl p-6 flex items-start space-x-4">
             <div class="bg-brand-primary/10 p-3 rounded-xl text-brand-primary">

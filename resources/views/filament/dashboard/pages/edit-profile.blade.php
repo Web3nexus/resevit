@@ -4,7 +4,7 @@
             Profile Information
         </x-slot>
 
-        <form wire:submit="updateProfile">
+        <x-filament-schemas::form wire:submit="updateProfile">
             {{ $this->profileForm }}
 
             <div class="mt-4 text-right">
@@ -12,7 +12,7 @@
                     Save Profile
                 </x-filament::button>
             </div>
-        </form>
+        </x-filament-schemas::form>
     </x-filament::section>
 
     <x-filament::section class="mt-6">
@@ -20,7 +20,7 @@
             Business Details
         </x-slot>
 
-        <form wire:submit="updateBusiness">
+        <x-filament-schemas::form wire:submit="updateBusiness">
             {{ $this->businessForm }}
 
             <div class="mt-4 text-right">
@@ -28,7 +28,7 @@
                     Save Business Details
                 </x-filament::button>
             </div>
-        </form>
+        </x-filament-schemas::form>
     </x-filament::section>
 
     <x-filament::section class="mt-6">
@@ -36,7 +36,7 @@
             Security
         </x-slot>
 
-        <form wire:submit="updatePassword">
+        <x-filament-schemas::form wire:submit="updatePassword">
             {{ $this->passwordForm }}
 
             <div class="mt-4 text-right">
@@ -44,6 +44,6 @@
                     Update Password
                 </x-filament::button>
             </div>
-        </form>
+        </x-filament-schemas::form>
     </x-filament::section>
 </x-filament-panels::page>

@@ -3,7 +3,7 @@
         <!-- Input Section -->
         <div>
             <x-filament::section>
-                <form wire:submit="generateImage">
+                <x-filament-schemas::form wire:submit="generateImage">
                     {{ $this->form }}
 
                     <div class="flex gap-4 mt-6">
@@ -17,7 +17,7 @@
                             Generate Image
                         </x-filament::button>
                     </div>
-                </form>
+                </x-filament-schemas::form>
 
                 <div wire:loading wire:target="refinePrompt" class="mt-4 text-sm text-gray-500">
                     <div class="flex items-center gap-2">

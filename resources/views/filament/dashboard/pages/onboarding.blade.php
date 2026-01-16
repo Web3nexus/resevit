@@ -5,8 +5,8 @@
             <p class="text-slate-500">Follow these steps to complete your profile.</p>
         </div>
 
-        <form wire:submit="submit">
+        <x-filament-schemas::form wire:submit="submit">
             {{ $this->form }}
-        </form>
+        </x-filament-schemas::form>
     </div>
 </x-filament-panels::page>

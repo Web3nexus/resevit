@@ -1,6 +1,6 @@
 <x-filament-panels::page>
     <x-filament::section>
-        <form wire:submit="save">
+        <x-filament-schemas::form wire:submit="save">
             {{ $this->form }}
 
             <div class="mt-4 flex justify-end">
@@ -8,6 +8,6 @@
                     Save Changes
                 </x-filament::button>
             </div>
-        </form>
+        </x-filament-schemas::form>
     </x-filament::section>
 </x-filament-panels::page>
