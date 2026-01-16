@@ -5,14 +5,14 @@
         </x-slot>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <x-filament::button href="/securegate/admin-users/create" tag="a" icon="heroicon-m-user-plus"
-                color="primary" class="w-full justify-center">
+            <x-filament::button href="/securegate/admins/create" tag="a" icon="heroicon-m-user-plus" color="primary"
+                class="w-full justify-center">
                 Add New Admin
             </x-filament::button>
 
-            <x-filament::button href="/securegate/marketing-campaigns/create" tag="a" icon="heroicon-m-megaphone"
+            <x-filament::button href="/securegate/marketing-materials/create" tag="a" icon="heroicon-m-megaphone"
                 color="success" class="w-full justify-center">
-                Create Campaign
+                Add Marketing Material
             </x-filament::button>
 
             <x-filament::button href="/securegate/investors/create" tag="a" icon="heroicon-m-banknotes" color="warning"

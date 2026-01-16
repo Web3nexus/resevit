@@ -1,11 +1,9 @@
 <x-filament-panels::page>
-    <form wire:submit="save">
+    <x-filament-schemas::form wire:submit="save">
         {{ $this->form }}
 
-        <div class="mt-6 flex items-center gap-3">
-            <x-filament::button type="submit" size="lg">
-                Save Details
-            </x-filament::button>
+        <div class="mt-6">
+            <x-filament-schemas::actions :actions="$this->getFormActions()" />
         </div>
-    </form>
+    </x-filament-schemas::form>
 </x-filament-panels::page>
