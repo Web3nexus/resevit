@@ -2,21 +2,35 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Livewire\Attributes\Layout;
 use App\Models\Category;
-use App\Models\MenuItem;
 use Illuminate\Support\Facades\Session;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 class RestaurantMenu extends Component
 {
+    public $website;
+
     public $activeCategoryId = null;
+
     public $cart = [];
+
     public $isCartOpen = false;
 
     public function mount()
     {
         $this->cart = Session::get('cart', []);
+        $this->website = \App\Models\TenantWebsite::where('tenant_id', tenant('id'))->first();
+
+        if (! $this->website) {
+            // Fallback to a default structure if no website settings exist
+            $this->website = new \App\Models\TenantWebsite([
+                'content' => [
+                    'business_name' => tenant('name'),
+                    'settings' => [],
+                ],
+            ]);
+        }
 
         // Default to first category
         $firstCategory = Category::where('is_active', true)->orderBy('sort_order')->first();
@@ -32,51 +46,29 @@ class RestaurantMenu extends Component
 
     public function addToCart($menuItemId, $variantId = null, $quantity = 1, $addons = [])
     {
-        $item = MenuItem::find($menuItemId);
-        if (!$item) return;
-
-        $cartItem = [
-            'id' => uniqid(), // Unique cart item ID
-            'menu_item_id' => $item->id,
-            'name' => $item->name,
-            'price' => $item->base_price, // Needs variant adjustment
+        $this->dispatch('add-to-cart', [
+            'menuItemId' => $menuItemId,
+            'variantId' => $variantId,
             'quantity' => $quantity,
-            'variant_id' => $variantId,
             'addons' => $addons,
-            // 'image' => $item->image_path,
-        ];
-
-        // Basic implementation for now
-        $this->cart[] = $cartItem;
-        $this->saveCart();
-
-        $this->dispatch('cart-updated');
-        $this->isCartOpen = true;
-    }
-
-    public function removeFromCart($cartItemId)
-    {
-        $this->cart = array_filter($this->cart, fn($item) => $item['id'] !== $cartItemId);
-        $this->saveCart();
-    }
-
-    protected function saveCart()
-    {
-        Session::put('cart', $this->cart);
+        ]);
     }
 
     #[Layout('components.layouts.app')]
     public function render()
     {
         $categories = Category::where('is_active', true)
-            ->with(['menuItems' => function ($query) {
-                $query->where('is_active', true)->where('is_available', true)->with('variants');
-            }])
+            ->with([
+                'menuItems' => function ($query) {
+                    $query->where('is_active', true)->where('is_available', true)->with('variants');
+                },
+            ])
             ->orderBy('sort_order')
             ->get();
 
         return view('livewire.restaurant-menu', [
             'categories' => $categories,
+            'website' => $this->website,
         ]); // Use a guest layout
     }
 }

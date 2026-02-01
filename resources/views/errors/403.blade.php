@@ -51,7 +51,7 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap justify-center gap-5 pt-4">
-                <a href="{{ route('home') }}"
+                <a href="{{ url('/') }}"
                     class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-bold rounded-2xl text-white bg-brand-primary hover:bg-brand-secondary transition-all shadow-xl hover:shadow-brand-primary/20 hover:-translate-y-1">
                     <i class="fa-solid fa-house mr-2"></i> Back to Home
                 </a>

@@ -1,5 +1,5 @@
 <x-auth-split-layout :heading="$this->getHeading()" :subheading="$this->getSubheading()">
-    <x-filament-schemas::form wire:submit="authenticate" id="authenticate" class="grid gap-y-8 w-full">
+    <form wire:submit="authenticate" id="authenticate" class="grid gap-y-8 w-full">
         {{ $this->form }}
         <x-filament::button type="submit" form="authenticate" class="w-full">
             Sign in
@@ -42,7 +42,7 @@
                 <span>Apple</span>
             </a>
         </div>
-    </x-filament-schemas::form>
+    </form>
     <div class="mt-6 flex items-center justify-between text-sm">
         @if (filament()->hasRegistration())
             <div class="text-left">

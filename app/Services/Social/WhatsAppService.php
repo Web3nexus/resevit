@@ -27,7 +27,7 @@ class WhatsAppService
         $changes = $entry['changes'][0] ?? [];
         $value = $changes['value'] ?? [];
 
-        if (!isset($value['messages'][0])) {
+        if (! isset($value['messages'][0])) {
             return; // Not a message event
         }
 
@@ -53,7 +53,7 @@ class WhatsAppService
         );
 
         // Save Message
-        ChatMessage::create([
+        $chatMessage = ChatMessage::create([
             'chat_id' => $chat->id,
             'direction' => 'inbound',
             'content' => $text,
@@ -65,6 +65,9 @@ class WhatsAppService
         // Update Chat timestamp
         $chat->touch('last_message_at');
         $chat->increment('unread_count');
+
+        // Pass to Automation Engine
+        app(AutomationEngineService::class)->processIncoming($chat, $chatMessage);
     }
 
     /**
@@ -72,8 +75,9 @@ class WhatsAppService
      */
     public function send(Chat $chat, string $content): bool
     {
-        if (!$this->account) {
+        if (! $this->account) {
             Log::error('WhatsAppService: No account context for sending.');
+
             return false;
         }
 
@@ -81,8 +85,9 @@ class WhatsAppService
         $phoneId = $this->account->external_account_id;
         $token = $creds['access_token'] ?? null;
 
-        if (!$token) {
+        if (! $token) {
             Log::error('WhatsAppService: Missing access token.');
+
             return false;
         }
 
@@ -110,11 +115,13 @@ class WhatsAppService
                 return true;
             }
 
-            Log::error('WhatsApp send failed: ' . $response->body());
+            Log::error('WhatsApp send failed: '.$response->body());
+
             return false;
 
         } catch (\Exception $e) {
-            Log::error('WhatsApp send exception: ' . $e->getMessage());
+            Log::error('WhatsApp send exception: '.$e->getMessage());
+
             return false;
         }
     }

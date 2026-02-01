@@ -1,13 +1,11 @@
 <x-filament-panels::page>
-    <x-filament::section>
-        <x-filament-schemas::form wire:submit="save">
-            {{ $this->form }}
+    <x-filament-schemas::form wire:submit="save" class="gap-y-6">
+        {{ $this->settingsForm }}
 
-            <div class="mt-4 flex justify-end">
-                <x-filament::button type="submit">
-                    Save Changes
-                </x-filament::button>
-            </div>
-        </x-filament-schemas::form>
-    </x-filament::section>
+        <div class="mt-4 text-right">
+            <x-filament::button type="submit">
+                Save changes
+            </x-filament::button>
+        </div>
+    </x-filament-schemas::form>
 </x-filament-panels::page>

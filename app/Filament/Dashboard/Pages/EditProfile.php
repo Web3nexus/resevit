@@ -3,13 +3,18 @@
 namespace App\Filament\Dashboard\Pages;
 
 use App\Models\ReservationSetting;
-use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -22,7 +27,9 @@ class EditProfile extends Page implements HasSchemas
     protected static bool $shouldRegisterNavigation = false;
 
     public ?array $profileData = [];
+
     public ?array $passwordData = [];
+
     public ?array $businessData = [];
 
     public function mount(): void
@@ -42,6 +49,8 @@ class EditProfile extends Page implements HasSchemas
             'business_address' => $settings->business_address,
             'business_phone' => $settings->business_phone,
             'business_hours' => $settings->business_hours,
+            'business_logo' => $settings->business_logo,
+            'social_links' => $settings->social_links ?? [],
             'currency' => $settings->currency,
             'timezone' => $settings->timezone,
         ];
@@ -63,20 +72,20 @@ class EditProfile extends Page implements HasSchemas
                 Section::make('Profile Information')
                     ->description('Update your account\'s profile information and email address.')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->required(),
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('email')
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true),
-                        Forms\Components\Select::make('currency')
+                        Select::make('currency')
                             ->options(app(\App\Services\CurrencyService::class)->getSupportedCurrencies())
                             ->required(),
-                        Forms\Components\Select::make('timezone')
+                        Select::make('timezone')
                             ->options(array_combine(timezone_identifiers_list(), timezone_identifiers_list()))
                             ->searchable()
                             ->required(),
-                        Forms\Components\Select::make('locale')
+                        Select::make('locale')
                             ->label('Language')
                             ->options([
                                 'en' => 'English',
@@ -86,12 +95,12 @@ class EditProfile extends Page implements HasSchemas
                                 'ar' => 'Arabic',
                             ])
                             ->required(),
-                        Forms\Components\FileUpload::make('avatar_url')
+                        FileUpload::make('avatar_url')
                             ->label('Avatar')
                             ->avatar()
                             ->imageEditor()
                             ->directory('avatars')
-                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->avatar_url ?? $record->profileData['avatar_url'] ?? null)),
+                            ->getUploadedFileUsing(fn ($record) => \App\Helpers\StorageHelper::getUrl($record->avatar_url ?? $record->profileData['avatar_url'] ?? null)),
                     ])
                     ->columns(2),
             ])
@@ -106,18 +115,18 @@ class EditProfile extends Page implements HasSchemas
                 Section::make('Update Password')
                     ->description('Ensure your account is using a long, random password to stay secure.')
                     ->schema([
-                        Forms\Components\TextInput::make('current_password')
+                        TextInput::make('current_password')
                             ->password()
                             ->required()
                             ->currentPassword(),
-                        Forms\Components\TextInput::make('password')
+                        TextInput::make('password')
                             ->label('New Password')
                             ->password()
                             ->required()
                             ->rule(Password::default())
                             ->autocomplete('new-password')
                             ->same('password_confirmation'),
-                        Forms\Components\TextInput::make('password_confirmation')
+                        TextInput::make('password_confirmation')
                             ->label('Confirm Password')
                             ->password()
                             ->required()
@@ -134,24 +143,52 @@ class EditProfile extends Page implements HasSchemas
                 Section::make('Business Details')
                     ->description('Manage your business information and operating hours.')
                     ->schema([
-                        Forms\Components\TextInput::make('business_name')
+                        TextInput::make('business_name')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('business_phone')
+                        FileUpload::make('business_logo')
+                            ->label('Business Logo')
+                            ->image()
+                            ->directory('business-logos')
+                            ->columnSpanFull(),
+                        Section::make('Social Media')
+                            ->schema([
+                                Repeater::make('social_links')
+                                    ->schema([
+                                        Select::make('platform')
+                                            ->options([
+                                                'facebook' => 'Facebook',
+                                                'instagram' => 'Instagram',
+                                                'twitter' => 'Twitter/X',
+                                                'linkedin' => 'LinkedIn',
+                                                'tiktok' => 'TikTok',
+                                                'youtube' => 'YouTube',
+                                            ])
+                                            ->required(),
+                                        TextInput::make('url')
+                                            ->label('URL')
+                                            ->url()
+                                            ->required(),
+                                    ])
+                                    ->columns(2)
+                                    ->defaultItems(0)
+                                    ->addActionLabel('Add Social Link'),
+                            ])->collapsed(),
+                        TextInput::make('business_phone')
                             ->tel()
                             ->maxLength(20),
-                        Forms\Components\Textarea::make('business_address')
+                        Textarea::make('business_address')
                             ->rows(3)
                             ->columnSpanFull(),
-                        Forms\Components\Select::make('currency')
+                        Select::make('currency')
                             ->options(app(\App\Services\CurrencyService::class)->getSupportedCurrencies())
                             ->required(),
-                        Forms\Components\Select::make('timezone')
+                        Select::make('timezone')
                             ->options(array_combine(timezone_identifiers_list(), timezone_identifiers_list()))
                             ->searchable()
                             ->required(),
 
-                        Forms\Components\KeyValue::make('business_hours')
+                        KeyValue::make('business_hours')
                             ->label('Weekly Schedule')
                             ->keyLabel('Day')
                             ->valueLabel('Hours')

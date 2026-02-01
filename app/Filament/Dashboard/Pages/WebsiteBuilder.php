@@ -2,20 +2,9 @@
 
 namespace App\Filament\Dashboard\Pages;
 
-
-use BackedEnum;
-use App\Models\SitePage;
-use App\Models\Category;
-use App\Services\AI\WebsiteGeneratorService;
-use Filament\Forms\Components\Builder;
-use Filament\Forms\Components\Builder\Block;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\FileUpload;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\ColorPicker;
+use App\Models\TenantWebsite;
+use App\Models\WebsiteTemplate;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
@@ -26,209 +15,264 @@ class WebsiteBuilder extends Page implements HasSchemas
 {
     use InteractsWithSchemas;
 
-    protected string $view = 'filament.dashboard.pages.website-builder';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-globe-alt';
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-globe-alt';
+    protected string $view = 'filament.dashboard.pages.website-builder';
 
     protected static ?string $navigationLabel = 'Website Builder';
 
-    protected static ?string $title = 'AI Website Builder';
+    protected static string|\UnitEnum|null $navigationGroup = 'Marketing';
 
-    protected static ?int $navigationSort = 100;
+    public ?WebsiteTemplate $selectedTemplate = null;
 
-    public ?array $data = [];
+    public ?TenantWebsite $website = null;
 
-    public static function canAccess(): bool
+    public bool $browsingTemplates = false;
+
+    public ?array $builderData = [];
+
+    public bool $isEditing = false;
+
+    protected function getSchemas(): array
     {
-        return has_feature('website_builder');
+        return ['builderForm'];
     }
 
     public function mount(): void
     {
-        $page = SitePage::home()->first();
+        $this->website = TenantWebsite::where('tenant_id', tenant('id'))->with('template')->first();
 
-        $this->data = [
-            'name' => $page->name ?? 'Home',
-            'is_published' => $page->is_published ?? false,
-            'custom_domain' => tenant()->website_custom_domain,
-            'blocks' => $page->config['blocks'] ?? [],
-        ];
+        if ($this->website) {
+            $this->selectedTemplate = $this->website->template;
+            $this->builderData = $this->website->content ?? [];
+        }
     }
 
-    protected function getActions(): array
-    {
-        return [
-            \Filament\Actions\Action::make('view_live')
-                ->label('View Live Site')
-                ->icon('heroicon-o-arrow-top-right-on-square')
-                ->url(route('home'), shouldOpenInNewTab: true)
-                ->color('gray'),
-        ];
-    }
-
-    protected function getSchemas(): array
-    {
-        return [
-            'form',
-        ];
-    }
-
-    public function form(Schema $schema): Schema
+    public function builderForm(Schema $schema): Schema
     {
         return $schema
             ->schema([
-                Section::make('Page Settings')
+                \Filament\Schemas\Components\Section::make('Global Styling')
                     ->schema([
-                        TextInput::make('name')
-                            ->required(),
-                        Toggle::make('is_published')
-                            ->label('Published')
-                            ->helperText('Enable this to make the website live on your domain.'),
-                    ])->columns(2),
-
-                Section::make('Domain Settings')
-                    ->description('Connect a custom domain to your website.')
-                    ->schema([
-                        has_feature('custom_domain')
-                        ? TextInput::make('custom_domain')
-                            ->label('Custom Domain')
-                            ->placeholder('example.com')
-                            ->helperText('To use a custom domain, point its A record to your server IP or CNAME to ' . parse_url(config('app.url'), PHP_URL_HOST) . '. Enter the domain without http:// or https://.')
-                            ->regex('/^(?!:\/\/)([a-zA-Z0-9-_]+\.)+[a-zA-Z0-9][a-zA-Z0-9-_]+$/')
-                        : \Filament\Forms\Components\Placeholder::make('custom_domain_locked')
-                            ->label('Custom Domain')
-                            ->content('Upgrade to the Pro plan to connect a custom domain.')
-                            ->extraAttributes(['class' => 'text-slate-500 italic']),
-                    ]),
-
-                Section::make('Website Blocks')
-                    ->description('Use AI to generate or manually add and customize sections.')
-                    ->schema([
-                        Builder::make('blocks')
-                            ->label('Sections')
-                            ->blocks([
-                                Block::make('hero')
-                                    ->icon('heroicon-o-sparkles')
-                                    ->schema([
-                                        TextInput::make('headline')->required(),
-                                        TextInput::make('subheadline'),
-                                        TextInput::make('cta_text'),
-                                        TextInput::make('cta_url'),
-                                        FileUpload::make('background_image')
-                                            ->image()
-                                            ->directory('website-images')
-                                            ->getUploadedFileUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
-                                        ColorPicker::make('overlay_color')->label('Overlay Color')->rgba(),
-                                        ColorPicker::make('text_color')->label('Text Color'),
-                                    ]),
-                                Block::make('about')
-                                    ->icon('heroicon-o-identification')
-                                    ->schema([
-                                        TextInput::make('title')->required(),
-                                        Textarea::make('content')->required(),
-                                        FileUpload::make('image')
-                                            ->image()
-                                            ->directory('website-images')
-                                            ->getUploadedFileUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
-                                        ColorPicker::make('background_color')->label('Background Color'),
-                                    ]),
-                                Block::make('dynamic_menu')
-                                    ->label('Dynamic Menu (Sync)')
-                                    ->icon('heroicon-o-arrow-path')
-                                    ->schema([
-                                        TextInput::make('title')->required()->default('Our Menu'),
-                                        TextInput::make('subtitle')->default('Freshly prepared for you.'),
-                                        \Filament\Forms\Components\Select::make('category_ids')
-                                            ->label('Select Categories to Display')
-                                            ->multiple()
-                                            ->options(fn() => Category::where('is_active', true)->pluck('name', 'id'))
-                                            ->required(),
-                                        ColorPicker::make('background_color')->label('Background Color'),
-                                    ]),
-                                Block::make('menu_preview')
-                                    ->icon('heroicon-o-shopping-bag')
-                                    ->schema([
-                                        TextInput::make('title')->required(),
-                                        Repeater::make('items')
-                                            ->schema([
-                                                TextInput::make('name')->required(),
-                                                TextInput::make('price'),
-                                                Textarea::make('description'),
-                                            ])->columns(2),
-                                        ColorPicker::make('background_color')->label('Background Color'),
-                                    ]),
-                                Block::make('reservation_cta')
-                                    ->icon('heroicon-o-calendar')
-                                    ->schema([
-                                        TextInput::make('headline')->required(),
-                                        TextInput::make('button_text')->required(),
-                                        FileUpload::make('background_image')
-                                            ->image()
-                                            ->directory('website-images')
-                                            ->getUploadedFileUsing(fn($file) => \App\Helpers\StorageHelper::getUrl($file)),
-                                        ColorPicker::make('text_color')->label('Text Color'),
-                                        ColorPicker::make('button_color')->label('Button Color'),
-                                    ]),
-                                Block::make('contact')
-                                    ->icon('heroicon-o-phone')
-                                    ->schema([
-                                        TextInput::make('address'),
-                                        TextInput::make('phone'),
-                                        TextInput::make('email'),
-                                        ColorPicker::make('background_color')->label('Background Color'),
-                                    ]),
-                                Block::make('reservation_form')
-                                    ->icon('heroicon-o-document-check')
-                                    ->schema([
-                                        TextInput::make('title')->required(),
-                                        TextInput::make('description'),
-                                        ColorPicker::make('background_color')->label('Background Color'),
-                                    ]),
+                        \Filament\Forms\Components\ColorPicker::make('settings.primary_color')
+                            ->label('Primary Brand Color')
+                            ->default('#0B132B'),
+                        \Filament\Forms\Components\Select::make('settings.border_radius')
+                            ->label('Border Radius')
+                            ->options([
+                                'none' => 'Sharp',
+                                'sm' => 'Small',
+                                'md' => 'Medium',
+                                'lg' => 'Large',
+                                'xl' => 'Extra Large',
+                                '2xl' => 'Double Extra Large',
+                                '3xl' => 'Rounded (Extra)',
+                                'full' => 'Pill',
                             ])
-                            ->collapsible()
-                            ->collapsed()
-                            ->cloneable(),
-                    ]),
+                            ->default('lg'),
+                        \Filament\Forms\Components\Select::make('settings.font_family')
+                            ->label('Font Family')
+                            ->options([
+                                'Inter' => 'Modern Sans (Inter)',
+                                'Outfit' => 'Clean Sans (Outfit)',
+                                'Playfair Display' => 'Classic Serif (Playfair)',
+                                'Montserrat' => 'Elegant Sans (Montserrat)',
+                            ])
+                            ->default('Outfit'),
+                    ])
+                    ->collapsible()
+                    ->collapsed(),
+                \Filament\Forms\Components\Builder::make('sections')
+                    ->blocks([
+                        \Filament\Forms\Components\Builder\Block::make('nav')
+                            ->schema([
+                                \Filament\Forms\Components\TextInput::make('logo_text')->required(),
+                                \Filament\Forms\Components\Repeater::make('links')
+                                    ->schema([
+                                        \Filament\Forms\Components\TextInput::make('label')->required(),
+                                        \Filament\Forms\Components\TextInput::make('url')->required(),
+                                    ])
+                                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
+                            ]),
+                        \Filament\Forms\Components\Builder\Block::make('hero')
+                            ->schema([
+                                \Filament\Forms\Components\TextInput::make('title')->required(),
+                                \Filament\Forms\Components\TextInput::make('subtitle'),
+                                \Filament\Forms\Components\TextInput::make('button_text'),
+                                \Filament\Forms\Components\TextInput::make('button_link'),
+                                \Filament\Forms\Components\TextInput::make('button_2_text'),
+                                \Filament\Forms\Components\TextInput::make('button_2_link'),
+                                \Filament\Forms\Components\FileUpload::make('background_image')->image()->directory('website'),
+                            ]),
+                        \Filament\Forms\Components\Builder\Block::make('about')
+                            ->schema([
+                                \Filament\Forms\Components\TextInput::make('title')->required(),
+                                \Filament\Forms\Components\Textarea::make('text')->required(),
+                                \Filament\Forms\Components\FileUpload::make('image')->image()->directory('website'),
+                            ]),
+                        \Filament\Forms\Components\Builder\Block::make('features')
+                            ->schema([
+                                \Filament\Forms\Components\TextInput::make('title')->required(),
+                                \Filament\Forms\Components\Repeater::make('items')
+                                    ->schema([
+                                        \Filament\Forms\Components\TextInput::make('title')->required(),
+                                        \Filament\Forms\Components\Textarea::make('text')->required(),
+                                        \Filament\Forms\Components\TextInput::make('icon'),
+                                    ])
+                                    ->itemLabel(fn (array $state): ?string => $state['title'] ?? null),
+                            ]),
+                        \Filament\Forms\Components\Builder\Block::make('menu')
+                            ->schema([
+                                \Filament\Forms\Components\TextInput::make('title')->required()->default('Signature Dishes'),
+                                \Filament\Forms\Components\Select::make('source')
+                                    ->options([
+                                        'manual' => 'Manual Entry',
+                                        'database' => 'Pull from Database (Menu Items)',
+                                    ])
+                                    ->default('manual')
+                                    ->reactive(),
+                                \Filament\Forms\Components\Repeater::make('items')
+                                    ->schema([
+                                        \Filament\Forms\Components\TextInput::make('name')->required(),
+                                        \Filament\Forms\Components\TextInput::make('description'),
+                                        \Filament\Forms\Components\TextInput::make('price')->required(),
+                                        \Filament\Forms\Components\FileUpload::make('image')->image()->directory('website'),
+                                    ])
+                                    ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+                                    ->hidden(fn ($get) => $get('source') === 'database'),
+                            ]),
+                        \Filament\Forms\Components\Builder\Block::make('contact')
+                            ->schema([
+                                \Filament\Forms\Components\TextInput::make('title')->required(),
+                                \Filament\Forms\Components\TextInput::make('address'),
+                                \Filament\Forms\Components\TextInput::make('phone'),
+                                \Filament\Forms\Components\TextInput::make('email'),
+                            ]),
+                        \Filament\Forms\Components\Builder\Block::make('footer')
+                            ->schema([
+                                \Filament\Forms\Components\TextInput::make('text')->required(),
+                            ]),
+                    ])
+                    ->collapsible()
+                    ->collapsed(),
             ])
-            ->statePath('data');
+            ->statePath('builderData');
     }
 
-    public function save(): void
+    public function selectTemplate(int $templateId)
     {
-        $state = $this->form->getState();
+        $template = WebsiteTemplate::findOrFail($templateId);
+        $this->selectedTemplate = $template;
+        $this->builderData = $template->default_content;
+        $this->browsingTemplates = false;
 
-        SitePage::updateOrCreate(
-            ['slug' => 'index'],
+        if ($this->website) {
+            $this->website->update([
+                'website_template_id' => $template->id,
+                'content' => $template->default_content,
+            ]);
+            Notification::make()->title('Template Switched')->success()->send();
+
+            return redirect()->to(request()->header('Referer'));
+        }
+    }
+
+    public function cancelBrowsing()
+    {
+        if ($this->website) {
+            $this->selectedTemplate = $this->website->template;
+            $this->builderData = $this->website->content;
+        } else {
+            $this->selectedTemplate = null;
+        }
+        $this->browsingTemplates = false;
+    }
+
+    public function createWebsite()
+    {
+        if (! $this->selectedTemplate) {
+            return;
+        }
+
+        // Fetch business settings
+        $settings = \App\Models\ReservationSetting::getInstance();
+
+        $content = $this->selectedTemplate->default_content;
+
+        // Inject real data
+        $content['business_name'] = $settings->business_name ?: ($content['business_name'] ?? tenant('id'));
+        if ($settings->business_logo) {
+            $content['logo'] = $settings->business_logo; // Assuming template uses 'logo' key or we add it
+        }
+        if ($settings->business_phone) {
+            $content['phone'] = $settings->business_phone;
+        }
+        // Basic Footer Text Injection
+        $content['footer_text'] = '© '.date('Y').' '.$content['business_name'].'. All Rights Reserved.';
+
+        // Save
+        $this->website = TenantWebsite::updateOrCreate(
+            ['tenant_id' => tenant('id')],
             [
-                'name' => $state['name'],
-                'is_published' => $state['is_published'],
-                'config' => ['blocks' => $state['blocks']],
+                'website_template_id' => $this->selectedTemplate->id,
+                'content' => $content,
+                'is_published' => false,
             ]
         );
 
-        // Handle Custom Domain Saving
-        if (has_feature('custom_domain')) {
-            tenant()->update([
-                'website_custom_domain' => $state['custom_domain'] ?? null,
+        $this->builderData = $this->website->content; // Load into form
+
+        Notification::make()->title('Template Selected')->success()->send();
+
+        return redirect()->to(request()->header('Referer'));
+    }
+
+    public function save()
+    {
+        $data = $this->builderForm->getState();
+
+        if ($this->website) {
+            $this->website->update([
+                'content' => $data,
             ]);
         }
 
-        Notification::make()
-            ->success()
-            ->title('Website saved successfully')
-            ->send();
+        Notification::make()->title('Website content saved')->success()->send();
+
+        // Refresh the page to reload the iframe with new content
+        return redirect()->to(request()->header('Referer'));
     }
 
-    public function generateWithAi(WebsiteGeneratorService $generator): void
+    public function toggleEditor()
     {
-        $blocks = $generator->generateLayout();
+        $this->isEditing = ! $this->isEditing;
+        if ($this->isEditing) {
+            $this->builderData = $this->website->content;
+        }
+    }
 
-        $this->data['blocks'] = $blocks;
+    public function getHeaderActions(): array
+    {
+        return [
+            Action::make('preview')
+                ->label('Preview Website')
+                ->color('gray')
+                ->icon('heroicon-o-arrow-top-right-on-square')
+                ->url(fn () => 'http://'.tenant('slug').'.'.config('tenancy.preview_domain'), shouldOpenInNewTab: true)
+                ->visible(fn () => $this->website !== null),
+            Action::make('changeTemplate')
+                ->label('Change Template')
+                ->color('gray')
+                ->icon('heroicon-o-swatch')
+                ->action(fn () => $this->browsingTemplates = true)
+                ->visible(fn () => $this->website !== null && ! $this->browsingTemplates),
+        ];
+    }
 
-        Notification::make()
-            ->success()
-            ->title('Website generated with AI!')
-            ->body('Review and publish your changes below.')
-            ->send();
+    protected function getViewData(): array
+    {
+        return [
+            'templates' => WebsiteTemplate::where('is_active', true)->get(),
+        ];
     }
 }

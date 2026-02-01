@@ -4,7 +4,7 @@
             Profile Information
         </x-slot>
 
-        <x-filament-schemas::form wire:submit="updateProfile">
+        <x-filament-schemas::form wire:submit.prevent="updateProfile">
             {{ $this->profileForm }}
 
             <div class="mt-4 text-right">
@@ -20,7 +20,7 @@
             Security
         </x-slot>
 
-        <x-filament-schemas::form wire:submit="updatePassword">
+        <x-filament-schemas::form wire:submit.prevent="updatePassword">
             {{ $this->passwordForm }}
 
             <div class="mt-4 text-right">

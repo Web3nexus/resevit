@@ -4,7 +4,7 @@
         <div>
             <x-filament::section>
                 <x-filament-schemas::form wire:submit="generateImage">
-                    {{ $this->form }}
+                    {{ $this->imageForm }}
 
                     <div class="flex gap-4 mt-6">
                         <x-filament::button wire:click="refinePrompt" color="info" icon="heroicon-o-sparkles"

@@ -9,7 +9,6 @@ use Illuminate\Support\Str;
 class Chat extends Model
 {
     protected $connection = 'tenant';
-    
 
     protected $fillable = [
         'uuid',
@@ -41,5 +40,10 @@ class Chat extends Model
     public function messages(): HasMany
     {
         return $this->hasMany(ChatMessage::class);
+    }
+
+    public function automationLogs(): HasMany
+    {
+        return $this->hasMany(AutomationLog::class);
     }
 }

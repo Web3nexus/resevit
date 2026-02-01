@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Billable;
-use Laravel\Cashier\Cashier;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDomains;
@@ -13,10 +12,9 @@ use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 class Tenant extends BaseTenant implements TenantWithDatabase
 {
-    use HasFactory, HasDatabase, HasDomains, Billable;
+    use Billable, HasDatabase, HasDomains, HasFactory;
 
     protected $connection = 'landlord';
-
 
     /**
      * The "type" of the primary key ID.
@@ -44,34 +42,36 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         });
 
         static::saved(function (Tenant $tenant) {
+            $centralDomains = config('tenancy.central_domains', []);
+            $previewDomain = config('tenancy.preview_domain');
+            $dashboardBase = parse_url(config('app.url'), PHP_URL_HOST);
+
+            $systemDomains = [
+                $tenant->slug.'.'.$previewDomain,
+                $tenant->slug.'.'.$dashboardBase,
+            ];
+
             $newCustomDomains = array_filter([
                 $tenant->website_custom_domain,
                 $tenant->dashboard_custom_domain,
             ]);
 
+            $allTenantDomains = array_merge($systemDomains, $newCustomDomains);
+
             // 1. Create/Update the new domains
-            foreach ($newCustomDomains as $domainName) {
+            foreach ($allTenantDomains as $domainName) {
                 $tenant->domains()->updateOrCreate(['domain' => $domainName]);
             }
 
             // 2. Cleanup old custom domains that are no longer selected
-            // We identify custom domains as those NOT ending with central domains
-            $centralDomains = config('tenancy.central_domains', []);
-            $tenant->domains()->get()->each(function ($d) use ($newCustomDomains, $centralDomains) {
-                $isSystemDomain = false;
-                foreach ($centralDomains as $central) {
-                    if (str_ends_with($d->domain, $central)) {
-                        $isSystemDomain = true;
-                        break;
-                    }
-                }
-
-                if (!$isSystemDomain && !in_array($d->domain, $newCustomDomains)) {
+            $tenant->domains()->get()->each(function ($d) use ($allTenantDomains) {
+                if (! in_array($d->domain, $allTenantDomains)) {
                     $d->delete();
                 }
             });
         });
     }
+
     protected $fillable = [
         'name',
         'slug',

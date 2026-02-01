@@ -46,4 +46,14 @@ class MenuController extends Controller
             'data' => $item
         ]);
     }
+
+    public function toggleAvailability(MenuItem $item)
+    {
+        $item->update(['is_available' => !$item->is_available]);
+
+        return response()->json([
+            'message' => 'Item availability updated',
+            'data' => $item
+        ]);
+    }
 }

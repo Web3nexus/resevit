@@ -30,8 +30,13 @@
             --brand-modern-accent: #7d40ff;
             --brand-modern-secondary: #2f81f7;
             --brand-modern-text: #e6edf3;
+            --brand-modern-secondary: #2f81f7;
+            --brand-modern-text: #e6edf3;
             --brand-modern-muted: #8b949e;
         }
+        @php
+            $platformSettings = \App\Models\PlatformSetting::current();
+        @endphp
 
         body {
             background-color: var(--brand-modern-bg);
@@ -130,11 +135,15 @@
                     <div class="flex-shrink-0 flex items-center">
                         <a href="{{ route('home') }}"
                             class="text-2xl font-black text-white tracking-tighter flex items-center gap-2">
-                            <div
-                                class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-modern-accent to-brand-modern-secondary flex items-center justify-center">
-                                <i class="fa-solid fa-bolt text-white text-xs"></i>
-                            </div>
-                            <span>RESE<span class="text-brand-modern-accent">VIT</span></span>
+                            @if (!empty($platformSettings->logo_path))
+                                <img src="{{ \App\Helpers\StorageHelper::getUrl($platformSettings->logo_path) }}" alt="{{ config('app.name') }}" class="h-8 w-auto">
+                            @else
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-modern-accent to-brand-modern-secondary flex items-center justify-center">
+                                    <i class="fa-solid fa-bolt text-white text-xs"></i>
+                                </div>
+                                <span>RESE<span class="text-brand-modern-accent">VIT</span></span>
+                            @endif
                         </a>
                     </div>
 
@@ -231,11 +240,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-12">
                     <div class="col-span-1 md:col-span-2">
                         <a href="{{ route('home') }}" class="text-2xl font-black text-white flex items-center gap-2">
-                            <div
-                                class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-modern-accent to-brand-modern-secondary flex items-center justify-center">
-                                <i class="fa-solid fa-bolt text-white text-xs"></i>
-                            </div>
-                            RESEVIT
+                            @if (!empty($platformSettings->logo_path))
+                                <img src="{{ \App\Helpers\StorageHelper::getUrl($platformSettings->logo_path) }}" alt="{{ config('app.name') }}" class="h-8 w-auto">
+                            @else
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-modern-accent to-brand-modern-secondary flex items-center justify-center">
+                                    <i class="fa-solid fa-bolt text-white text-xs"></i>
+                                </div>
+                                RESEVIT
+                            @endif
                         </a>
                         <p class="mt-6 text-brand-modern-muted leading-relaxed max-w-sm">
                             The future of restaurant management is here. We build tools that empower owners and delight

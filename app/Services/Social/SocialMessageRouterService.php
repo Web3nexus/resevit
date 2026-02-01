@@ -18,19 +18,20 @@ class SocialMessageRouterService
                 $service->handleIncoming($payload);
             }
         } catch (\Exception $e) {
-            Log::error("Social routing failed for {$platform}: " . $e->getMessage());
+            Log::error("Social routing failed for {$platform}: ".$e->getMessage());
         }
     }
 
     /**
      * Factory method to get platform service
      */
-    public function getService(string $platform, ?SocialAccount $account = null): object|null
+    public function getService(string $platform, ?SocialAccount $account = null): ?object
     {
         return match ($platform) {
             'whatsapp' => new WhatsAppService($account),
             'facebook' => new FacebookMessengerService($account),
             'instagram' => new InstagramDMService($account),
+            'google' => new GoogleBusinessService($account),
             default => null,
         };
     }

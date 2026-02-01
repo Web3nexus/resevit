@@ -23,6 +23,18 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
+# Design Assets
+/design/
+/public/design/
+/*.zip
+/*.sql
+
+# Storage
+/storage/framework/cache/data/
+/storage/framework/sessions/
+/storage/framework/views/
+/storage/tenant*/
+
 # Debug scripts
 *_debug.php
 debug_*.php

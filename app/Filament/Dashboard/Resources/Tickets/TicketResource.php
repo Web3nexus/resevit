@@ -2,39 +2,34 @@
 
 namespace App\Filament\Dashboard\Resources\Tickets;
 
-
-use BackedEnum;
-use UnitEnum;
 use App\Filament\Dashboard\Resources\Tickets\Pages\ManageTickets;
 use App\Models\Ticket;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
+use BackedEnum;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-
+use UnitEnum;
 
 class TicketResource extends Resource
 {
     protected static ?string $model = Ticket::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Communication';
+    protected static string|UnitEnum|null $navigationGroup = 'Communication';
 
     public static function canViewAny(): bool
     {
         return has_feature('support_tickets');
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('status', 'open')->count() ?: null;
     }
 
     public static function form(Schema $schema): Schema
@@ -62,7 +57,7 @@ class TicketResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->with(['ticketable', 'messages'])->latest())
+            ->modifyQueryUsing(fn ($query) => $query->with(['ticketable', 'messages'])->latest())
             ->columns([
                 \Filament\Tables\Columns\TextColumn::make('code')
                     ->searchable()
@@ -75,7 +70,7 @@ class TicketResource extends Resource
                     ->searchable(),
                 \Filament\Tables\Columns\TextColumn::make('priority')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'high' => 'danger',
                         'medium' => 'warning',
                         'low' => 'success',
@@ -83,7 +78,7 @@ class TicketResource extends Resource
                     }),
                 \Filament\Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'open' => 'success',
                         'closed' => 'gray',
                         default => 'primary',
@@ -102,12 +97,12 @@ class TicketResource extends Resource
             ->recordActions([
                 \Filament\Actions\Action::make('reply')
                     ->icon('heroicon-o-chat-bubble-left-ellipsis')
-                    ->modalHeading(fn($record) => 'Ticket: ' . $record->subject)
-                    ->modalContent(fn($record) => view('filament.dashboard.resources.tickets.chat-modal', ['ticket' => $record]))
+                    ->modalHeading(fn ($record) => 'Ticket: '.$record->subject)
+                    ->modalContent(fn ($record) => view('filament.dashboard.resources.tickets.chat-modal', ['ticket' => $record]))
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false)
                     ->slideOver(),
-                EditAction::make()->slideOver()->visible(fn($record) => $record->ticketable_id === \Filament\Facades\Filament::auth()->id() && $record->ticketable_type === get_class(\Filament\Facades\Filament::auth()->user())), // Only allow edit if own ticket
+                EditAction::make()->slideOver()->visible(fn ($record) => $record->ticketable_id === \Filament\Facades\Filament::auth()->id() && $record->ticketable_type === get_class(\Filament\Facades\Filament::auth()->user())), // Only allow edit if own ticket
             ])
             ->toolbarActions([
                 \Filament\Actions\CreateAction::make()

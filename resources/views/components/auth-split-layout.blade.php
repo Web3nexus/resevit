@@ -3,7 +3,7 @@
 
     <!-- Global Full-Page Background Image -->
     <div class="absolute inset-0 z-0">
-        <img src="https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?q=80&w=2574&auto=format&fit=crop"
+        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1170&auto=format&fit=crop"
             alt="Background" class="w-full h-full object-cover transform scale-105" />
 
         <!-- Brand-consistent Gradient/Dark Overlay for readability -->

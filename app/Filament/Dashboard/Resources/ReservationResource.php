@@ -2,19 +2,18 @@
 
 namespace App\Filament\Dashboard\Resources;
 
-
-use BackedEnum;
-use UnitEnum;
 use App\Filament\Dashboard\Resources\ReservationResource\Pages;
+use App\Filament\Exports\ReservationExporter;
 use App\Models\Reservation;
-use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
+use BackedEnum;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ExportBulkAction;
-use App\Filament\Exports\ReservationExporter;
+use Filament\Forms;
+use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Tables;
+use Filament\Tables\Table;
+use UnitEnum;
 
 class ReservationResource extends Resource
 {
@@ -24,11 +23,16 @@ class ReservationResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Reservations';
 
-    protected static int|null $navigationSort = 1;
+    protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
     {
         return has_feature('reservations');
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('status', 'pending')->count() ?: null;
     }
 
     public static function form(Schema $schema): Schema
@@ -43,28 +47,31 @@ class ReservationResource extends Resource
                         if (auth()->user()->hasAnyRole(['owner', 'manager'])) {
                             return $state;
                         }
-                        return substr($state, 0, 1) . '****' . substr($state, -1);
+
+                        return substr($state, 0, 1).'****'.substr($state, -1);
                     }),
                 Forms\Components\TextInput::make('guest_email')
                     ->label('Guest Email')
                     ->email()
                     ->maxLength(255)
                     ->formatStateUsing(function ($state) {
-                        if (!$state || auth()->user()->hasAnyRole(['owner', 'manager'])) {
+                        if (! $state || auth()->user()->hasAnyRole(['owner', 'manager'])) {
                             return $state;
                         }
                         $parts = explode('@', $state);
-                        return substr($parts[0], 0, min(3, strlen($parts[0]))) . '****@' . ($parts[1] ?? '');
+
+                        return substr($parts[0], 0, min(3, strlen($parts[0]))).'****@'.($parts[1] ?? '');
                     }),
                 Forms\Components\TextInput::make('guest_phone')
                     ->label('Guest Phone')
                     ->tel()
                     ->maxLength(20)
                     ->formatStateUsing(function ($state) {
-                        if (!$state || auth()->user()->hasAnyRole(['owner', 'manager'])) {
+                        if (! $state || auth()->user()->hasAnyRole(['owner', 'manager'])) {
                             return $state;
                         }
-                        return substr($state, 0, 3) . ' **** ' . substr($state, -2);
+
+                        return substr($state, 0, 3).' **** '.substr($state, -2);
                     }),
                 Forms\Components\TextInput::make('party_size')
                     ->label('Party Size')
@@ -83,7 +90,7 @@ class ReservationResource extends Resource
                     ->numeric()
                     ->minValue(30)
                     ->maxValue(480)
-                    ->default(fn() => \App\Models\ReservationSetting::getInstance()->default_duration_minutes)
+                    ->default(fn () => \App\Models\ReservationSetting::getInstance()->default_duration_minutes)
                     ->helperText('How long the reservation will last'),
                 Forms\Components\Select::make('table_id')
                     ->label('Table')
@@ -97,7 +104,7 @@ class ReservationResource extends Resource
                     ->searchable()
                     ->preload()
                     ->placeholder('Assign to staff (optional)')
-                    ->visible(fn() => auth()->user()->hasAnyRole(['owner', 'manager'])),
+                    ->visible(fn () => auth()->user()->hasAnyRole(['owner', 'manager'])),
                 Forms\Components\Select::make('source')
                     ->label('Source')
                     ->options([
@@ -123,7 +130,7 @@ class ReservationResource extends Resource
                     ->relationship('branch', 'name')
                     ->searchable()
                     ->preload()
-                    ->default(fn() => \Illuminate\Support\Facades\Session::get('current_branch_id'))
+                    ->default(fn () => \Illuminate\Support\Facades\Session::get('current_branch_id'))
                     ->required()
                     ->label('Branch'),
                 Forms\Components\Textarea::make('special_requests')
@@ -148,7 +155,8 @@ class ReservationResource extends Resource
                         if (auth()->user()->hasAnyRole(['owner', 'manager'])) {
                             return $state;
                         }
-                        return substr($state, 0, 1) . '****' . substr($state, -1);
+
+                        return substr($state, 0, 1).'****'.substr($state, -1);
                     }),
                 Tables\Columns\TextColumn::make('assignedTo.user.name')
                     ->label('Assigned To')
@@ -156,7 +164,7 @@ class ReservationResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('source')
                     ->badge()
-                    ->icon(fn(string $state): ?string => match ($state) {
+                    ->icon(fn (string $state): ?string => match ($state) {
                         'manual' => 'heroicon-m-user',
                         'website' => 'heroicon-m-globe-alt',
                         'whatsapp' => 'heroicon-m-chat-bubble-left-ellipsis',
@@ -164,7 +172,7 @@ class ReservationResource extends Resource
                         'instagram' => 'heroicon-m-camera',
                         default => null,
                     })
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'manual' => 'gray',
                         'website' => 'info',
                         'whatsapp' => 'success',
@@ -176,14 +184,14 @@ class ReservationResource extends Resource
                     ->label('Start Time')
                     ->dateTime()
                     ->sortable()
-                    ->description(fn(Reservation $record) => $record->reservation_time->diffForHumans()),
+                    ->description(fn (Reservation $record) => $record->reservation_time->diffForHumans()),
                 Tables\Columns\TextColumn::make('end_time')
                     ->label('End Time')
                     ->dateTime()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('duration_minutes')
                     ->label('Duration')
-                    ->formatStateUsing(fn($state) => $state . ' min')
+                    ->formatStateUsing(fn ($state) => $state.' min')
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('party_size')
                     ->numeric()
@@ -200,7 +208,7 @@ class ReservationResource extends Resource
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'pending' => 'gray',
                         'confirmed' => 'info',
                         'seated' => 'success',
@@ -211,7 +219,7 @@ class ReservationResource extends Resource
             ])
             ->filters([
                 Tables\Filters\Filter::make('today')
-                    ->query(fn($query) => $query->whereDate('reservation_time', today()))
+                    ->query(fn ($query) => $query->whereDate('reservation_time', today()))
                     ->label('Today'),
                 Tables\Filters\SelectFilter::make('branch_id')
                     ->relationship('branch', 'name')
@@ -228,10 +236,10 @@ class ReservationResource extends Resource
             ->recordActions([
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\Action::make('seat')
-                    ->action(fn(Reservation $record) => $record->update(['status' => 'seated']))
+                    ->action(fn (Reservation $record) => $record->update(['status' => 'seated']))
                     ->requiresConfirmation()
                     ->color('success')
-                    ->visible(fn(Reservation $record) => $record->status === 'confirmed')
+                    ->visible(fn (Reservation $record) => $record->status === 'confirmed')
                     ->icon('heroicon-o-arrow-right-end-on-rectangle'),
             ])
             ->headerActions([

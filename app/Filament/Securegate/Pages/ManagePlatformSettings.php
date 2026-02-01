@@ -2,22 +2,21 @@
 
 namespace App\Filament\Securegate\Pages;
 
-
-use BackedEnum;
-use UnitEnum;
 use App\Models\PlatformSetting;
-use Filament\Forms\Components\FileUpload;
+use BackedEnum;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
+use UnitEnum;
 
 class ManagePlatformSettings extends Page implements HasSchemas
 {
@@ -31,15 +30,20 @@ class ManagePlatformSettings extends Page implements HasSchemas
 
     protected static ?string $title = 'Platform Settings';
 
-    public ?array $data = [];
+    public ?array $platformData = [];
+
+    protected function getSchemas(): array
+    {
+        return ['settingsForm'];
+    }
 
     public function mount(): void
     {
         $settings = PlatformSetting::current();
-        $this->form->fill($settings->toArray());
+        $this->platformData = $settings->toArray();
     }
 
-    public function form(Schema $schema): Schema
+    public function settingsForm(Schema $schema): Schema
     {
         return $schema
             ->schema([
@@ -58,18 +62,20 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                                     ->label('Platform Logo')
                                                     ->image()
                                                     ->maxSize(1024)
+                                                    ->disk('public')
                                                     ->directory('platform')
                                                     ->visibility('public')
                                                     ->imageEditor()
-                                                    ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->logo_path)),
+                                                    ->getUploadedFileUsing(fn ($record) => $record?->logo_path ? \App\Helpers\StorageHelper::getUrl($record->logo_path) : null),
 
                                                 FileUpload::make('favicon_path')
                                                     ->label('Favicon')
                                                     ->image()
                                                     ->maxSize(512)
+                                                    ->disk('public')
                                                     ->directory('platform')
                                                     ->visibility('public')
-                                                    ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->favicon_path))
+                                                    ->getUploadedFileUsing(fn ($record) => $record?->favicon_path ? \App\Helpers\StorageHelper::getUrl($record->favicon_path) : null)
                                                     ->acceptedFileTypes(['image/x-icon', 'image/vnd.microsoft.icon', 'image/png', 'image/svg+xml']),
 
                                                 \Filament\Forms\Components\Select::make('landing_settings.active_theme')
@@ -77,6 +83,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                                     ->options([
                                                         'default' => 'Classic Elegance',
                                                         'modern' => 'Modern Dark (GitHub Style)',
+                                                        'calendly' => 'Calendly Style (Clean & Professional)',
                                                     ])
                                                     ->default('default')
                                                     ->required()
@@ -118,7 +125,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                                     ->maxSize(2048)
                                                     ->directory('platform/landing')
                                                     ->visibility('public')
-                                                    ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->landing_settings['hero_image'] ?? null))
+                                                    ->getUploadedFileUsing(fn ($record) => $record?->landing_settings['hero_image'] ?? null ? \App\Helpers\StorageHelper::getUrl($record->landing_settings['hero_image']) : null)
                                                     ->columnSpanFull(),
                                             ]),
                                     ]),
@@ -196,7 +203,6 @@ class ManagePlatformSettings extends Page implements HasSchemas
                             ])
                             ->columnSpanFull(),
                     ]),
-
 
                 Section::make('Localization')
                     ->description('Select the languages available in the system.')
@@ -296,8 +302,8 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                     ])
                                     ->collapsible()
                                     ->columnSpanFull()
-                                    ->itemLabel(fn(array $state): ?string => $state['label'] ?? null),
-                            ])
+                                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
+                            ]),
                     ]),
 
                 Section::make('Error Pages')
@@ -321,7 +327,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                             ->image()
                                             ->directory('platform/errors')
                                             ->visibility('public')
-                                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->error_pages['404']['image'] ?? null)),
+                                            ->getUploadedFileUsing(fn ($record) => $record?->error_pages['404']['image'] ?? null ? \App\Helpers\StorageHelper::getUrl($record->error_pages['404']['image']) : null),
                                     ])->columnSpan(1),
 
                                 Section::make('500 Page (Server Error)')
@@ -339,158 +345,17 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                             ->image()
                                             ->directory('platform/errors')
                                             ->visibility('public')
-                                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->error_pages['500']['image'] ?? null)),
+                                            ->getUploadedFileUsing(fn ($record) => $record?->error_pages['500']['image'] ?? null ? \App\Helpers\StorageHelper::getUrl($record->error_pages['500']['image']) : null),
                                     ])->columnSpan(1),
                             ]),
                     ]),
-
-                Section::make('Stripe Configuration')
-                    ->description('Manage your platform-wide Stripe API credentials and switch between test and live environments.')
-                    ->icon('heroicon-o-credit-card')
-                    ->schema([
-                        // Environment Mode Toggle
-                        Grid::make(2)
-                            ->schema([
-                                Toggle::make('stripe_mode')
-                                    ->label('Use Live Mode')
-                                    ->helperText('⚠️ WARNING: Switching to live mode will process real payments. Ensure live keys are configured correctly.')
-                                    ->onColor('danger')
-                                    ->offColor('warning')
-                                    ->inline(false)
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        // Update the mode in stripe_settings as well for consistency
-                                        $set('stripe_settings.mode', $state ? 'live' : 'test');
-                                    })
-                                    ->formatStateUsing(fn($state) => $state === 'live'),
-
-                                \Filament\Forms\Components\Placeholder::make('current_mode_indicator')
-                                    ->label('Current Mode')
-                                    ->content(function ($get) {
-                                        $mode = $get('stripe_mode');
-                                        $isLive = $mode === 'live';
-                                        $badge = $isLive
-                                            ? '🔴 LIVE MODE - Real payments will be processed'
-                                            : '🟡 TEST MODE - Safe for testing';
-                                        return $badge;
-                                    }),
-                            ]),
-
-                        // Tabbed interface for Test and Live keys
-                        \Filament\Schemas\Components\Tabs::make('Stripe Keys')
-                            ->tabs([
-                                \Filament\Schemas\Components\Tabs\Tab::make('Test Environment')
-                                    ->icon('heroicon-o-beaker')
-                                    ->badge('Safe')
-                                    ->badgeColor('success')
-                                    ->schema([
-                                        Grid::make(3)
-                                            ->schema([
-                                                TextInput::make('stripe_settings.test.publishable_key')
-                                                    ->label('Test Publishable Key')
-                                                    ->password()
-                                                    ->revealable()
-                                                    ->placeholder('pk_test_...')
-                                                    ->helperText('Starts with pk_test_'),
-                                                TextInput::make('stripe_settings.test.secret_key')
-                                                    ->label('Test Secret Key')
-                                                    ->password()
-                                                    ->revealable()
-                                                    ->placeholder('sk_test_...')
-                                                    ->helperText('Starts with sk_test_'),
-                                                TextInput::make('stripe_settings.test.webhook_secret')
-                                                    ->label('Test Webhook Secret')
-                                                    ->password()
-                                                    ->revealable()
-                                                    ->placeholder('whsec_...')
-                                                    ->helperText('Optional - for webhook verification'),
-                                            ]),
-                                    ]),
-
-                                \Filament\Schemas\Components\Tabs\Tab::make('Live Environment')
-                                    ->icon('heroicon-o-bolt')
-                                    ->badge('Production')
-                                    ->badgeColor('danger')
-                                    ->schema([
-                                        \Filament\Forms\Components\Placeholder::make('live_warning')
-                                            ->content('⚠️ These keys will process REAL payments. Double-check before saving.')
-                                            ->columnSpanFull(),
-
-                                        Grid::make(3)
-                                            ->schema([
-                                                TextInput::make('stripe_settings.live.publishable_key')
-                                                    ->label('Live Publishable Key')
-                                                    ->password()
-                                                    ->revealable()
-                                                    ->placeholder('pk_live_...')
-                                                    ->helperText('Starts with pk_live_'),
-                                                TextInput::make('stripe_settings.live.secret_key')
-                                                    ->label('Live Secret Key')
-                                                    ->password()
-                                                    ->revealable()
-                                                    ->placeholder('sk_live_...')
-                                                    ->helperText('Starts with sk_live_'),
-                                                TextInput::make('stripe_settings.live.webhook_secret')
-                                                    ->label('Live Webhook Secret')
-                                                    ->password()
-                                                    ->revealable()
-                                                    ->placeholder('whsec_...')
-                                                    ->helperText('Optional - for webhook verification'),
-                                            ]),
-                                    ]),
-                            ])
-                            ->columnSpanFull(),
-                    ]),
-
-                Section::make('Third-Party Plugins & Security')
-                    ->description('Manage analytics, security, and tracking scripts.')
-                    ->icon('heroicon-o-puzzle-piece')
-                    ->schema([
-                        \Filament\Schemas\Components\Tabs::make('Plugins')
-                            ->tabs([
-                                \Filament\Schemas\Components\Tabs\Tab::make('Google Analytics')
-                                    ->icon('heroicon-o-presentation-chart-line')
-                                    ->schema([
-                                        TextInput::make('plugin_settings.google_analytics_id')
-                                            ->label('GA4 Measurement ID')
-                                            ->placeholder('G-XXXXXXXXXX'),
-                                        \Filament\Forms\Components\Textarea::make('plugin_settings.google_analytics_script')
-                                            ->label('Custom GA Script')
-                                            ->rows(5)
-                                            ->placeholder('<script>...</script>'),
-                                    ]),
-                                \Filament\Schemas\Components\Tabs\Tab::make('Cloudflare Turnstile')
-                                    ->icon('heroicon-o-shield-check')
-                                    ->schema([
-                                        Toggle::make('plugin_settings.cloudflare_turnstile_enabled')
-                                            ->label('Enable Turnstile'),
-                                        TextInput::make('plugin_settings.cloudflare_turnstile_site_key')
-                                            ->label('Site Key'),
-                                        TextInput::make('plugin_settings.cloudflare_turnstile_secret_key')
-                                            ->label('Secret Key')
-                                            ->password(),
-                                    ]),
-                                \Filament\Schemas\Components\Tabs\Tab::make('Google reCAPTCHA')
-                                    ->icon('heroicon-o-lock-closed')
-                                    ->schema([
-                                        Toggle::make('plugin_settings.recaptcha_enabled')
-                                            ->label('Enable reCAPTCHA v3'),
-                                        TextInput::make('plugin_settings.recaptcha_site_key')
-                                            ->label('Site Key'),
-                                        TextInput::make('plugin_settings.recaptcha_secret_key')
-                                            ->label('Secret Key')
-                                            ->password(),
-                                    ]),
-                            ])
-                            ->columnSpanFull(),
-                    ]),
             ])
-            ->statePath('data');
+            ->statePath('platformData');
     }
 
     public function save(): void
     {
-        $data = $this->form->getState();
+        $data = $this->settingsForm->getState();
 
         $settings = PlatformSetting::current();
         $settings->update($data);
@@ -540,7 +405,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
             ]);
 
             // 5. Sync Image to First Item (Icon field)
-            if (!empty($landingSettings['hero_image'])) {
+            if (! empty($landingSettings['hero_image'])) {
                 $imageUrl = \App\Helpers\StorageHelper::getUrl($landingSettings['hero_image']);
 
                 $heroItem = \App\Models\LandingItem::firstOrCreate(
@@ -553,7 +418,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
 
         } catch (\Exception $e) {
             // Log error silently or notify admin - strictly for sync resilience
-            \Illuminate\Support\Facades\Log::error('Failed to sync Platform Settings to Landing Page: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Failed to sync Platform Settings to Landing Page: '.$e->getMessage());
         }
     }
 
@@ -608,7 +473,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                 ]);
 
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("Failed to sync legal page {$pageInfo['slug']}: " . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error("Failed to sync legal page {$pageInfo['slug']}: ".$e->getMessage());
             }
         }
     }

@@ -28,8 +28,9 @@ class InstagramDMService
         $senderId = $messaging['sender']['id'] ?? null;
         $message = $messaging['message'] ?? null;
 
-        if (!$senderId || !$message)
+        if (! $senderId || ! $message) {
             return;
+        }
 
         $text = $message['text'] ?? '[Media]';
         $messageId = $message['mid'] ?? null;
@@ -49,7 +50,7 @@ class InstagramDMService
             ]
         );
 
-        ChatMessage::create([
+        $chatMessage = ChatMessage::create([
             'chat_id' => $chat->id,
             'direction' => 'inbound',
             'content' => $text,
@@ -60,23 +61,28 @@ class InstagramDMService
 
         $chat->touch('last_message_at');
         $chat->increment('unread_count');
+
+        // Pass to Automation Engine
+        app(AutomationEngineService::class)->processIncoming($chat, $chatMessage);
     }
 
     public function send(Chat $chat, string $content): bool
     {
-        if (!$this->account)
+        if (! $this->account) {
             return false;
+        }
 
         $creds = $this->account->credentials;
         $token = $creds['access_token'] ?? null;
 
-        if (!$token)
+        if (! $token) {
             return false;
+        }
 
         try {
             // Instagram Messaging API
             $response = Http::withToken($token)
-                ->post("https://graph.facebook.com/v19.0/me/messages", [
+                ->post('https://graph.facebook.com/v19.0/me/messages', [
                     'recipient' => ['id' => $chat->external_chat_id],
                     'message' => ['text' => $content],
                 ]);
@@ -90,14 +96,17 @@ class InstagramDMService
                     'external_message_id' => $data['message_id'] ?? null,
                     'status' => 'sent',
                 ]);
+
                 return true;
             }
 
-            Log::error('IG DM send failed: ' . $response->body());
+            Log::error('IG DM send failed: '.$response->body());
+
             return false;
 
         } catch (\Exception $e) {
-            Log::error('IG DM send exception: ' . $e->getMessage());
+            Log::error('IG DM send exception: '.$e->getMessage());
+
             return false;
         }
     }

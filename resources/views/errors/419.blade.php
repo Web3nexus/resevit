@@ -56,10 +56,10 @@
                     class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-bold rounded-2xl text-white bg-brand-primary hover:bg-brand-secondary transition-all shadow-xl hover:shadow-brand-primary/20 hover:-translate-y-1">
                     <i class="fa-solid fa-arrows-rotate mr-2"></i> Refresh Page
                 </button>
-                    <a href="{{ route('home') }}"
-                        class="inline-flex items-center px-8 py-4 border-2 border-slate-200 text-lg font-bold rounded-2xl text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-md hover:-translate-y-1">
-                        <i class="fa-solid fa-house mr-2"></i> Go Home
-                    </a>
+                <a href="{{ url('/') }}"
+                    class="inline-flex items-center px-8 py-4 border-2 border-slate-200 text-lg font-bold rounded-2xl text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-md hover:-translate-y-1">
+                    <i class="fa-solid fa-house mr-2"></i> Go Home
+                </a>
             </div>
         </div>
     </div>

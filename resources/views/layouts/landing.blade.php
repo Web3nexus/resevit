@@ -54,15 +54,21 @@
     @endif
 </head>
 
-<body class="font-sans antialiased text-slate-900 bg-brand-offwhite">
+<body class="font-sans antialiased text-slate-900 bg-brand-offwhite overflow-x-hidden">
     <div class="min-h-screen flex flex-col">
         <!-- Navigation -->
         <header class="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
             <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16 items-center">
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="{{ route('home') }}" class="text-2xl font-extrabold text-brand-primary tracking-tight">
-                            RESE<span class="text-brand-accent">VIT</span>
+                        <a href="{{ url('/') }}"
+                            class="text-2xl font-extrabold text-brand-primary tracking-tight flex items-center gap-2">
+                            @if (!empty($platformSettings->logo_path))
+                                <img src="{{ \App\Helpers\StorageHelper::getUrl($platformSettings->logo_path) }}"
+                                    alt="{{ config('app.name') }}" class="h-8 w-auto">
+                            @else
+                                RESE<span class="text-brand-accent">VIT</span>
+                            @endif
                         </a>
                     </div>
 
@@ -70,7 +76,7 @@
                         @php
                             $currentRoute = Route::currentRouteName();
                             $navItems = [
-                                ['route' => 'features', 'label' => 'Features', 'hasMega' => true],
+                                ['route' => '/', 'label' => 'Features', 'hasMega' => true],
                                 ['route' => 'pricing', 'label' => 'Pricing'],
                                 ['route' => 'directory.index', 'label' => 'Directory'],
                                 ['route' => 'food.index', 'label' => 'Order Food', 'special' => true],
@@ -82,7 +88,7 @@
 
                         @foreach($navItems as $item)
                             @php
-                                $isActive = $currentRoute === $item['route'];
+                                $isActive = request()->is($item['route']);
                                 $baseClass = 'relative text-sm font-medium transition-colors py-2';
                                 $activeClass = $isActive ? 'text-brand-accent border-b-2 border-brand-accent' : 'text-slate-600 hover:text-brand-primary';
                                 $specialClass = isset($item['special']) ? 'text-[#FF4F18] hover:text-brand-primary font-bold' : '';
@@ -90,7 +96,7 @@
 
                             @if(isset($item['hasMega']) && $item['hasMega'])
                                 <div class="relative group">
-                                    <a href="{{ route($item['route']) }}"
+                                    <a href="{{ url('/#features') }}"
                                         class="{{ $baseClass }} {{ $activeClass }} flex items-center">
                                         {{ $item['label'] }}
                                         <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none"
@@ -114,7 +120,7 @@
                                                     ];
                                                 @endphp
                                                 @foreach($featureCategories as $category)
-                                                    <a href="{{ route('features') }}"
+                                                    <a href="{{ url('/#features') }}"
                                                         class="flex items-start p-3 rounded-lg hover:bg-brand-offwhite transition-colors group/item">
                                                         <div
                                                             class="flex-shrink-0 w-10 h-10 bg-brand-primary/10 rounded-lg flex items-center justify-center group-hover/item:bg-brand-accent transition-colors">
@@ -134,7 +140,7 @@
                                                 @endforeach
                                             </div>
                                             <div class="mt-4 pt-4 border-t border-slate-100">
-                                                <a href="{{ route('features') }}"
+                                                <a href="{{ url('/#features') }}"
                                                     class="text-sm font-semibold text-brand-accent hover:text-brand-primary flex items-center">
                                                     View All Features
                                                     <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor"
@@ -148,7 +154,7 @@
                                     </div>
                                 </div>
                             @else
-                                <a href="{{ route($item['route']) }}"
+                                <a href="{{ Str::startsWith($item['route'], 'http') ? $item['route'] : (Str::contains($item['route'], 'index') ? route($item['route']) : url($item['route'])) }}"
                                     class="{{ $baseClass }} {{ $specialClass ?: $activeClass }}">
                                     {{ $item['label'] }}
                                 </a>
@@ -190,10 +196,10 @@
                 <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-b border-slate-100">
                     @foreach($navItems as $item)
                         @php
-                            $isActive = $currentRoute === $item['route'];
+                            $isActive = request()->is($item['route']);
                             $mobileActiveClass = $isActive ? 'text-brand-accent bg-brand-offwhite border-l-4 border-brand-accent' : 'text-slate-600';
                         @endphp
-                        <a href="{{ route($item['route']) }}"
+                        <a href="{{ Str::startsWith($item['route'], 'http') ? $item['route'] : (Str::contains($item['route'], 'index') ? route($item['route']) : url($item['route'])) }}"
                             class="block px-3 py-2 text-base font-medium {{ $mobileActiveClass }}">
                             {{ $item['label'] }}
                         </a>
@@ -223,10 +229,15 @@
         <!-- Footer -->
         <footer class="bg-brand-primary text-white py-16">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-12">
                     <div class="col-span-1 md:col-span-1">
-                        <a href="{{ route('home') }}" class="text-3xl font-extrabold tracking-tight">
-                            RESE<span class="text-brand-accent">VIT</span>
+                        <a href="{{ url('/') }}" class="text-3xl font-extrabold tracking-tight flex items-center gap-2">
+                            @if (!empty($platformSettings->logo_path))
+                                <img src="{{ \App\Helpers\StorageHelper::getUrl($platformSettings->logo_path) }}"
+                                    alt="{{ config('app.name') }}" class="h-10 w-auto brightness-0 invert">
+                            @else
+                                RESE<span class="text-brand-accent">VIT</span>
+                            @endif
                         </a>
                         <p class="mt-4 text-slate-400 max-w-xs">
                             Modernizing restaurant management with powerful automation and AI-driven insights.
@@ -267,16 +278,16 @@
                         </ul>
                     </div>
 
-                    <div class="max-w-full overflow-hidden">
+                    <div class="max-w-full">
                         <h4 class="text-lg font-semibold mb-6">Stay Updated</h4>
                         <p class="text-slate-400 mb-4">Subscribe to our newsletter for the latest updates.</p>
                         <form action="{{ route('newsletter.subscribe') }}" method="POST"
-                            class="flex flex-col sm:flex-row gap-2">
+                            class="flex flex-col lg:flex-row gap-2 lg:gap-0">
                             @csrf
                             <input type="email" name="email" required placeholder="Enter your email"
-                                class="flex-grow px-4 py-2 rounded-lg sm:rounded-l-md sm:rounded-r-none bg-brand-secondary text-white border-none focus:ring-2 focus:ring-brand-accent">
+                                class="flex-grow px-4 py-2 rounded-lg lg:rounded-l-md lg:rounded-r-none bg-brand-secondary text-white border-none focus:ring-2 focus:ring-brand-accent">
                             <button type="submit"
-                                class="bg-brand-accent text-brand-primary font-bold px-4 py-2 rounded-lg sm:rounded-r-md sm:rounded-l-none hover:opacity-90 transition-opacity whitespace-nowrap">
+                                class="bg-brand-accent text-brand-primary font-bold px-4 py-2 rounded-lg lg:rounded-r-md lg:rounded-l-none hover:opacity-90 transition-opacity">
                                 Join
                             </button>
                         </form>

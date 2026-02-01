@@ -2,26 +2,24 @@
 
 namespace App\Filament\Dashboard\Resources;
 
-
-use BackedEnum;
-use UnitEnum;
 use App\Filament\Dashboard\Resources\SocialAccountResource\Pages;
 use App\Models\SocialAccount;
-use Filament\Forms;
-use Filament\Schemas\Schema;
+use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class SocialAccountResource extends Resource
 {
     protected static ?string $model = SocialAccount::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-share';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-share';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
 
-    protected static int|null $navigationSort = 10;
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function canViewAny(): bool
     {
@@ -79,7 +77,7 @@ class SocialAccountResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('platform')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'whatsapp' => 'success',
                         'facebook' => 'info',
                         'instagram' => 'warning',
@@ -120,8 +118,6 @@ class SocialAccountResource extends Resource
     {
         return [
             'index' => Pages\ListSocialAccounts::route('/'),
-            'create' => Pages\CreateSocialAccount::route('/create'),
-            'edit' => Pages\EditSocialAccount::route('/{record}/edit'),
         ];
     }
 }

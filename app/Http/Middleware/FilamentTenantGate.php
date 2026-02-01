@@ -4,11 +4,10 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Routing\Pipeline;
-use App\Http\Middleware\InitializeTenancyBySubdomainSlug;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+use Symfony\Component\HttpFoundation\Response;
 
 class FilamentTenantGate
 {
@@ -36,7 +35,7 @@ class FilamentTenantGate
             // We need to identify the tenant to know where to redirect
             try {
                 // Initialize tenancy temporarily to get the tenant object if not already done
-                if (!function_exists('tenancy') || !tenancy()->initialized) {
+                if (! function_exists('tenancy') || ! tenancy()->initialized) {
                     app(InitializeTenancyByDomain::class)->handle($request, function ($req) {
                         return response('initialized');
                     });
@@ -65,7 +64,7 @@ class FilamentTenantGate
                         $path = $request->getPathInfo();
                         $query = $request->getQueryString();
                         $protocol = $request->secure() ? 'https://' : 'http://';
-                        $url = $protocol . $targetHost . $path . ($query ? '?' . $query : '');
+                        $url = $protocol.$targetHost.$path.($query ? '?'.$query : '');
 
                         return redirect()->to($url);
                     }
@@ -84,7 +83,7 @@ class FilamentTenantGate
             return app(Pipeline::class)
                 ->send($request)
                 ->through([
-                    InitializeTenancyBySubdomainSlug::class,
+                    InitializeTenancyByDomain::class,
                     PreventAccessFromCentralDomains::class,
                 ])
                 ->then($next);

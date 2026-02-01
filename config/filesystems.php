@@ -41,10 +41,16 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => '/storage',
+            'url' => env('APP_URL').'/tenant-storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
+        ],
+
+        'livewire' => [
+            'driver' => 'local',
+            'root' => storage_path('app'),
+            'visibility' => 'public',
         ],
 
         's3' => [

@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Route;
 
 // dd('Web routes loaded');
 
+// Tenant Storage Route - Must be early to avoid conflicts
+Route::get('/tenant-storage/{path}', [\App\Http\Controllers\TenantStorageController::class, 'show'])
+    ->where('path', '.*')
+    ->name('tenant.storage');
+
 Route::get('/', [\App\Http\Controllers\SiteController::class, 'index'])->name('home');
 Route::middleware(['platform.protect'])->group(function () {
     Route::get('/pricing', [LandingPageController::class, 'pricing'])->name('pricing');
@@ -96,10 +101,15 @@ Route::middleware('auth')->group(function () {
     // Web Setup Flow (Finish Setup)
     Route::get('setup/finish', [\App\Http\Controllers\Web\SetupController::class, 'index'])->name('setup.finish.index');
     Route::post('setup/finish', [\App\Http\Controllers\Web\SetupController::class, 'store'])->name('setup.finish.store');
+    Route::post('setup/finish', [\App\Http\Controllers\Web\SetupController::class, 'store'])->name('setup.finish.store');
 });
+
+// Template Preview (Public)
+Route::get('/templates/preview/{slug}', [\App\Http\Controllers\TemplatePreviewController::class, 'show'])->name('templates.preview');
 
 Route::get('/debug-auth', function () {
     $user = auth()->user();
+
     return [
         'is_logged_in' => auth()->check(),
         'user' => $user,
@@ -119,15 +129,10 @@ Route::middleware([
     Route::get('/impersonate/leave', [\App\Http\Controllers\ImpersonationController::class, 'leave'])->name('impersonate.leave');
 });
 
-// Temporary Seed/Fix Route
-// Stripe Webhooks
-Route::post('/stripe/webhook', [\App\Http\Controllers\Stripe\StripeWebhookController::class, 'handle'])
-    ->name('stripe.webhook');
-
 Route::get('/debug/seed-features', function () {
     // 1. Run Seeder
     try {
-        $seeder = new \Database\Seeders\PricingSeeder();
+        $seeder = new \Database\Seeders\PricingSeeder;
         $seeder->run();
     } catch (\Exception $e) {
     }
@@ -143,11 +148,8 @@ Route::get('/debug/seed-features', function () {
         \Illuminate\Support\Facades\Auth::logout();
         session()->flush();
         session()->regenerate(true);
-        return "System Deep-Cleaned! You have been logged out. <br><br> 
-                <b>ACTION:</b> Please perform a <b>HARD REFRESH (Cmd+Shift+R)</b> and log in again.";
-    }
 
-    return "System Repaired! Caches cleared and Filament upgraded. <br><br> 
-            <b>IMPORTANT:</b> Please perform a <b>HARD REFRESH (Cmd+Shift+R or Ctrl+F5)</b> in your browser now. <br>
-            If the UI is still stuck, try <a href='/debug/seed-features?reset=1'>Deep Clean (Logout)</a>.";
+        return 'System Deep-Cleaned! You have been logged out. <br><br>
+                <b>ACTION:</b> Please perform a <b>HARD REFRESH (Cmd+Shift+R)</b> and log in again.';
+    }
 });

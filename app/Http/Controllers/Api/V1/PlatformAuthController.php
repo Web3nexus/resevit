@@ -46,7 +46,17 @@ class PlatformAuthController extends Controller
                 $user = Auth::guard('web')->user();
                 $token = $user->createToken('auth-token')->plainTextToken;
 
-                $role = $user->hasRole('Super Admin') ? 'super_admin' : 'business_owner';
+                $roles = $user->getRoleNames(); // Returns Collection
+                $permissions = $user->getAllPermissions()->pluck('name');
+
+                // Determine effective role for App Routing
+                $role = 'staff';
+                if ($user->hasRole('Super Admin')) {
+                    $role = 'super_admin';
+                } elseif ($user->hasRole('Business Owner') || $type === 'business_owner') {
+                    $role = 'business_owner';
+                }
+
                 $onboardingStatus = 'active';
 
                 if ($role === 'business_owner') {
@@ -57,13 +67,12 @@ class PlatformAuthController extends Controller
                     }
                 }
 
-                // Determine functionality based on internal logic or separate 'role' column
-                // For now, assume Business Owner logic or Super Admin
                 return response()->json([
                     'token' => $token,
                     'user' => $user,
-                    'role' => $role,
-                    'onboarding_status' => $onboardingStatus,
+                    'role' => $role, // Primary role for routing
+                    'roles' => $roles, // All assigned roles
+                    'permissions' => $permissions, // All permissions
                     'email_verified_at' => $user->email_verified_at,
                     // Note: 'business_owner' user creates a tenant. Staff belongs to tenant.
                     // This logic might need refinement if Staff logins are on Tenant URLs.

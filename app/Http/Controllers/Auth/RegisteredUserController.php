@@ -43,8 +43,8 @@ class RegisteredUserController extends Controller
         $tenant = Tenant::create([
             'name' => $request->business_name,
             'slug' => $request->business_slug,
-            'domain' => $request->domain,
-            'database_name' => 'resevit_' . Str::slug($request->business_slug),
+            'domain' => $request->business_slug.'.'.config('tenancy.preview_domain'),
+            'database_name' => 'resevit_'.Str::slug($request->business_slug),
             'owner_user_id' => $user->id,
         ]);
 
@@ -59,27 +59,28 @@ class RegisteredUserController extends Controller
                 'dashboard_url' => "http://{$tenant->domain}/dashboard",
             ]));
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Failed to send welcome email: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Failed to send welcome email: '.$e->getMessage());
         }
 
         // Notify Super Admins of new customer
         try {
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Admin> $superAdmins */
             $superAdmins = \App\Models\Admin::whereHas('roles', function ($query) {
                 $query->where('name', 'super_admin');
             })->get();
 
-            foreach ($superAdmins as $admin) {
+            $superAdmins->each(function (\App\Models\Admin $admin) use ($tenant, $user) {
                 $admin->notify(new \App\Notifications\SuperAdminNewCustomerNotification([
                     'business_name' => $tenant->name,
                     'owner_name' => $user->name,
                     'owner_email' => $user->email,
                     'registration_date' => now()->format('F j, Y g:i A'),
                     'plan_name' => 'Free Trial',
-                    'admin_url' => config('app.url') . '/securegate/users',
+                    'admin_url' => config('app.url').'/securegate/users',
                 ]));
-            }
+            });
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Failed to send super admin notification: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Failed to send super admin notification: '.$e->getMessage());
         }
 
         return redirect()->to("http://{$tenant->domain}/dashboard");

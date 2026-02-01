@@ -11,6 +11,8 @@ class ReservationStatsWidget extends BaseWidget
     // Exposing to dashboard by default as per user request
     protected static ?int $sort = 1;
 
+    protected int|string|array $columnSpan = 'full';
+
     protected function getStats(): array
     {
         $today = now()->startOfDay();
@@ -55,7 +57,7 @@ class ReservationStatsWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-clock')
                 ->color($pendingConfirmations > 5 ? 'warning' : 'gray'),
 
-            Stat::make('Today\'s Occupancy', $occupancyRate . '%')
+            Stat::make('Today\'s Occupancy', $occupancyRate.'%')
                 ->description("{$totalSeatedToday} covers seated")
                 ->descriptionIcon('heroicon-m-user-group')
                 ->color($occupancyRate > 70 ? 'success' : ($occupancyRate > 40 ? 'warning' : 'danger')),

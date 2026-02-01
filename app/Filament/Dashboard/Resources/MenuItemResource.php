@@ -2,23 +2,22 @@
 
 namespace App\Filament\Dashboard\Resources;
 
-
-use BackedEnum;
-use UnitEnum;
 use App\Filament\Dashboard\Resources\MenuItemResource\Pages;
+use App\Filament\Exports\MenuItemExporter;
 use App\Models\MenuItem;
-use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
+use BackedEnum;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ExportBulkAction;
-use App\Filament\Exports\MenuItemExporter;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
+use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+use Filament\Tables;
+use Filament\Tables\Table;
+use UnitEnum;
 
 class MenuItemResource extends Resource
 {
@@ -28,7 +27,7 @@ class MenuItemResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Menu Management';
 
-    protected static int|null $navigationSort = 2;
+    protected static ?int $navigationSort = 2;
 
     public static function canViewAny(): bool
     {
@@ -51,7 +50,7 @@ class MenuItemResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn(string $operation, $state, Set $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
+                            ->afterStateUpdated(fn (string $operation, $state, Set $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
 
                         Forms\Components\TextInput::make('slug')
                             ->required()
@@ -59,6 +58,11 @@ class MenuItemResource extends Resource
                             ->unique(ignoreRecord: true),
 
                         Forms\Components\Textarea::make('description')
+                            ->maxLength(65535)
+                            ->columnSpanFull(),
+
+                        Forms\Components\Textarea::make('ingredients')
+                            ->placeholder('e.g. Tomato, Mozzarella, Basil')
                             ->maxLength(65535)
                             ->columnSpanFull(),
 
@@ -83,9 +87,9 @@ class MenuItemResource extends Resource
                         FileUpload::make('image_path')
                             ->label('Image')
                             ->image()
+                            ->disk('public')
                             ->directory('menu-items')
                             ->visibility('public')
-                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->image_path))
                             ->columnSpanFull(),
 
                     ])->columns(2),
@@ -127,7 +131,7 @@ class MenuItemResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('image_path')
                     ->label('Image')
-                    ->disk(fn($record) => str_contains($record->image_path, '::') ? explode('::', $record->image_path)[0] : config('filesystems.default')),
+                    ->disk('public'),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),

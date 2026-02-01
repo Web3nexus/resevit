@@ -2,34 +2,39 @@
 
 namespace App\Filament\Securegate\Pages;
 
-
+use App\Models\PlatformSetting;
 use BackedEnum;
-use UnitEnum;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\KeyValue;
-use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
-use App\Models\PlatformSetting;
 use Illuminate\Support\Facades\File;
+use UnitEnum;
 
 class ManageTranslations extends Page implements HasSchemas
 {
     use InteractsWithSchemas;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-language';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-language';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Platform Settings';
+    protected static string|UnitEnum|null $navigationGroup = 'Platform Settings';
 
     protected string $view = 'filament.securegate.pages.manage-translations';
 
     protected static ?string $title = 'Manage Translations';
 
-    public ?array $data = [];
+    public ?array $translationData = [];
+
     public $selectedLocale = 'en';
+
+    protected function getSchemas(): array
+    {
+        return ['translationForm'];
+    }
 
     public function mount(): void
     {
@@ -46,13 +51,13 @@ class ManageTranslations extends Page implements HasSchemas
             $translations = json_decode(File::get($path), true) ?? [];
         }
 
-        $this->form->fill([
+        $this->translationData = [
             'locale' => $locale,
             'translations' => $translations,
-        ]);
+        ];
     }
 
-    public function form(Schema $schema): Schema
+    public function translationForm(Schema $schema): Schema
     {
         return $schema
             ->schema([
@@ -70,10 +75,11 @@ class ManageTranslations extends Page implements HasSchemas
                                     'de' => 'German 🇩🇪',
                                     'ar' => 'Arabic 🇸🇦',
                                 ];
+
                                 return array_intersect_key($names, array_flip($supported));
                             })
                             ->live()
-                            ->afterStateUpdated(fn($state) => $this->loadLocaleData($state)),
+                            ->afterStateUpdated(fn ($state) => $this->loadLocaleData($state)),
 
                         KeyValue::make('translations')
                             ->label('Translations')
@@ -83,19 +89,19 @@ class ManageTranslations extends Page implements HasSchemas
                             ->addActionLabel('Add Translation Key'),
                     ]),
             ])
-            ->statePath('data');
+            ->statePath('translationData');
     }
 
     public function save(): void
     {
-        $data = $this->form->getState();
+        $data = $this->translationForm->getState();
         $locale = $data['locale'];
         $translations = $data['translations'];
 
         $path = base_path("lang/{$locale}.json");
 
         // Ensure directory exists
-        if (!File::isDirectory(base_path('lang'))) {
+        if (! File::isDirectory(base_path('lang'))) {
             File::makeDirectory(base_path('lang'), 0755, true);
         }
 

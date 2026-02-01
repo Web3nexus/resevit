@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     <x-filament::section>
         <x-filament-schemas::form wire:submit="save">
-            {{ $this->form }}
+            {{ $this->translationForm }}
 
             <div class="mt-4 flex justify-end">
                 <x-filament::button type="submit">

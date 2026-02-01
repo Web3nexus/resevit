@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PricingSeeder extends Seeder
@@ -71,8 +70,8 @@ class PricingSeeder extends Seeder
             'order' => 2,
         ]);
 
-        $pro = \App\Models\PricingPlan::updateOrCreate(['slug' => 'pro'], [
-            'name' => 'Pro',
+        $pro = \App\Models\PricingPlan::updateOrCreate(['slug' => 'professional'], [
+            'name' => 'Professional',
             'description' => 'For busy restaurants that need advanced POS and analytics.',
             'price_monthly' => 149.00,
             'price_yearly' => 1490.00,
@@ -103,7 +102,7 @@ class PricingSeeder extends Seeder
                 $feature->id => [
                     'is_included' => $isIncluded,
                     'limit_value' => $isIncluded && $feature->feature_key === 'staff' ? 5 : null,
-                ]
+                ],
             ]);
         }
 
@@ -115,7 +114,7 @@ class PricingSeeder extends Seeder
                 $feature->id => [
                     'is_included' => $isIncluded,
                     'limit_value' => $isIncluded && $feature->feature_key === 'staff' ? 15 : null,
-                ]
+                ],
             ]);
         }
 
@@ -125,7 +124,7 @@ class PricingSeeder extends Seeder
                 $feature->id => [
                     'is_included' => true,
                     'limit_value' => $feature->feature_key === 'staff' ? 50 : null,
-                ]
+                ],
             ]);
         }
 
@@ -135,7 +134,7 @@ class PricingSeeder extends Seeder
                 $feature->id => [
                     'is_included' => true,
                     'limit_value' => null,
-                ]
+                ],
             ]);
         }
     }

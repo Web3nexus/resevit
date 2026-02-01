@@ -6,7 +6,7 @@
         </div>
 
         <x-filament-schemas::form wire:submit="submit">
-            {{ $this->form }}
+            {{ $this->onboardingForm }}
         </x-filament-schemas::form>
     </div>
 </x-filament-panels::page>

@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class ReservationSetting extends Model
 {
     protected $connection = 'tenant';
-    
 
     protected $fillable = [
         'business_name',
         'business_address',
         'business_phone',
+        'business_logo',
+        'social_links',
         'openai_api_key',
         'google_maps_api_key',
         'facebook_pixel_id',
@@ -35,6 +36,7 @@ class ReservationSetting extends Model
     ];
 
     protected $casts = [
+        'social_links' => 'array',
         'auto_confirm_enabled' => 'boolean',
         'auto_confirm_hours_threshold' => 'integer',
         'auto_confirm_capacity_match' => 'boolean',
@@ -59,7 +61,7 @@ class ReservationSetting extends Model
         try {
             $settings = self::first();
 
-            if (!$settings) {
+            if (! $settings) {
                 $settings = self::create([
                     'auto_confirm_enabled' => false,
                     'auto_confirm_hours_threshold' => 24,
@@ -81,7 +83,7 @@ class ReservationSetting extends Model
         } catch (\Exception $e) {
             // Table doesn't exist yet - return a new instance with defaults
             // This allows the app to work before migrations are run
-            $instance = new self();
+            $instance = new self;
             $instance->fill([
                 'auto_confirm_enabled' => false,
                 'auto_confirm_hours_threshold' => 24,
@@ -97,6 +99,7 @@ class ReservationSetting extends Model
                 'allow_guest_bookings' => true,
                 'require_email_verification' => false,
             ]);
+
             return $instance;
         }
     }
@@ -131,11 +134,12 @@ class ReservationSetting extends Model
         $dayOfWeek = strtolower($dateTime->format('l'));
         $hours = $this->business_hours[$dayOfWeek] ?? null;
 
-        if (!$hours || ($hours['closed'] ?? false)) {
+        if (! $hours || ($hours['closed'] ?? false)) {
             return false;
         }
 
         $time = $dateTime->format('H:i');
+
         return $time >= $hours['open'] && $time <= $hours['close'];
     }
 }

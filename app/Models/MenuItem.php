@@ -11,11 +11,12 @@ class MenuItem extends Model
 {
     protected $connection = 'tenant';
 
-
     protected $fillable = [
         'category_id',
         'name',
+        'slug',
         'description',
+        'ingredients',
         'image_path',
         'base_price',
         'is_available',

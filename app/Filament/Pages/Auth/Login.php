@@ -2,20 +2,29 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Auth\Pages\Login as BaseLogin;
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Component;
-use Illuminate\Contracts\Support\Htmlable;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
-
+use Filament\Auth\Pages\Login as BaseLogin;
+use Filament\Forms\Components\TextInput;
 use Filament\Pages\Concerns\InteractsWithFormActions;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 
-class Login extends BaseLogin
+class Login extends BaseLogin implements HasSchemas
 {
     use InteractsWithFormActions;
+    use InteractsWithSchemas;
     use WithRateLimiting;
+
+    protected function getSchemas(): array
+    {
+        return [
+            'form',
+        ];
+    }
 
     protected function getFormActions(): array
     {
@@ -73,6 +82,7 @@ class Login extends BaseLogin
             ->required()
             ->prefixIcon('heroicon-o-lock-closed');
     }
+
     public function authenticate(): ?\Filament\Auth\Http\Responses\Contracts\LoginResponse
     {
         try {
@@ -90,22 +100,23 @@ class Login extends BaseLogin
             $email = $credentials['email']; // Define email early for logging
 
             // 1. Try Local Login first
-            \Illuminate\Support\Facades\Log::info("DEBUG: Attempting local login for $email on connection: " . (new \App\Models\User)->getConnectionName());
+            \Illuminate\Support\Facades\Log::info("DEBUG: Attempting local login for $email on connection: ".(new \App\Models\User)->getConnectionName());
 
             if (\Filament\Facades\Filament::auth()->attempt($credentials, $remember)) {
                 $user = \Filament\Facades\Filament::auth()->user();
-                \Illuminate\Support\Facades\Log::info('LOGIN: Local login success for ' . $email . '. User ID: ' . $user->id . ' on connection: ' . $user->getConnectionName());
+                \Illuminate\Support\Facades\Log::info('LOGIN: Local login success for '.$email.'. User ID: '.$user->id.' on connection: '.$user->getConnectionName());
                 // session()->regenerate(); // default attempt() already does this
 
                 // Explicitly redirect to dashboard to prevent 'intended' loop back to login
-                return new class implements \Filament\Auth\Http\Responses\Contracts\LoginResponse, \Illuminate\Contracts\Support\Responsable {
+                return new class implements \Filament\Auth\Http\Responses\Contracts\LoginResponse, \Illuminate\Contracts\Support\Responsable
+                {
                     public function toResponse($request)
                     {
                         return redirect()->to('/dashboard');
                     }
                 };
             }
-            \Illuminate\Support\Facades\Log::info('LOGIN: Local login failed for ' . $email . '. Trying Landlord.');
+            \Illuminate\Support\Facades\Log::info('LOGIN: Local login failed for '.$email.'. Trying Landlord.');
 
             // If we are already in a tenant context, stop here.
             // We don't want to check Landlord credentials because that leads to a redirect loop (redirecting to self).
@@ -117,28 +128,28 @@ class Login extends BaseLogin
             // Only proceed if we are potentially on the central portal (conceptually)
             $password = $credentials['password'];
 
-            $landlordUser = \App\Models\LandlordUser::where('email', $email)->first();
+            $landlordUser = \App\Models\LandlordUser::where('email', '=', $email, 'and')->first();
 
             if ($landlordUser && \Illuminate\Support\Facades\Hash::check($password, $landlordUser->password)) {
-                \Illuminate\Support\Facades\Log::info('LOGIN: Landlord user found: ' . $landlordUser->id);
+                \Illuminate\Support\Facades\Log::info('LOGIN: Landlord user found: '.$landlordUser->id);
                 // User credentials are valid for a Landlord User.
                 // Find their tenant.
-                $tenant = \App\Models\Tenant::where('owner_user_id', $landlordUser->id)->first();
+                $tenant = \App\Models\Tenant::where('owner_user_id', '=', $landlordUser->id, 'and')->first();
 
                 if ($tenant) {
-                    \Illuminate\Support\Facades\Log::info('LOGIN: Tenant found: ' . $tenant->id);
+                    \Illuminate\Support\Facades\Log::info('LOGIN: Tenant found: '.$tenant->id);
 
                     $domain = $tenant->domains->first()?->domain;
 
                     if ($domain) {
                         // Redirect to the tenant's login page, just like Register.php
                         $url = tenant_route($domain, 'filament.dashboard.auth.login');
-                        \Illuminate\Support\Facades\Log::info('LOGIN: Redirecting to ' . $url);
+                        \Illuminate\Support\Facades\Log::info('LOGIN: Redirecting to '.$url);
 
-                        return new class ($url) implements \Filament\Auth\Http\Responses\Contracts\LoginResponse, \Illuminate\Contracts\Support\Responsable {
-                            public function __construct(protected string $url)
-                            {
-                            }
+                        return new class($url) implements \Filament\Auth\Http\Responses\Contracts\LoginResponse, \Illuminate\Contracts\Support\Responsable
+                        {
+                            public function __construct(protected string $url) {}
+
                             public function toResponse($request)
                             {
                                 return redirect()->to($this->url);
@@ -156,7 +167,7 @@ class Login extends BaseLogin
 
             $this->throwFailureValidationException();
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('LOGIN ERROR: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('LOGIN ERROR: '.$e->getMessage());
             throw $e;
         }
     }

@@ -2,22 +2,21 @@
 
 namespace App\Filament\Dashboard\Resources;
 
-
-use BackedEnum;
-use UnitEnum;
 use App\Filament\Dashboard\Resources\OrderResource\Pages;
+use App\Filament\Exports\OrderExporter;
 use App\Models\Order;
-use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Repeater;
+use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ExportBulkAction;
-use App\Filament\Exports\OrderExporter;
+use Filament\Forms;
+use Filament\Forms\Components\Repeater;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables;
+use Filament\Tables\Table;
+use UnitEnum;
 
 class OrderResource extends Resource
 {
@@ -32,6 +31,11 @@ class OrderResource extends Resource
     public static function canViewAny(): bool
     {
         return has_feature('pos');
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('status', 'pending')->count() ?: null;
     }
 
     public static function form(Schema $schema): Schema
@@ -73,12 +77,12 @@ class OrderResource extends Resource
                             ->searchable()
                             ->preload()
                             ->placeholder('Assign to staff (optional)')
-                            ->visible(fn() => auth()->user()->hasAnyRole(['owner', 'manager'])),
+                            ->visible(fn () => auth()->user()->hasAnyRole(['owner', 'manager'])),
                         Forms\Components\Select::make('branch_id')
                             ->relationship('branch', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(fn() => \Illuminate\Support\Facades\Session::get('current_branch_id'))
+                            ->default(fn () => \Illuminate\Support\Facades\Session::get('current_branch_id'))
                             ->required()
                             ->label('Branch'),
                     ])->columns(2),
@@ -90,7 +94,7 @@ class OrderResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('menu_item_display')
                                     ->label('Menu Item')
-                                    ->formatStateUsing(fn($record) => $record?->menuItem?->name)
+                                    ->formatStateUsing(fn ($record) => $record?->menuItem?->name)
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->columnSpan(1),
@@ -103,7 +107,7 @@ class OrderResource extends Resource
                                     ->disabled()
                                     ->columnSpan(1),
                                 Forms\Components\TextInput::make('variant')
-                                    ->formatStateUsing(fn($record) => $record?->variant?->name ?? '-')
+                                    ->formatStateUsing(fn ($record) => $record?->variant?->name ?? '-')
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->columnSpan(1),
@@ -132,38 +136,53 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('branch.name')
-                    ->sortable()
-                    ->searchable()
-                    ->label('Branch'),
                 Tables\Columns\TextColumn::make('id')
                     ->label('Order #')
                     ->sortable()
                     ->searchable()
-                    ->formatStateUsing(fn($state) => 'ORD-' . str_pad($state, 5, '0', STR_PAD_LEFT)),
-                Tables\Columns\TextColumn::make('staff.user.name')
-                    ->label('Assigned To')
-                    ->placeholder('Unassigned')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('table.name')
-                    ->label('Table')
-                    ->placeholder('N/A')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('type')
+                    ->formatStateUsing(fn ($state) => 'ORD-'.str_pad($state, 6, '0', STR_PAD_LEFT)),
+                Tables\Columns\TextColumn::make('order_source')
+                    ->label('Source')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
+                        'online' => 'success',
+                        'pos' => 'info',
+                        'phone' => 'warning',
+                        default => 'gray',
+                    })
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('customer_name')
+                    ->label('Customer')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Guest'),
+                Tables\Columns\TextColumn::make('order_type')
+                    ->label('Type')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
                         'dine-in' => 'info',
-                        'pickup' => 'warning',
+                        'takeout' => 'warning',
                         'delivery' => 'success',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('total_amount')
+                Tables\Columns\TextColumn::make('total')
+                    ->label('Total')
                     ->money('USD')
-                    ->sortable(),
+                    ->sortable()
+                    ->default(fn ($record) => $record->total_amount),
+                Tables\Columns\TextColumn::make('payment_status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'paid' => 'success',
+                        'unpaid' => 'warning',
+                        'pending' => 'gray',
+                        'failed' => 'danger',
+                        'refunded' => 'info',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'pending' => 'gray',
                         'preparing' => 'warning',
                         'ready' => 'success',
@@ -171,16 +190,27 @@ class OrderResource extends Resource
                         'cancelled' => 'danger',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('payment_status')
-                    ->badge(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Date')
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('branch_id')
-                    ->relationship('branch', 'name')
-                    ->label('Branch'),
+                Tables\Filters\SelectFilter::make('order_source')
+                    ->label('Source')
+                    ->options([
+                        'online' => 'Online',
+                        'pos' => 'POS',
+                        'phone' => 'Phone',
+                    ]),
+                Tables\Filters\SelectFilter::make('payment_status')
+                    ->options([
+                        'paid' => 'Paid',
+                        'unpaid' => 'Unpaid',
+                        'pending' => 'Pending',
+                        'failed' => 'Failed',
+                        'refunded' => 'Refunded',
+                    ]),
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'pending' => 'Pending',
@@ -188,6 +218,13 @@ class OrderResource extends Resource
                         'ready' => 'Ready',
                         'completed' => 'Completed',
                         'cancelled' => 'Cancelled',
+                    ]),
+                Tables\Filters\SelectFilter::make('order_type')
+                    ->label('Type')
+                    ->options([
+                        'dine-in' => 'Dine-in',
+                        'takeout' => 'Takeout',
+                        'delivery' => 'Delivery',
                     ]),
             ])
             ->recordActions([

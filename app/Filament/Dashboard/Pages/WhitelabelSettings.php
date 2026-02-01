@@ -2,22 +2,20 @@
 
 namespace App\Filament\Dashboard\Pages;
 
-
 use BackedEnum;
-use UnitEnum;
 use Filament\Forms\Components\FileUpload;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use App\Models\Tenant;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Schemas\Schema;
+use UnitEnum;
 
-class WhitelabelSettings extends Page implements HasForms
+class WhitelabelSettings extends Page implements HasSchemas
 {
-    use InteractsWithForms;
+    use InteractsWithSchemas;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-swatch';
 
@@ -31,26 +29,31 @@ class WhitelabelSettings extends Page implements HasForms
 
     protected string $view = 'filament.dashboard.pages.whitelabel-settings';
 
-    public ?array $data = [];
+    public ?array $brandingData = [];
 
     public static function canAccess(): bool
     {
         return has_feature('whitelabel');
     }
 
+    protected function getSchemas(): array
+    {
+        return ['brandingForm'];
+    }
+
     public function mount(): void
     {
         $tenant = tenant();
 
-        $this->form->fill([
+        $this->brandingData = [
             'whitelabel_active' => $tenant->whitelabel_active,
             'whitelabel_logo' => $tenant->whitelabel_logo,
             'website_custom_domain' => $tenant->website_custom_domain,
             'dashboard_custom_domain' => $tenant->dashboard_custom_domain,
-        ]);
+        ];
     }
 
-    public function form(Schema $schema): Schema
+    public function brandingForm(Schema $schema): Schema
     {
         return $schema
             ->schema([
@@ -70,8 +73,8 @@ class WhitelabelSettings extends Page implements HasForms
                             ->directory('whitelabel-logos')
                             ->visibility('public')
                             ->helperText('Replaces the platform logo on your dashboard.')
-                            ->getUploadedFileUsing(fn($record) => \App\Helpers\StorageHelper::getUrl($record->whitelabel_logo ?? $record->data['whitelabel_logo'] ?? null))
-                            ->visible(fn($get) => $get('whitelabel_active'))
+                            ->getUploadedFileUsing(fn ($record) => \App\Helpers\StorageHelper::getUrl($record->whitelabel_logo ?? $record->data['whitelabel_logo'] ?? null))
+                            ->visible(fn ($get) => $get('whitelabel_active'))
                             ->columnSpanFull(),
 
                         \Filament\Forms\Components\TextInput::make('website_custom_domain')
@@ -85,7 +88,7 @@ class WhitelabelSettings extends Page implements HasForms
                             ->placeholder('e.g., app.myrestaurant.com')
                             ->helperText('Point this to your whitelabeled administration dashboard.')
                             ->columnSpan(1)
-                            ->visible(fn($get) => $get('whitelabel_active')),
+                            ->visible(fn ($get) => $get('whitelabel_active')),
                     ]),
 
                 Section::make('DNS Record Setup Instructions')
@@ -96,8 +99,8 @@ class WhitelabelSettings extends Page implements HasForms
                             ->content(function () {
                                 $ip = $_SERVER['SERVER_ADDR'] ?? '127.0.0.1';
                                 $host = parse_url(config('app.url'), PHP_URL_HOST);
-                                $ns1 = 'ns1.' . $host;
-                                $ns2 = 'ns2.' . $host;
+                                $ns1 = 'ns1.'.$host;
+                                $ns2 = 'ns2.'.$host;
 
                                 return new \Illuminate\Support\HtmlString("
                                     <div class='space-y-6 text-sm'>
@@ -145,20 +148,21 @@ class WhitelabelSettings extends Page implements HasForms
                     ])
                     ->collapsible(),
             ])
-            ->statePath('data');
+            ->statePath('brandingData');
     }
 
     public function save(): void
     {
-        $tenant = tenant();
-        $state = $this->form->getState();
+        $state = $this->brandingForm->getState();
 
-        $tenant->update([
+        /** @var \App\Models\Tenant $tenant */
+        $tenant = \App\Models\Tenant::on('landlord')->find(tenant('id'));
+        $tenant->fill([
             'whitelabel_active' => $state['whitelabel_active'],
             'whitelabel_logo' => $state['whitelabel_logo'],
             'website_custom_domain' => $state['website_custom_domain'],
             'dashboard_custom_domain' => $state['dashboard_custom_domain'],
-        ]);
+        ])->save();
 
         Notification::make()
             ->success()

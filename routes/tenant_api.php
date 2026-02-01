@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\MenuController;
+use App\Http\Controllers\Api\V1\OrderController;
+use App\Http\Controllers\Api\V1\ReservationController;
+use App\Http\Controllers\Api\V1\TaskController;
+use App\Http\Controllers\Api\V1\ChatController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
-use App\Http\Controllers\Api\V1\MenuController;
-use App\Http\Controllers\Api\V1\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,8 +30,28 @@ Route::middleware([
     Route::get('/menu/categories', [MenuController::class, 'categories']);
     Route::get('/menu/items', [MenuController::class, 'items']);
     Route::get('/menu/items/{item}', [MenuController::class, 'showItem']);
+    Route::post('/menu/items/{item}/toggle-availability', [MenuController::class, 'toggleAvailability']);
 
     // Order Endpoints
+    Route::get('/orders', [OrderController::class, 'index']); // New: List orders
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']); // New: Update Status
+
+    // Reservation Endpoints
+    Route::get('/reservations', [ReservationController::class, 'index']);
+    Route::post('/reservations', [ReservationController::class, 'store']);
+    Route::get('/reservations/availability', [ReservationController::class, 'availability']);
+    Route::get('/reservations/{reservation}', [ReservationController::class, 'show']);
+
+    // Branch Endpoints
+    Route::get('/branches', [ReservationController::class, 'branches']);
+
+    // Task Endpoints
+    Route::apiResource('tasks', TaskController::class);
+
+    // Chat Endpoints
+    Route::get('/chats', [ChatController::class, 'conversations']);
+    Route::get('/chats/{chat}/messages', [ChatController::class, 'messages']);
+    Route::post('/chats/messages', [ChatController::class, 'sendMessage']);
 });

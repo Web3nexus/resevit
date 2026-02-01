@@ -18,6 +18,7 @@ class SystemsSetupSeeder extends Seeder
     {
         $this->ensureSuperAdminExists();
         $this->ensurePlatformSettingsExist();
+        $this->ensureDefaultEmailSettingsExist();
     }
 
     /**
@@ -92,6 +93,37 @@ class SystemsSetupSeeder extends Seeder
             $this->command->info('Default platform settings created.');
         } else {
             $this->command->info('Platform settings already exist. Skipping.');
+        }
+    }
+
+    /**
+     * Ensure default email settings exist to "unpause" the email system.
+     */
+    private function ensureDefaultEmailSettingsExist(): void
+    {
+        if (!Schema::hasTable('default_email_settings')) {
+            $this->command->warn('Table default_email_settings does not exist. Skipping.');
+            return;
+        }
+
+        $exists = \App\Models\DefaultEmailSetting::where('is_active', true)->exists();
+
+        if (!$exists) {
+            \App\Models\DefaultEmailSetting::create([
+                'provider' => 'smtp',
+                'smtp_host' => 'smtp.hostinger.com',
+                'smtp_port' => 465,
+                'smtp_username' => 'noreply@cryptogateshub.com',
+                'smtp_password' => '4oC>!]=7!;',
+                'smtp_encryption' => 'ssl',
+                'from_email' => 'hello@resevit.com',
+                'from_name' => 'Resevit',
+                'is_active' => true,
+            ]);
+            $this->command->info('Default email settings seeded (System Unpaused).');
+            $this->command->warn('IMPORTANT: Update these credentials in the admin panel/database for production!');
+        } else {
+            $this->command->info('Active default email settings already exist.');
         }
     }
 }

@@ -12,10 +12,9 @@ class Category extends Model
     // Note: We don't need BelongsToTenant here because this table is inside the tenant DB.
     // BelongsToTenant is for central tables that have a tenant_id column.
 
-
-
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'is_active',
         'sort_order',

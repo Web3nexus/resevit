@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class PlatformSetting extends Model
 {
     protected $connection = 'landlord';
+
     protected $fillable = [
         'logo_path',
         'favicon_path',
@@ -30,7 +31,7 @@ class PlatformSetting extends Model
         'landing_settings' => 'array',
         'legal_settings' => 'array',
         'onboarding_settings' => 'array',
-        'stripe_settings' => 'encrypted:array',
+        'stripe_settings' => 'array',
         'stripe_mode' => 'string',
         'plugin_settings' => 'array',
     ];
@@ -83,7 +84,8 @@ class PlatformSetting extends Model
     public function getFooterLinks(string $section): array
     {
         $settings = $this->footer_settings ?? self::getDefaultFooterSettings();
-        return array_filter($settings[$section] ?? [], fn($link) => $link['is_visible'] ?? true);
+
+        return array_filter($settings[$section] ?? [], fn ($link) => $link['is_visible'] ?? true);
     }
 
     /**
@@ -107,6 +109,7 @@ class PlatformSetting extends Model
     public function getStripePublishableKey(): ?string
     {
         $config = $this->getActiveStripeConfig();
+
         return $config['publishable_key'] ?? null;
     }
 
@@ -116,6 +119,7 @@ class PlatformSetting extends Model
     public function getStripeSecretKey(): ?string
     {
         $config = $this->getActiveStripeConfig();
+
         return $config['secret_key'] ?? null;
     }
 
@@ -125,6 +129,7 @@ class PlatformSetting extends Model
     public function getStripeWebhookSecret(): ?string
     {
         $config = $this->getActiveStripeConfig();
+
         return $config['webhook_secret'] ?? null;
     }
 

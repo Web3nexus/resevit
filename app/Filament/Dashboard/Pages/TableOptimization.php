@@ -2,32 +2,35 @@
 
 namespace App\Filament\Dashboard\Pages;
 
-
-use BackedEnum;
-use UnitEnum;
 use App\Models\Reservation;
-use App\Models\Table;
 use App\Services\TableOptimizationService;
+use BackedEnum;
+use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Components\DatePicker;
 use Filament\Schemas\Schema;
+use UnitEnum;
 
-class TableOptimization extends Page implements HasForms
+class TableOptimization extends Page implements \Filament\Schemas\Contracts\HasSchemas
 {
-    use InteractsWithForms;
+    use \Filament\Schemas\Concerns\InteractsWithSchemas;
 
     protected string $view = 'filament.dashboard.pages.table-optimization';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-sparkles';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-sparkles';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Operations';
+    protected static string|UnitEnum|null $navigationGroup = 'Operations';
 
-    public ?string $date = null;
+    public ?array $optimizationData = [];
+
     public array $suggestions = [];
+
     public bool $isOptimizing = false;
+
+    protected function getSchemas(): array
+    {
+        return ['optimizationForm'];
+    }
 
     public static function canAccess(): bool
     {
@@ -36,11 +39,12 @@ class TableOptimization extends Page implements HasForms
 
     public function mount()
     {
-        $this->date = now()->format('Y-m-d');
-        $this->form->fill(['date' => $this->date]);
+        $this->optimizationData = [
+            'date' => now()->format('Y-m-d'),
+        ];
     }
 
-    public function form(Schema $schema): Schema
+    public function optimizationForm(Schema $schema): Schema
     {
         return $schema
             ->schema([
@@ -48,7 +52,8 @@ class TableOptimization extends Page implements HasForms
                     ->label('Select Date')
                     ->required()
                     ->live(),
-            ]);
+            ])
+            ->statePath('optimizationData');
     }
 
     public function runOptimization(TableOptimizationService $service)
@@ -57,7 +62,7 @@ class TableOptimization extends Page implements HasForms
         $this->isOptimizing = true;
 
         try {
-            $results = $service->optimize($this->date);
+            $results = $service->optimize($this->optimizationData['date']);
 
             if (isset($results['message'])) {
                 Notification::make()->warning()->title($results['message'])->send();
@@ -85,7 +90,7 @@ class TableOptimization extends Page implements HasForms
 
     public function getReservationsProperty()
     {
-        return Reservation::whereDate('reservation_time', $this->date)
+        return Reservation::whereDate('reservation_time', $this->optimizationData['date'])
             ->whereIn('status', ['confirmed', 'pending'])
             ->with('table')
             ->get();

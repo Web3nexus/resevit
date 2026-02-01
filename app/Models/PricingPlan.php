@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class PricingPlan extends Model
 {
     protected $connection = 'landlord';
+
     protected $fillable = [
         'name',
         'slug',
@@ -56,6 +57,11 @@ class PricingPlan extends Model
         return $this->hasMany(PricingPlanFeature::class, 'pricing_plan_id');
     }
 
+    public function websiteTemplates()
+    {
+        return $this->belongsToMany(WebsiteTemplate::class, 'pricing_plan_website_template');
+    }
+
     /**
      * Get the Stripe product ID for the current environment
      */
@@ -71,9 +77,8 @@ class PricingPlan extends Model
 
     /**
      * Get the Stripe price ID for the current environment and billing cycle
-     * 
-     * @param string $billingCycle 'monthly' or 'yearly'
-     * @return string|null
+     *
+     * @param  string  $billingCycle  'monthly' or 'yearly'
      */
     public function getStripePriceId(string $billingCycle = 'monthly'): ?string
     {

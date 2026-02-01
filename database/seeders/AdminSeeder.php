@@ -13,8 +13,8 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create default super admin
-        $admin = Admin::firstOrCreate(
+        // Create or Update default super admin (Forces password reset)
+        $admin = Admin::updateOrCreate(
             ['email' => 'admin@resevit.com'],
             [
                 'name' => 'Super Admin',
@@ -22,9 +22,20 @@ class AdminSeeder extends Seeder
             ]
         );
 
-        // Assign securegate_admin role
-        if (method_exists($admin, 'assignRole')) {
-            $admin->assignRole('securegate_admin');
+        // Assign securegate_admin role safely
+        $role = \Spatie\Permission\Models\Role::where('name', 'securegate_admin')->where('guard_name', 'securegate')->first();
+        if ($role) {
+            // Check if role is already assigned to avoid duplicate entry error
+            $exists = \Illuminate\Support\Facades\DB::table('model_has_roles')
+                ->where('model_id', $admin->id)
+                ->where('model_type', get_class($admin))
+                ->where('role_id', $role->id)
+                ->where('branch_id', 0)
+                ->exists();
+
+            if (! $exists) {
+                $admin->roles()->attach($role->id, ['branch_id' => 0, 'model_type' => get_class($admin)]);
+            }
         }
 
         $this->command->info('Super Admin created successfully!');

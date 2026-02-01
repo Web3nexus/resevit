@@ -2,19 +2,16 @@
 
 namespace App\Filament\Dashboard\Pages;
 
-
-use BackedEnum;
-use Filament\Pages\Page;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Wizard;
-use Filament\Schemas\Components\Wizard\Step;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\KeyValue;
 use App\Models\Branch;
 use App\Models\Tenant;
+use BackedEnum;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
 class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
@@ -22,7 +19,9 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
     use \Filament\Schemas\Concerns\InteractsWithSchemas;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-sparkles';
+
     protected string $view = 'filament.dashboard.pages.onboarding';
+
     protected static bool $shouldRegisterNavigation = false;
 
     public ?array $data = [];
@@ -31,18 +30,19 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
     {
         if (tenant('onboarding_completed')) {
             $this->redirect(route('filament.dashboard.pages.dashboard'));
+
             return;
         }
 
-        $this->form->fill();
+        $this->data = [];
     }
 
     protected function getSchemas(): array
     {
-        return ['form'];
+        return ['onboardingForm'];
     }
 
-    public function form(Schema $schema): Schema
+    public function onboardingForm(Schema $schema): Schema
     {
         return $schema
             ->schema([
@@ -61,7 +61,7 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
                                 ->required()
                                 ->placeholder('Main Branch')
                                 ->live(onBlur: true)
-                                ->afterStateUpdated(fn($state, callable $set) => $set('branch_slug', Str::slug($state))),
+                                ->afterStateUpdated(fn ($state, callable $set) => $set('branch_slug', Str::slug($state))),
                             TextInput::make('branch_slug')
                                 ->label('Branch URL Slug')
                                 ->required()
@@ -92,7 +92,7 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
 
     public function submit()
     {
-        $data = $this->form->getState();
+        $data = $this->onboardingForm->getState();
 
         // Create the first branch
         Branch::create([
@@ -105,10 +105,11 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
         ]);
 
         // Update tenant settings - use the landlord connection
+        /** @var \App\Models\Tenant $tenant */
         $tenant = \App\Models\Tenant::on('landlord')->find(tenant('id'));
-        $tenant->update([
+        $tenant->fill([
             'onboarding_completed' => true,
-        ]);
+        ])->save();
 
         Notification::make()
             ->title('Setup Complete!')

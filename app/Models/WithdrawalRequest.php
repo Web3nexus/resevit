@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class WithdrawalRequest extends TenantModel
 {
@@ -13,6 +12,7 @@ class WithdrawalRequest extends TenantModel
     protected $fillable = [
         'requester_id',
         'requester_type',
+        'tenant_id',
         'amount',
         'currency',
         'status',

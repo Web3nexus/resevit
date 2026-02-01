@@ -2,31 +2,45 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-use App\Models\LandingPage;
-use App\Models\LandingSection;
-use App\Models\Testimonial;
-use App\Models\PricingPlan;
-use App\Models\Faq;
 use App\Models\ContactMessage;
+use App\Models\Faq;
+use App\Models\LandingPage;
 use App\Models\NewsletterSubscriber;
 use App\Models\PricingFeature;
+use App\Models\PricingPlan;
+use App\Models\Testimonial;
+use Illuminate\Http\Request;
 
 class LandingPageController extends Controller
 {
     public function home()
     {
+        // Check if Calendly theme is active
+        $platformSettings = \App\Models\PlatformSetting::current();
+        $activeTheme = $platformSettings->landing_settings['active_theme'] ?? 'default';
+
+        if ($activeTheme === 'calendly') {
+            return app(\App\Http\Controllers\LandingController::class)->home();
+        }
+
         return $this->renderPage('home');
     }
 
     public function pricing()
     {
+        // Check if Calendly theme is active
+        $platformSettings = \App\Models\PlatformSetting::current();
+        $activeTheme = $platformSettings->landing_settings['active_theme'] ?? 'default';
+
+        if ($activeTheme === 'calendly') {
+            return app(\App\Http\Controllers\LandingController::class)->pricing();
+        }
+
         $plans = PricingPlan::where('is_active', true)
             ->with([
                 'features' => function ($q) {
                     $q->orderBy('order');
-                }
+                },
             ])
             ->orderBy('order')
             ->get();
@@ -138,7 +152,7 @@ class LandingPageController extends Controller
             ->where('is_active', true)
             ->first();
 
-        if (!$page) {
+        if (! $page) {
             $legal = $settings->legal_settings ?? [];
             $legalMapping = [
                 'terms' => 'terms_of_service',
@@ -148,7 +162,7 @@ class LandingPageController extends Controller
                 'dmca' => 'dmca',
             ];
 
-            if (isset($legalMapping[$slug]) && !empty($legal[$legalMapping[$slug]])) {
+            if (isset($legalMapping[$slug]) && ! empty($legal[$legalMapping[$slug]])) {
                 return view('landing.legal-simple', [
                     'title' => ucwords(str_replace(['-', '_'], ' ', $slug)),
                     'content' => $legal[$legalMapping[$slug]],
@@ -156,8 +170,8 @@ class LandingPageController extends Controller
                 ]);
             }
 
-            if (view()->exists($viewPrefix . $slug)) {
-                return view($viewPrefix . $slug, compact('layout', 'theme'));
+            if (view()->exists($viewPrefix.$slug)) {
+                return view($viewPrefix.$slug, compact('layout', 'theme'));
             }
 
             abort(404);
@@ -190,7 +204,7 @@ class LandingPageController extends Controller
                 ->get();
         }
 
-        $viewName = view()->exists($viewPrefix . 'dynamic') ? $viewPrefix . 'dynamic' : 'landing.dynamic';
+        $viewName = view()->exists($viewPrefix.'dynamic') ? $viewPrefix.'dynamic' : 'landing.dynamic';
 
         return view($viewName, compact('page', 'sections', 'testimonials', 'plans', 'pricing_features', 'layout', 'theme'));
     }

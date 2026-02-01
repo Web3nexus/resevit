@@ -2,26 +2,26 @@
 
 namespace App\Filament\Dashboard\Pages;
 
-
-use BackedEnum;
-use UnitEnum;
 use App\Services\AI\ContentGeneratorService;
+use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Actions\Action;
+use Filament\Schemas\Schema;
+use UnitEnum;
 
-class AiImageGenerator extends Page implements HasForms
+class AiImageGenerator extends Page implements \Filament\Schemas\Contracts\HasSchemas
 {
-    use InteractsWithForms;
+    use \Filament\Schemas\Concerns\InteractsWithSchemas;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-photo';
-    protected static string | UnitEnum | null $navigationGroup = 'Marketing';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-photo';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Marketing';
+
     protected static ?string $navigationLabel = 'AI Image Studio';
+
     protected static ?string $title = 'AI Image Studio';
 
     protected string $view = 'filament.dashboard.pages.ai-image-generator';
@@ -31,16 +31,23 @@ class AiImageGenerator extends Page implements HasForms
         return has_feature('ai_generator');
     }
 
-    public ?array $data = [];
+    protected function getSchemas(): array
+    {
+        return ['imageForm'];
+    }
+
+    public ?array $generatorData = [];
+
     public ?string $generatedImageUrl = null;
+
     public bool $isGenerating = false;
 
     public function mount(): void
     {
-        $this->form->fill();
+        $this->generatorData = [];
     }
 
-    public function form(Schema $schema): Schema
+    public function imageForm(Schema $schema): Schema
     {
         return $schema
             ->schema([
@@ -67,25 +74,26 @@ class AiImageGenerator extends Page implements HasForms
                     ->required()
                     ->columnSpanFull(),
             ])
-            ->statePath('data');
+            ->statePath('generatorData');
     }
 
     public function refinePrompt(ContentGeneratorService $ai): void
     {
-        $prompt = $this->data['prompt'] ?? '';
+        $prompt = $this->generatorData['prompt'] ?? '';
 
         if (empty($prompt)) {
             Notification::make()->title('Please enter a prompt first')->warning()->send();
+
             return;
         }
 
-        $style = $this->data['style'] ?? 'Photographic';
+        $style = $this->generatorData['style'] ?? 'Photographic';
 
         try {
             $refined = $ai->refineImagePrompt($prompt, $style);
 
-            $this->data['prompt'] = $refined;
-            $this->form->fill($this->data);
+            $this->generatorData['prompt'] = $refined;
+            $this->imageForm->fill($this->generatorData);
 
             Notification::make()->title('Prompt optimized!')->success()->send();
 
@@ -101,9 +109,9 @@ class AiImageGenerator extends Page implements HasForms
         $this->isGenerating = true;
 
         try {
-            $prompt = $this->data['prompt'];
+            $prompt = $this->generatorData['prompt'];
             // Append style to ensuring it's enforced even if not in the text
-            $fullPrompt = $prompt . ", Style: " . ($this->data['style'] ?? 'Photographic');
+            $fullPrompt = $prompt.', Style: '.($this->generatorData['style'] ?? 'Photographic');
 
             $url = $ai->generateImage($fullPrompt);
 
@@ -115,7 +123,7 @@ class AiImageGenerator extends Page implements HasForms
             }
 
         } catch (\Exception $e) {
-            Notification::make()->title('Error: ' . $e->getMessage())->danger()->send();
+            Notification::make()->title('Error: '.$e->getMessage())->danger()->send();
         } finally {
             $this->isGenerating = false;
         }

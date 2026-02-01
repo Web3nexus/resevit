@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\PlatformAuthController;
+use App\Http\Controllers\Api\V1\InvestorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +25,16 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/login', [PlatformAuthController::class, 'login'])->middleware('throttle:login');
 
     // Protected User Info
-    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-        return $request->user();
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        });
+
+        // Investor Routes
+        Route::get('/investor/opportunities', [InvestorController::class, 'opportunities']);
+        Route::get('/investor/opportunities/{opportunity}', [InvestorController::class, 'showOpportunity']);
+        Route::post('/investor/invest', [InvestorController::class, 'invest']);
+        Route::get('/investor/portfolio', [InvestorController::class, 'portfolio']);
+        Route::get('/investor/wallet', [InvestorController::class, 'wallet']);
     });
 });
