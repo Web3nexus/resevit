@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Admin;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class AdminSeeder extends Seeder
 {
@@ -23,24 +24,14 @@ class AdminSeeder extends Seeder
         );
 
         // Assign securegate_admin role safely
-        $role = \Spatie\Permission\Models\Role::where('name', 'securegate_admin')->where('guard_name', 'securegate')->first();
+        $role = Role::where('name', 'securegate_admin')->where('guard_name', 'securegate')->first();
         if ($role) {
-            // Check if role is already assigned to avoid duplicate entry error
-            $exists = \Illuminate\Support\Facades\DB::table('model_has_roles')
-                ->where('model_id', $admin->id)
-                ->where('model_type', get_class($admin))
-                ->where('role_id', $role->id)
-                ->where('branch_id', 0)
-                ->exists();
-
-            if (! $exists) {
-                $admin->roles()->attach($role->id, ['branch_id' => 0, 'model_type' => get_class($admin)]);
-            }
+            $admin->roles()->syncWithPivotValues([$role->id], ['branch_id' => 0, 'model_type' => get_class($admin)], false);
         }
 
         $this->command->info('Super Admin created successfully!');
         $this->command->info('Email: admin@resevit.com');
         $this->command->info('Password: password');
-        $this->command->warn('IMPORTANT: Change this password in production!');
+        $this->command->warn('IMPORTANT: Change this password in the Super Admin panel!');
     }
 }

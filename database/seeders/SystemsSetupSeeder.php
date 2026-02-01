@@ -16,50 +16,10 @@ class SystemsSetupSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->ensureSuperAdminExists();
         $this->ensurePlatformSettingsExist();
         $this->ensureDefaultEmailSettingsExist();
     }
 
-    /**
-     * Ensure exactly one Super Admin exists with the correct role.
-     */
-    private function ensureSuperAdminExists(): void
-    {
-        $email = 'admin@resevit.com';
-
-        // Find or create the admin
-        $admin = Admin::where('email', $email)->first();
-
-        if (!$admin) {
-            $admin = Admin::create([
-                'name' => 'Super Admin',
-                'email' => $email,
-                'password' => Hash::make('password'), // User MUST change this in production
-            ]);
-            $this->command->info("Super Admin created: {$email}");
-        } else {
-            $this->command->info("Super Admin already exists: {$email}");
-        }
-
-        // Ensure the role exists and is assigned
-        if (class_exists(\Spatie\Permission\Models\Role::class)) {
-            $roleName = 'securegate_admin';
-
-            // Check if role exists in landlord connection or default
-            $role = Role::where('name', $roleName)->first();
-
-            if (!$role) {
-                $role = Role::create(['name' => $roleName, 'guard_name' => 'admin']);
-                $this->command->info("Role created: {$roleName}");
-            }
-
-            if (!$admin->hasRole($roleName)) {
-                $admin->assignRole($roleName);
-                $this->command->info("Role {$roleName} assigned to Super Admin");
-            }
-        }
-    }
 
     /**
      * Ensure baseline platform settings exist without overwriting production values.
@@ -80,10 +40,12 @@ class SystemsSetupSeeder extends Seeder
                 'landing_settings' => [
                     'hero_badge' => 'THE FUTURE OF DINING',
                     'hero_title' => 'Maximize Your Restaurant’s <span class="text-brand-accent">Potential</span>',
-                    'hero_subtitle' => "Streamline reservations, optimize staff schedules, and delight customers with the world's most advanced restaurant management platform.",
-                    'hero_cta_text' => 'Get Started Free',
+                    'hero_subtitle' => "Streamline reservations, optimize staff schedules, and delight customers with Resevit's advanced restaurant management platform.",
+                    'hero_cta_text' => 'Launch Your Business',
                     'hero_cta_url' => '/register',
                     'active_theme' => 'default',
+                    'support_email' => 'support@resevit.com',
+                    'contact_phone' => '+1 (555) 000-0000',
                 ],
                 'promotion_settings' => [
                     'min_withdrawal_amount' => 50,
