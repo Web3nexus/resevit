@@ -11,14 +11,30 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('tenants', function (Blueprint $table) {
-            $table->boolean('is_public')->default(true)->after('plan_id');
-            $table->boolean('is_sponsored')->default(false)->after('is_public');
-            $table->integer('sponsored_ranking')->default(0)->after('is_sponsored');
-            $table->foreignId('business_category_id')->nullable()->constrained('business_categories')->nullOnDelete()->after('sponsored_ranking');
-            $table->text('description')->nullable()->after('business_category_id');
-            $table->string('cover_image')->nullable()->after('description');
-            $table->string('seo_title')->nullable()->after('cover_image');
-            $table->text('seo_description')->nullable()->after('seo_title');
+            if (!Schema::hasColumn('tenants', 'is_public')) {
+                $table->boolean('is_public')->default(true)->after('plan_id');
+            }
+            if (!Schema::hasColumn('tenants', 'is_sponsored')) {
+                $table->boolean('is_sponsored')->default(false)->after('is_public');
+            }
+            if (!Schema::hasColumn('tenants', 'sponsored_ranking')) {
+                $table->integer('sponsored_ranking')->default(0)->after('is_sponsored');
+            }
+            if (!Schema::hasColumn('tenants', 'business_category_id')) {
+                $table->foreignId('business_category_id')->nullable()->constrained('business_categories')->nullOnDelete()->after('sponsored_ranking');
+            }
+            if (!Schema::hasColumn('tenants', 'description')) {
+                $table->text('description')->nullable()->after('business_category_id');
+            }
+            if (!Schema::hasColumn('tenants', 'cover_image')) {
+                $table->string('cover_image')->nullable()->after('description');
+            }
+            if (!Schema::hasColumn('tenants', 'seo_title')) {
+                $table->string('seo_title')->nullable()->after('cover_image');
+            }
+            if (!Schema::hasColumn('tenants', 'seo_description')) {
+                $table->text('seo_description')->nullable()->after('seo_title');
+            }
         });
     }
 

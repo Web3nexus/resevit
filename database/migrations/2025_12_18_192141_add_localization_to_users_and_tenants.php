@@ -11,13 +11,21 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('currency')->default('USD')->after('newsletter_subscribed');
-            $table->string('timezone')->default('UTC')->after('currency');
+            if (!Schema::hasColumn('users', 'currency')) {
+                $table->string('currency')->default('USD')->after('newsletter_subscribed');
+            }
+            if (!Schema::hasColumn('users', 'timezone')) {
+                $table->string('timezone')->default('UTC')->after('currency');
+            }
         });
 
         Schema::table('tenants', function (Blueprint $table) {
-            $table->string('currency')->default('USD')->after('plan_id');
-            $table->string('timezone')->default('UTC')->after('currency');
+            if (!Schema::hasColumn('tenants', 'currency')) {
+                $table->string('currency')->default('USD')->after('plan_id');
+            }
+            if (!Schema::hasColumn('tenants', 'timezone')) {
+                $table->string('timezone')->default('UTC')->after('currency');
+            }
         });
     }
 
