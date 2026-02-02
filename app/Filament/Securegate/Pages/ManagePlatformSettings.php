@@ -40,7 +40,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
     public function mount(): void
     {
         $settings = PlatformSetting::current();
-        $this->platformData = $settings->toArray();
+        $this->settingsForm->fill($settings->toArray());
     }
 
     public function settingsForm(Schema $schema): Schema
@@ -66,7 +66,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                                     ->directory('platform')
                                                     ->visibility('public')
                                                     ->imageEditor()
-                                                    ->getUploadedFileUsing(fn ($record) => $record?->logo_path ? \App\Helpers\StorageHelper::getUrl($record->logo_path) : null),
+                                                    ->getUploadedFileUsing(fn($record) => $record?->logo_path ? \App\Helpers\StorageHelper::getUrl($record->logo_path) : null),
 
                                                 FileUpload::make('favicon_path')
                                                     ->label('Favicon')
@@ -75,7 +75,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                                     ->disk('public')
                                                     ->directory('platform')
                                                     ->visibility('public')
-                                                    ->getUploadedFileUsing(fn ($record) => $record?->favicon_path ? \App\Helpers\StorageHelper::getUrl($record->favicon_path) : null)
+                                                    ->getUploadedFileUsing(fn($record) => $record?->favicon_path ? \App\Helpers\StorageHelper::getUrl($record->favicon_path) : null)
                                                     ->acceptedFileTypes(['image/x-icon', 'image/vnd.microsoft.icon', 'image/png', 'image/svg+xml']),
 
                                                 \Filament\Forms\Components\Select::make('landing_settings.active_theme')
@@ -125,7 +125,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                                     ->maxSize(2048)
                                                     ->directory('platform/landing')
                                                     ->visibility('public')
-                                                    ->getUploadedFileUsing(fn ($record) => $record?->landing_settings['hero_image'] ?? null ? \App\Helpers\StorageHelper::getUrl($record->landing_settings['hero_image']) : null)
+                                                    ->getUploadedFileUsing(fn($record) => $record?->landing_settings['hero_image'] ?? null ? \App\Helpers\StorageHelper::getUrl($record->landing_settings['hero_image']) : null)
                                                     ->columnSpanFull(),
                                             ]),
                                     ]),
@@ -302,7 +302,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                     ])
                                     ->collapsible()
                                     ->columnSpanFull()
-                                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
+                                    ->itemLabel(fn(array $state): ?string => $state['label'] ?? null),
                             ]),
                     ]),
 
@@ -327,7 +327,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                             ->image()
                                             ->directory('platform/errors')
                                             ->visibility('public')
-                                            ->getUploadedFileUsing(fn ($record) => $record?->error_pages['404']['image'] ?? null ? \App\Helpers\StorageHelper::getUrl($record->error_pages['404']['image']) : null),
+                                            ->getUploadedFileUsing(fn($record) => $record?->error_pages['404']['image'] ?? null ? \App\Helpers\StorageHelper::getUrl($record->error_pages['404']['image']) : null),
                                     ])->columnSpan(1),
 
                                 Section::make('500 Page (Server Error)')
@@ -345,7 +345,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                             ->image()
                                             ->directory('platform/errors')
                                             ->visibility('public')
-                                            ->getUploadedFileUsing(fn ($record) => $record?->error_pages['500']['image'] ?? null ? \App\Helpers\StorageHelper::getUrl($record->error_pages['500']['image']) : null),
+                                            ->getUploadedFileUsing(fn($record) => $record?->error_pages['500']['image'] ?? null ? \App\Helpers\StorageHelper::getUrl($record->error_pages['500']['image']) : null),
                                     ])->columnSpan(1),
                             ]),
                     ]),
@@ -405,7 +405,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
             ]);
 
             // 5. Sync Image to First Item (Icon field)
-            if (! empty($landingSettings['hero_image'])) {
+            if (!empty($landingSettings['hero_image'])) {
                 $imageUrl = \App\Helpers\StorageHelper::getUrl($landingSettings['hero_image']);
 
                 $heroItem = \App\Models\LandingItem::firstOrCreate(
@@ -418,7 +418,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
 
         } catch (\Exception $e) {
             // Log error silently or notify admin - strictly for sync resilience
-            \Illuminate\Support\Facades\Log::error('Failed to sync Platform Settings to Landing Page: '.$e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Failed to sync Platform Settings to Landing Page: ' . $e->getMessage());
         }
     }
 
@@ -473,7 +473,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                 ]);
 
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("Failed to sync legal page {$pageInfo['slug']}: ".$e->getMessage());
+                \Illuminate\Support\Facades\Log::error("Failed to sync legal page {$pageInfo['slug']}: " . $e->getMessage());
             }
         }
     }
