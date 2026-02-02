@@ -2,7 +2,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Form -->
         <div class="lg:col-span-2">
-            <x-filament-schemas::form wire:submit.prevent="updateProfile" class="space-y-6">
+            <form wire:submit.prevent="updateProfile" class="space-y-6">
                 {{ $this->profileForm }}
 
                 <div class="flex justify-end">
@@ -10,7 +10,7 @@
                         Save Changes
                     </x-filament::button>
                 </div>
-            </x-filament-schemas::form>
+            </form>
         </div>
 
         <!-- Promotion Section -->

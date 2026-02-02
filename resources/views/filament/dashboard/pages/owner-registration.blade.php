@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <x-filament-schemas::form wire:submit="register" class="space-y-6">
+    <form wire:submit="register" class="space-y-6">
         {{ $this->form }}
 
         <div class="flex justify-end gap-3">
@@ -7,5 +7,5 @@
                 Create Account & Business
             </x-filament::button>
         </div>
-    </x-filament-schemas::form>
+    </form>
 </x-filament-panels::page>

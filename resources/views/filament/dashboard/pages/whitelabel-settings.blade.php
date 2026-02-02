@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <x-filament-schemas::form wire:submit.prevent="save">
+    <form wire:submit.prevent="save">
         {{ $this->brandingForm }}
 
         <div class="mt-6">
@@ -7,5 +7,5 @@
                 Save Changes
             </x-filament::button>
         </div>
-    </x-filament-schemas::form>
+    </form>
 </x-filament-panels::page>

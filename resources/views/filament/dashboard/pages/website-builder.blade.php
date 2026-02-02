@@ -98,7 +98,7 @@
                                     <span>Theme Editor</span>
                                 </div>
                             </x-slot>
-                            <x-filament-schemas::form wire:submit="save" class="space-y-6">
+                            <form wire:submit="save" class="space-y-6">
                                 {{ $this->builderForm }}
 
                                 <div class="sticky bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md pt-4 border-t border-gray-100 dark:border-gray-800 z-10">
@@ -106,7 +106,7 @@
                                         Save All Changes
                                     </x-filament::button>
                                 </div>
-                            </x-filament-schemas::form>
+                            </form>
                         </x-filament::section>
                     </div>
 

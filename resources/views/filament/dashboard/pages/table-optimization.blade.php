@@ -3,9 +3,9 @@
         <x-filament::section>
             <div class="flex items-end gap-4">
                 <div class="flex-1">
-                    <x-filament-schemas::form>
+                    <form>
                         {{ $this->optimizationForm }}
-                    </x-filament-schemas::form>
+                    </form>
                 </div>
                 <x-filament::button 
                     wire:click="runOptimization" 
