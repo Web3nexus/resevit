@@ -39,6 +39,10 @@ class EditProfile extends Page implements HasSchemas
             'currency' => $user->currency,
             'timezone' => $user->timezone,
         ];
+
+        $this->twoFactorData = [
+            'two_factor_enabled' => (bool) $user->two_factor_confirmed_at,
+        ];
     }
 
     protected function getSchemas(): array
