@@ -24,6 +24,8 @@ class PlatformAuthController extends Controller
         return response()->json([
             'app_name' => config('app.name'),
             'logo_url' => $settings->logo_path ? StorageHelper::getUrl($settings->logo_path) : null,
+            'logo_light_url' => $settings->logo_path ? StorageHelper::getUrl($settings->logo_path) : null,
+            'logo_dark_url' => $settings->logo_dark_path ? StorageHelper::getUrl($settings->logo_dark_path) : null,
             'hero_title' => $settings->landing_settings['hero_title'] ?? null,
             // Add other branding colors/fonts here if stored in DB
         ]);

@@ -10,6 +10,7 @@ class PlatformSetting extends Model
 
     protected $fillable = [
         'logo_path',
+        'logo_dark_path',
         'favicon_path',
         'supported_languages',
         'footer_settings',
@@ -85,7 +86,7 @@ class PlatformSetting extends Model
     {
         $settings = $this->footer_settings ?? self::getDefaultFooterSettings();
 
-        return array_filter($settings[$section] ?? [], fn ($link) => $link['is_visible'] ?? true);
+        return array_filter($settings[$section] ?? [], fn($link) => $link['is_visible'] ?? true);
     }
 
     /**

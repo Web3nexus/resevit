@@ -59,7 +59,7 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                         Grid::make(2)
                                             ->schema([
                                                 FileUpload::make('logo_path')
-                                                    ->label('Platform Logo')
+                                                    ->label('Light Mode Logo')
                                                     ->image()
                                                     ->maxSize(1024)
                                                     ->disk('public')
@@ -67,6 +67,16 @@ class ManagePlatformSettings extends Page implements HasSchemas
                                                     ->visibility('public')
                                                     ->imageEditor()
                                                     ->getUploadedFileUsing(fn($record) => $record?->logo_path ? \App\Helpers\StorageHelper::getUrl($record->logo_path) : null),
+
+                                                FileUpload::make('logo_dark_path')
+                                                    ->label('Dark Mode Logo')
+                                                    ->image()
+                                                    ->maxSize(1024)
+                                                    ->disk('public')
+                                                    ->directory('platform')
+                                                    ->visibility('public')
+                                                    ->imageEditor()
+                                                    ->getUploadedFileUsing(fn($record) => $record?->logo_dark_path ? \App\Helpers\StorageHelper::getUrl($record->logo_dark_path) : null),
 
                                                 FileUpload::make('favicon_path')
                                                     ->label('Favicon')
@@ -391,17 +401,20 @@ class ManagePlatformSettings extends Page implements HasSchemas
             $content = $heroSection->content ?? [];
             $landingSettings = $data['landing_settings'] ?? [];
 
-            $content['description'] = $landingSettings['hero_subtitle'] ?? $content['description'] ?? null;
-            $content['cta_text'] = $landingSettings['hero_cta_text'] ?? $content['cta_text'] ?? null;
-            $content['cta_url'] = $landingSettings['hero_cta_url'] ?? $content['cta_url'] ?? null;
-            $content['secondary_cta_text'] = $landingSettings['hero_secondary_cta_text'] ?? $content['secondary_cta_text'] ?? null;
-            $content['secondary_cta_url'] = $landingSettings['hero_secondary_cta_url'] ?? $content['secondary_cta_url'] ?? null;
-
             // 4. Update Section Main Fields
             $heroSection->update([
                 'title' => $landingSettings['hero_title'] ?? $heroSection->title,
                 'subtitle' => $landingSettings['hero_badge'] ?? $heroSection->subtitle, // Badge maps to subtitle
-                'content' => $content,
+                'content' => array_merge($heroSection->content ?? [], [
+                    'description' => $landingSettings['hero_subtitle'] ?? $content['description'] ?? null,
+                    'cta_text' => $landingSettings['hero_cta_text'] ?? $content['cta_text'] ?? null,
+                    'cta_url' => $landingSettings['hero_cta_url'] ?? $content['cta_url'] ?? null,
+                    'secondary_cta_text' => $landingSettings['hero_secondary_cta_text'] ?? $content['secondary_cta_text'] ?? null,
+                    'secondary_cta_url' => $landingSettings['hero_secondary_cta_url'] ?? $content['secondary_cta_url'] ?? null,
+                    'active_theme' => $landingSettings['active_theme'] ?? 'default',
+                    'logo_light' => !empty($data['logo_path']) ? \App\Helpers\StorageHelper::getUrl($data['logo_path']) : ($content['logo_light'] ?? null),
+                    'logo_dark' => !empty($data['logo_dark_path']) ? \App\Helpers\StorageHelper::getUrl($data['logo_dark_path']) : ($content['logo_dark'] ?? null),
+                ]),
             ]);
 
             // 5. Sync Image to First Item (Icon field)
