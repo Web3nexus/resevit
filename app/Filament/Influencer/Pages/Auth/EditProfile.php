@@ -18,7 +18,7 @@ class EditProfile extends BaseEditProfile implements HasSchemas
 {
     use InteractsWithSchemas;
 
-    protected static string $view = 'filament.influencer.pages.auth.edit-profile';
+    protected string $view = 'filament.influencer.pages.auth.edit-profile';
 
     public ?array $twoFactorData = [];
 
