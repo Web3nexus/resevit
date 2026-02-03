@@ -30,6 +30,8 @@ Route::prefix('v1')->group(function () {
             return $request->user();
         });
 
+        Route::post('/auth/email/resend', [PlatformAuthController::class, 'resendVerificationEmail']);
+
         // Investor Routes
         Route::get('/investor/opportunities', [InvestorController::class, 'opportunities']);
         Route::get('/investor/opportunities/{opportunity}', [InvestorController::class, 'showOpportunity']);

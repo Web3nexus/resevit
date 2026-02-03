@@ -27,6 +27,7 @@ class PlatformAuthController extends Controller
             'logo_light_url' => $settings->logo_path ? StorageHelper::getUrl($settings->logo_path) : null,
             'logo_dark_url' => $settings->logo_dark_path ? StorageHelper::getUrl($settings->logo_dark_path) : null,
             'hero_title' => $settings->landing_settings['hero_title'] ?? null,
+            'email_settings' => $settings->email_settings ?? [],
             // Add other branding colors/fonts here if stored in DB
         ]);
     }
@@ -143,12 +144,11 @@ class PlatformAuthController extends Controller
                 'password' => Hash::make($request->password),
                 'phone' => $request->phone,
                 'country' => $request->country,
-                // 'mobile' might be redundant if 'phone' is used, but populating both if needed
                 'mobile' => $request->phone,
             ]);
 
-            // Assign Business Owner Role?
-            // $user->assignRole('Business Owner'); 
+            // Assign Business Owner Role explicitly
+            $user->assignRole('Business Owner');
 
             $tenant = Tenant::create([
                 'name' => $request->business_name,
@@ -156,16 +156,22 @@ class PlatformAuthController extends Controller
                 'domain' => $request->domain,
                 'database_name' => 'resevit_' . Str::slug($request->business_slug),
                 'owner_user_id' => $user->id,
+                'mobile' => $request->phone, // Map to column
+                'country' => $request->country, // Map to column
+                'phone_country_code' => $request->phone_country_code, // Assuming column exists or use data
                 'data' => [
-                    'country' => $request->country,
+                    // Keep in data as backup or if used by other logic
                     'phone_country_code' => $request->phone_country_code,
-                    'phone' => $request->phone,
                 ],
                 'staff_range' => $request->staff_range,
                 'onboarding_status' => 'pending_setup',
             ]);
 
-            event(new \Illuminate\Auth\Events\Registered($user));
+            // Explicitly send verification email only if enabled
+            $settings = PlatformSetting::current();
+            if ($settings->email_settings['enable_registration_email'] ?? true) {
+                $user->sendEmailVerificationNotification();
+            }
 
             $token = $user->createToken('auth-token')->plainTextToken;
 
@@ -231,5 +237,48 @@ class PlatformAuthController extends Controller
         }
 
         return response()->json(['message' => 'Invalid type'], 400);
+    }
+
+    /**
+     * Mark the authenticated user's email address as verified.
+     */
+    public function verify(Request $request)
+    {
+        $user = User::find($request->route('id'));
+
+        if (!$user) {
+            return view('emails.rendered-text', ['content' => 'Invalid user.']);
+        }
+
+        if (!hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
+            return view('emails.rendered-text', ['content' => 'Invalid verification link.']);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            // Already verified
+            return view('emails.rendered-text', ['content' => 'Email already verified! You can return to the app.']);
+        }
+
+        if ($user->markEmailAsVerified()) {
+            event(new \Illuminate\Auth\Events\Verified($user));
+        }
+
+        return view('emails.rendered-text', ['content' => 'Email verified successfully! You can return to the app.']);
+    }
+
+    /**
+     * Resend the email verification notification.
+     */
+    public function resendVerificationEmail(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified.'], 400);
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return response()->json(['message' => 'Verification link sent!']);
     }
 }

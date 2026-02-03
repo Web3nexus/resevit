@@ -22,6 +22,7 @@ class PlatformSetting extends Model
         'stripe_settings',
         'stripe_mode',
         'plugin_settings',
+        'email_settings',
     ];
 
     protected $casts = [
@@ -35,6 +36,7 @@ class PlatformSetting extends Model
         'stripe_settings' => 'array',
         'stripe_mode' => 'string',
         'plugin_settings' => 'array',
+        'email_settings' => 'array',
     ];
 
     public static function current(): self

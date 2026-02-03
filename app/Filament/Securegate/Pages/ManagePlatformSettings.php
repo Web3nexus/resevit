@@ -297,6 +297,34 @@ class ManagePlatformSettings extends Page implements HasSchemas
                             ]),
                     ]),
 
+                Section::make('Notification Settings')
+                    ->description('Control which transactional emails are sent by the system.')
+                    ->icon('heroicon-o-envelope')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Toggle::make('email_settings.enable_registration_email')
+                                    ->label('Enable Registration Welcome Email')
+                                    ->helperText('Send a welcome/verification email when a user registers.')
+                                    ->default(true),
+
+                                Toggle::make('email_settings.enable_login_alert')
+                                    ->label('Enable Login Alerts')
+                                    ->helperText('Send an email alert on new device login (if implemented).')
+                                    ->default(false),
+
+                                Toggle::make('email_settings.enable_order_notifications')
+                                    ->label('Enable Order Notifications')
+                                    ->helperText('Send emails for new orders.')
+                                    ->default(true),
+
+                                Toggle::make('email_settings.enable_reservation_notifications')
+                                    ->label('Enable Reservation Notifications')
+                                    ->helperText('Send emails for new reservations.')
+                                    ->default(true),
+                            ]),
+                    ]),
+
                 Section::make('Footer Management')
                     ->description('Organize and manage the links displayed in the site footer.')
                     ->icon('heroicon-o-link')

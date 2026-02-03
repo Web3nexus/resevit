@@ -153,3 +153,7 @@ Route::get('/debug/seed-features', function () {
                 <b>ACTION:</b> Please perform a <b>HARD REFRESH (Cmd+Shift+R)</b> and log in again.';
     }
 });
+
+Route::get('/auth/email/verify/{id}/{hash}', [App\Http\Controllers\Api\V1\PlatformAuthController::class, 'verify'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
