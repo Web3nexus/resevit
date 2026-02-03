@@ -36,14 +36,8 @@
             Two-Factor Authentication
         </x-slot>
 
-        <form wire:submit="updateTwoFactor">
+        <div>
             {{ $this->twoFactorForm }}
-
-            <div class="mt-4 text-right">
-                <x-filament::button type="submit">
-                    Save 2FA Settings
-                </x-filament::button>
-            </div>
-        </form>
+        </div>
     </x-filament::section>
 </x-filament-panels::page>

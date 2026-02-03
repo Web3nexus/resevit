@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 
 class Influencer extends Authenticatable
 {
-    use Notifiable, TenantAuthenticatable;
+    use Notifiable, TenantAuthenticatable, \App\Traits\HasTwoFactorAuthentication;
 
     protected $connection = 'landlord';
 
@@ -31,6 +31,9 @@ class Influencer extends Authenticatable
         'account_number',
         'iban',
         'swift_code',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
     ];
 
     protected $hidden = [
@@ -40,6 +43,7 @@ class Influencer extends Authenticatable
 
     protected $casts = [
         'social_links' => 'array',
+        'two_factor_confirmed_at' => 'datetime',
     ];
 
     public function referrals(): MorphMany

@@ -29,7 +29,7 @@ class InvestorPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->viteTheme('resources/css/app.css')
             // enable the built-in login form
-            ->login()
+            ->login(\App\Filament\Invest\Pages\Auth\Login::class)
             // NOTE: Filament's registration page is enabled by adding the Register page
             // (most Filament installs will provide this). We keep login + registration support.
             ->colors([

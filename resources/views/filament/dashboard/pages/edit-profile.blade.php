@@ -46,4 +46,14 @@
             </div>
         </form>
     </x-filament::section>
+
+    <x-filament::section class="mt-6">
+        <x-slot name="heading">
+            Two-Factor Authentication
+        </x-slot>
+
+        <div>
+            {{ $this->twoFactorForm }}
+        </div>
+    </x-filament::section>
 </x-filament-panels::page>

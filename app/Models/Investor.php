@@ -23,7 +23,7 @@ use Spatie\Permission\Traits\HasRoles;
 class Investor extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\InvestorFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, \App\Traits\HasTwoFactorAuthentication;
 
     protected $connection = 'landlord';
 
@@ -45,6 +45,9 @@ class Investor extends Authenticatable implements FilamentUser
         'password',
         'phone',
         'wallet_balance',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
     ];
 
     /**
@@ -66,6 +69,7 @@ class Investor extends Authenticatable implements FilamentUser
         'email_verified_at' => 'datetime',
         'wallet_balance' => 'decimal:2',
         'password' => 'hashed',
+        'two_factor_confirmed_at' => 'datetime',
     ];
 
     /**

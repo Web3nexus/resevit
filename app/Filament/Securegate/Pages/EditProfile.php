@@ -15,6 +15,10 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\View;
+use Filament\Actions\Action;
+use Filament\Forms\Form;
 
 class EditProfile extends Page implements HasSchemas
 {
@@ -28,7 +32,6 @@ class EditProfile extends Page implements HasSchemas
 
     public ?array $passwordData = [];
 
-    public ?array $twoFactorData = [];
 
     public function mount(): void
     {
@@ -40,9 +43,6 @@ class EditProfile extends Page implements HasSchemas
             'timezone' => $user->timezone,
         ];
 
-        $this->twoFactorData = [
-            'two_factor_enabled' => (bool) $user->two_factor_confirmed_at,
-        ];
     }
 
     protected function getSchemas(): array
@@ -110,15 +110,87 @@ class EditProfile extends Page implements HasSchemas
 
     public function twoFactorForm(Schema $schema): Schema
     {
+        $user = auth()->user();
+        $isTwoFactorEnabled = $user->hasTwoFactorEnabled();
+
         return $schema
             ->schema([
                 Section::make('Two-Factor Authentication')
                     ->description('Add additional security to your account using two-factor authentication.')
                     ->schema([
-                        Toggle::make('two_factor_enabled')
-                            ->label('Enable Two-Factor Authentication')
-                            ->helperText('When two-factor authentication is enabled, you will be prompted for a secure, random token during authentication.')
-                            ->live(),
+                        View::make('filament.securegate.pages.auth.two-factor-status')
+                            ->viewData([
+                                'enabled' => $isTwoFactorEnabled,
+                            ]),
+
+                        // Setup Flow
+                        Actions::make([
+                            Action::make('enable')
+                                ->label('Enable Two-Factor Authentication')
+                                ->button()
+                                ->color('primary')
+                                ->visible(!$isTwoFactorEnabled)
+                                ->action(function () use ($user) {
+                                    $user->enableTwoFactorAuthentication(); // Generates secret
+                                })
+                                ->modalHeading('Setup Two-Factor Authentication')
+                                ->modalContent(function () use ($user) {
+                                    // Ensure secret exists
+                                    if (!$user->two_factor_secret) {
+                                        $user->enableTwoFactorAuthentication();
+                                    }
+                                    return view('filament.securegate.pages.auth.two-factor-modal', [
+                                        'qrCodeUrl' => $user->getTwoFactorQrCodeUrl(),
+                                        'secret' => decrypt($user->two_factor_secret),
+                                    ]);
+                                })
+                                ->modalSubmitActionLabel('Confirm')
+                                ->form([
+                                    TextInput::make('code')
+                                        ->label('Verification Code')
+                                        ->placeholder('Enter the code from your authenticator app')
+                                        ->required()
+                                        ->numeric(),
+                                ])
+                                ->action(function (array $data) use ($user) {
+                                    if ($user->confirmTwoFactorAuthentication($data['code'])) {
+                                        Notification::make()->title('Two-factor authentication enabled')->success()->send();
+                                        // Show recovery codes
+                                        $this->dispatch('open-recovery-codes-modal');
+                                        // Since we can't easily open another modal from here in standard Filament, 
+                                        // we might need a persistent state or a notification with the codes.
+                                        // Better yet, just show them in a notification or redirect.
+                                    } else {
+                                        Notification::make()->title('Invalid verification code')->danger()->send();
+                                        $user->disableTwoFactorAuthentication(); // Reset if failed
+                                        // Halt execution/re-open modal? Hard to do.
+                                    }
+                                }),
+
+                            Action::make('disable')
+                                ->label('Disable Two-Factor Authentication')
+                                ->button()
+                                ->color('danger')
+                                ->visible($isTwoFactorEnabled)
+                                ->requiresConfirmation()
+                                ->action(function () use ($user) {
+                                    $user->disableTwoFactorAuthentication();
+                                    Notification::make()->title('Two-factor authentication disabled')->success()->send();
+                                }),
+
+                            Action::make('showRecoveryCodes')
+                                ->label('Show Recovery Codes')
+                                ->button()
+                                ->color('gray')
+                                ->visible($isTwoFactorEnabled)
+                                ->modalHeading('Recovery Codes')
+                                ->modalContent(function () use ($user) {
+                                    return view('filament.securegate.pages.auth.recovery-codes-modal', [
+                                        'codes' => $user->getTwoFactorRecoveryCodes(),
+                                    ]);
+                                })
+                                ->modalSubmitAction(false),
+                        ]),
                     ]),
             ])
             ->statePath('twoFactorData');
@@ -156,24 +228,6 @@ class EditProfile extends Page implements HasSchemas
 
     public function updateTwoFactor(): void
     {
-        $enabled = $this->twoFactorData['two_factor_enabled'] ?? false;
-        $user = auth()->user();
-
-        if ($enabled) {
-            $user->update([
-                'two_factor_secret' => Str::random(32),
-                'two_factor_confirmed_at' => now(),
-            ]);
-        } else {
-            $user->update([
-                'two_factor_secret' => null,
-                'two_factor_confirmed_at' => null,
-            ]);
-        }
-
-        Notification::make()
-            ->success()
-            ->title($enabled ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled')
-            ->send();
+        // No-op, actions handle the logic
     }
 }

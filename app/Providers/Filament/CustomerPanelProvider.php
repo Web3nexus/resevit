@@ -28,7 +28,7 @@ class CustomerPanelProvider extends PanelProvider
             ->authGuard('customer')
             ->databaseNotifications()
             ->viteTheme('resources/css/app.css')
-            ->login()
+            ->login(\App\Filament\Customer\Pages\Auth\Login::class)
             ->colors([
                 'primary' => \Filament\Support\Colors\Color::hex('#0B132B'),
             ])

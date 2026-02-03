@@ -26,7 +26,7 @@ class DashboardPanelProvider extends PanelProvider
             ->default()
             ->id('dashboard')
             ->path('dashboard')
-            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->login(\App\Filament\Dashboard\Pages\Auth\Login::class)
             ->registration(\App\Filament\Pages\Auth\Register::class)
             ->databaseNotifications()
             // ->databaseNotificationsPolling('30s')

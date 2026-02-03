@@ -57,14 +57,10 @@ class Admin extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
-            'two_factor_recovery_codes' => 'array',
         ];
     }
 
-    public function hasTwoFactorEnabled(): bool
-    {
-        return !is_null($this->two_factor_secret) && !is_null($this->two_factor_confirmed_at);
-    }
+    use \App\Traits\HasTwoFactorAuthentication;
 
     /**
      * Automatically hash the password when set.

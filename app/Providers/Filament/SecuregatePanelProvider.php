@@ -27,7 +27,7 @@ class SecuregatePanelProvider extends PanelProvider
             ->authGuard('securegate')
             ->databaseNotifications()
             ->viteTheme('resources/css/app.css')
-            ->login()
+            ->login(\App\Filament\Securegate\Pages\Auth\Login::class)
             ->colors([
                 'primary' => \Filament\Support\Colors\Color::hex('#0B132B'),
             ])
@@ -56,14 +56,14 @@ class SecuregatePanelProvider extends PanelProvider
             ->userMenuItems([
                 'profile' => \Filament\Navigation\MenuItem::make()
                     ->label('Edit Profile')
-                    ->url(fn (): string => EditProfile::getUrl())
+                    ->url(fn(): string => EditProfile::getUrl())
                     ->icon('heroicon-m-user-circle'),
             ])
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->brandLogo(fn () => ($setting = \App\Models\PlatformSetting::current()) && $setting->logo_path ? \App\Helpers\StorageHelper::getUrl($setting->logo_path) : null)
-            ->favicon(fn () => ($setting = \App\Models\PlatformSetting::current()) && $setting->favicon_path ? \App\Helpers\StorageHelper::getUrl($setting->favicon_path) : null)
+            ->brandLogo(fn() => ($setting = \App\Models\PlatformSetting::current()) && $setting->logo_path ? \App\Helpers\StorageHelper::getUrl($setting->logo_path) : null)
+            ->favicon(fn() => ($setting = \App\Models\PlatformSetting::current()) && $setting->favicon_path ? \App\Helpers\StorageHelper::getUrl($setting->favicon_path) : null)
             ->navigationGroups([
                 'Dashboard',
                 'Marketing Tools',
@@ -79,7 +79,7 @@ class SecuregatePanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->renderHook(
                 'panels::user-menu.before',
-                fn () => view('filament.components.language-switcher-hook')
+                fn() => view('filament.components.language-switcher-hook')
             );
 
     }

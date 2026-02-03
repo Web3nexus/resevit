@@ -100,14 +100,10 @@ class User extends Authenticatable implements FilamentUser
             'newsletter_subscribed' => 'boolean',
             'wallet_balance' => 'decimal:2',
             'two_factor_confirmed_at' => 'datetime',
-            'two_factor_recovery_codes' => 'array',
         ];
     }
 
-    public function hasTwoFactorEnabled(): bool
-    {
-        return ! is_null($this->two_factor_secret) && ! is_null($this->two_factor_confirmed_at);
-    }
+    use \App\Traits\HasTwoFactorAuthentication;
 
     public function transactions()
     {
@@ -126,7 +122,7 @@ class User extends Authenticatable implements FilamentUser
     protected static function booted()
     {
         static::creating(function ($user) {
-            if (! $user->referral_code) {
+            if (!$user->referral_code) {
                 $user->referral_code = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(8));
             }
         });
