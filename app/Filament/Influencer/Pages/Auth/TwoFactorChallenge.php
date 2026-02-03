@@ -15,7 +15,7 @@ class TwoFactorChallenge extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string $view = 'filament.influencer.pages.auth.two-factor-challenge';
+    protected string $view = 'filament.influencer.pages.auth.two-factor-challenge';
 
     protected static string $layout = 'filament-panels::components.layout.base';
 
