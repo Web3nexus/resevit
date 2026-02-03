@@ -21,14 +21,38 @@ class PlatformAuthController extends Controller
     {
         $settings = PlatformSetting::current();
 
+        // 1. Branding
+        $branding = [
+            'primaryColor' => '#E2B33B', // Default brand color
+            'logoUrl' => $settings->logo_path ? StorageHelper::getUrl($settings->logo_path) : null,
+        ];
+
+        // 2. Tenant Info (Landlord level defaults)
+        $tenantInfo = [
+            'id' => 'landlord',
+            'name' => config('app.name', 'Resevit'),
+            'currency' => 'USD',
+            'timezone' => 'UTC',
+        ];
+
+        // 3. Features Toggle
+        $features = [
+            'registration' => true,
+            'search' => true,
+            'business_owner_reg' => true,
+            'investor_reg' => true,
+        ];
+
+        // 4. Pricing Plans (for the "pricing or something" part)
+        $plans = PricingPlan::where('is_active', true)->orderBy('order')->get();
+
         return response()->json([
-            'app_name' => config('app.name'),
-            'logo_url' => $settings->logo_path ? StorageHelper::getUrl($settings->logo_path) : null,
-            'logo_light_url' => $settings->logo_path ? StorageHelper::getUrl($settings->logo_path) : null,
-            'logo_dark_url' => $settings->logo_dark_path ? StorageHelper::getUrl($settings->logo_dark_path) : null,
-            'hero_title' => $settings->landing_settings['hero_title'] ?? null,
+            'branding' => $branding,
+            'tenant' => $tenantInfo,
+            'features' => $features,
             'email_settings' => $settings->email_settings ?? [],
-            // Add other branding colors/fonts here if stored in DB
+            'pricing_plans' => $plans, // Added for UI needs
+            'app_name' => config('app.name'),
         ]);
     }
 
@@ -124,116 +148,142 @@ class PlatformAuthController extends Controller
 
         $type = $request->type;
 
-        if ($type === 'business_owner') {
-            $request->validate([
-                'email' => 'unique:users,email',
-                'business_name' => 'required|string',
-                'business_slug' => 'required|string|unique:tenants,slug',
-                'domain' => 'required|string|unique:tenants,domain',
-                'name' => 'required|string',
-                'country' => 'required|string',
-                'phone' => 'required|string',
-                'phone_country_code' => 'required|string',
-                'staff_range' => 'required|string',
-            ]);
+        try {
+            if ($type === 'business_owner') {
+                $request->validate([
+                    'email' => 'unique:users,email',
+                    'business_name' => 'required|string',
+                    'business_slug' => 'required|string|unique:tenants,slug',
+                    'domain' => 'required|string|unique:tenants,domain',
+                    'name' => 'required|string',
+                    'country' => 'required|string',
+                    'phone' => 'required|string',
+                    'phone_country_code' => 'required|string',
+                    'staff_range' => 'required|string',
+                ]);
 
-            // Logic adapted from RegisteredUserController
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'phone' => $request->phone,
-                'country' => $request->country,
-                'mobile' => $request->phone,
-            ]);
+                // Logic adapted from RegisteredUserController
+                $user = User::create([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'phone' => $request->phone,
+                    'country' => $request->country,
+                    'mobile' => $request->phone,
+                ]);
 
-            // Assign Business Owner Role explicitly
-            $user->assignRole('Business Owner');
+                // Assign Business Owner Role explicitly
+                if (class_exists(\Spatie\Permission\Models\Role::class)) {
+                    // Check if role exists before assigning
+                    $roleExists = \Spatie\Permission\Models\Role::where('name', 'Business Owner')->exists();
+                    if ($roleExists) {
+                        $user->assignRole('Business Owner');
+                    }
+                }
 
-            $tenant = Tenant::create([
-                'name' => $request->business_name,
-                'slug' => $request->business_slug,
-                'domain' => $request->domain,
-                'database_name' => 'resevit_' . Str::slug($request->business_slug),
-                'owner_user_id' => $user->id,
-                'mobile' => $request->phone, // Map to column
-                'country' => $request->country, // Map to column
-                'phone_country_code' => $request->phone_country_code, // Assuming column exists or use data
-                'data' => [
-                    // Keep in data as backup or if used by other logic
-                    'phone_country_code' => $request->phone_country_code,
-                ],
-                'staff_range' => $request->staff_range,
-                'onboarding_status' => 'pending_setup',
-            ]);
+                $tenant = Tenant::create([
+                    'name' => $request->business_name,
+                    'slug' => $request->business_slug,
+                    'domain' => $request->domain,
+                    'database_name' => 'resevit_' . Str::slug($request->business_slug),
+                    'owner_user_id' => $user->id,
+                    'mobile' => $request->phone, // Map to column
+                    'country' => $request->country, // Map to column
+                    'phone_country_code' => $request->phone_country_code, // Assuming column exists or use data
+                    'data' => [
+                        // Keep in data as backup or if used by other logic
+                        'phone_country_code' => $request->phone_country_code,
+                    ],
+                    'staff_range' => $request->staff_range,
+                    'onboarding_status' => 'pending_setup',
+                ]);
 
-            // Explicitly send verification email only if enabled
-            $settings = PlatformSetting::current();
-            if ($settings->email_settings['enable_registration_email'] ?? true) {
-                $user->sendEmailVerificationNotification();
+                // Explicitly send verification email only if enabled
+                $settings = PlatformSetting::current();
+                if ($settings->email_settings['enable_registration_email'] ?? true) {
+                    $user->sendEmailVerificationNotification();
+                }
+
+                $token = $user->createToken('auth-token')->plainTextToken;
+
+                return response()->json([
+                    'message' => 'Business registered successfully',
+                    'token' => $token,
+                    'user' => $user,
+                    'role' => 'business_owner',
+                    'tenant_domain' => $tenant->domain,
+                    'onboarding_status' => 'pending_setup',
+                    'email_verified_at' => null,
+                ], 201);
             }
-
-            $token = $user->createToken('auth-token')->plainTextToken;
-
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Registration Error: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Business registered successfully',
-                'token' => $token,
-                'user' => $user,
-                'role' => 'business_owner',
-                'tenant_domain' => $tenant->domain,
-                'onboarding_status' => 'pending_setup',
-                'email_verified_at' => null,
-            ], 201);
+                'message' => 'Registration failed: ' . $e->getMessage(),
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null
+            ], 500);
         }
 
-        if ($type === 'customer') {
-            $request->validate([
-                'email' => 'unique:customers,email',
-                'name' => 'required|string',
-            ]);
+        try {
+            if ($type === 'customer') {
+                $request->validate([
+                    'email' => 'unique:customers,email',
+                    'name' => 'required|string',
+                ]);
 
-            $user = Customer::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
-
-            // $user->assignRole('customer');
-
-            $token = $user->createToken('auth-token')->plainTextToken;
-
-            return response()->json([
-                'message' => 'Customer registered successfully',
-                'token' => $token,
-                'user' => $user,
-                'role' => 'customer',
-            ], 201);
-        }
-
-        if ($type === 'investor') {
-            $request->validate([
-                'email' => 'unique:investors,email', // Assuming investors table
-                'name' => 'required|string',
-            ]);
-
-            // Check if Investor model exists. For now, referencing generic.
-            // If class doesn't exist, this will error, but implementing placeholder.
-            if (class_exists(Investor::class)) {
-                $user = Investor::create([
+                $user = Customer::create([
                     'name' => $request->name,
                     'email' => $request->email,
                     'password' => Hash::make($request->password),
                 ]);
+
+                // $user->assignRole('customer');
+
                 $token = $user->createToken('auth-token')->plainTextToken;
+
                 return response()->json([
-                    'message' => 'Investor registered successfully',
+                    'message' => 'Customer registered successfully',
                     'token' => $token,
                     'user' => $user,
-                    'role' => 'investor',
+                    'role' => 'customer',
+                    'onboarding_status' => 'active',
                 ], 201);
-            } else {
-                return response()->json(['message' => 'Investor registration not implemented'], 501);
             }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Customer Registration Error: ' . $e->getMessage());
+            return response()->json(['message' => 'Registration failed: ' . $e->getMessage()], 500);
+        }
+
+        try {
+            if ($type === 'investor') {
+                $request->validate([
+                    'email' => 'unique:investors,email', // Assuming investors table
+                    'name' => 'required|string',
+                ]);
+
+                // Check if Investor model exists. For now, referencing generic.
+                // If class doesn't exist, this will error, but implementing placeholder.
+                if (class_exists(Investor::class)) {
+                    $user = Investor::create([
+                        'name' => $request->name,
+                        'email' => $request->email,
+                        'password' => Hash::make($request->password),
+                    ]);
+                    $token = $user->createToken('auth-token')->plainTextToken;
+                    return response()->json([
+                        'message' => 'Investor registered successfully',
+                        'token' => $token,
+                        'user' => $user,
+                        'role' => 'investor',
+                        'onboarding_status' => 'active',
+                    ], 201);
+                } else {
+                    return response()->json(['message' => 'Investor registration not implemented'], 501);
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Investor Registration Error: ' . $e->getMessage());
+            return response()->json(['message' => 'Registration failed: ' . $e->getMessage()], 500);
         }
 
         return response()->json(['message' => 'Invalid type'], 400);
