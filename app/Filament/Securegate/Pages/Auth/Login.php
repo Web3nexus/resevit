@@ -5,7 +5,7 @@ namespace App\Filament\Securegate\Pages\Auth;
 use Filament\Auth\Pages\Login as BaseLogin;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Validation\ValidationException;
-use Filament\Http\Responses\Auth\Contracts\LoginResponse;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Filament\Facades\Filament;
