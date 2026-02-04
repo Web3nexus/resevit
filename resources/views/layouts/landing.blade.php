@@ -10,6 +10,10 @@
     <meta name="description"
         content="@yield('meta_description', 'Advanced Reservation & Management System for Restaurants')">
 
+    @if(!empty($platformSettings->favicon_path))
+        <link rel="icon" type="image/png" href="{{ \App\Helpers\StorageHelper::getUrl($platformSettings->favicon_path) }}">
+    @endif
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

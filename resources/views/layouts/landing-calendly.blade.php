@@ -9,6 +9,14 @@
     <title>@yield('title', config('app.name'))</title>
     <meta name="description" content="@yield('meta_description', 'Modern Restaurant Management Platform')">
 
+    @php
+        $platformSettings = \App\Models\PlatformSetting::current();
+    @endphp
+
+    @if(!empty($platformSettings->favicon_path))
+        <link rel="icon" type="image/png" href="{{ \App\Helpers\StorageHelper::getUrl($platformSettings->favicon_path) }}">
+    @endif
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +26,6 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     @php
-        $platformSettings = \App\Models\PlatformSetting::current();
         $theme = $platformSettings->calendly_theme_settings ?? [];
         // Calendly blue: #006BFF - we'll use this as primary
         $primaryColor = $theme['primary_color'] ?? '#006BFF';

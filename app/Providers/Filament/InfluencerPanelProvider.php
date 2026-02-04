@@ -56,6 +56,8 @@ class InfluencerPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->brandLogo(fn() => ($setting = \App\Models\PlatformSetting::current()) && $setting->logo_path ? \App\Helpers\StorageHelper::getUrl($setting->logo_path) : null)
+            ->favicon(fn() => ($setting = \App\Models\PlatformSetting::current()) && $setting->favicon_path ? \App\Helpers\StorageHelper::getUrl($setting->favicon_path) : null);
     }
 }

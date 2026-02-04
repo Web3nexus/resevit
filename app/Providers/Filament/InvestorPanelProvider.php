@@ -78,6 +78,8 @@ class InvestorPanelProvider extends PanelProvider
             ->renderHook(
                 'panels::user-menu.before',
                 fn() => view('filament.components.language-switcher-hook')
-            );
+            )
+            ->brandLogo(fn() => ($setting = \App\Models\PlatformSetting::current()) && $setting->logo_path ? \App\Helpers\StorageHelper::getUrl($setting->logo_path) : null)
+            ->favicon(fn() => ($setting = \App\Models\PlatformSetting::current()) && $setting->favicon_path ? \App\Helpers\StorageHelper::getUrl($setting->favicon_path) : null);
     }
 }
