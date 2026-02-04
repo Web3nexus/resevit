@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Customer;
 use App\Models\Investor; // Assuming Investor model exists
 use App\Models\Tenant;
+use App\Models\PricingPlan;
 use App\Jobs\CreateTenantDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -185,13 +186,10 @@ class PlatformAuthController extends Controller
                     'name' => $request->business_name,
                     'slug' => $request->business_slug,
                     'domain' => $request->domain,
-                    'database_name' => 'resevit_' . Str::slug($request->business_slug),
                     'owner_user_id' => $user->id,
                     'mobile' => $request->phone, // Map to column
                     'country' => $request->country, // Map to column
-                    'phone_country_code' => $request->phone_country_code, // Assuming column exists or use data
                     'data' => [
-                        // Keep in data as backup or if used by other logic
                         'phone_country_code' => $request->phone_country_code,
                     ],
                     'staff_range' => $request->staff_range,
