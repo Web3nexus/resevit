@@ -124,7 +124,22 @@
         @endif
 
         <div class="content">
-            {!! clean($body) !!}
+            {!! clean($body ?? $slot ?? '') !!}
+
+            @if(isset($actionUrl))
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="{{ $actionUrl }}" class="cta-button">
+                        {{ $actionText ?? 'Click Here' }}
+                    </a>
+                </div>
+            @endif
+
+            @if(isset($subcopy))
+                <div
+                    style="margin-top: 30px; border-top: 1px solid #E5E7EB; padding-top: 20px; font-size: 12px; color: #6B7280;">
+                    {!! clean($subcopy) !!}
+                </div>
+            @endif
         </div>
 
         <div class="footer">
