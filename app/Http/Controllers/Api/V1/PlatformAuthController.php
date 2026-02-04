@@ -95,15 +95,18 @@ class PlatformAuthController extends Controller
                     }
                 }
 
-                // Ensure onboarding_status is part of the user object for the frontend
                 $user->onboarding_status = $onboardingStatus;
+
+                $userArray = $user->toArray();
+                $userArray['onboarding_status'] = $onboardingStatus;
+                $userArray['email_verified_at'] = $user->email_verified_at;
 
                 return response()->json([
                     'token' => $token,
-                    'user' => $user,
-                    'role' => $role, // Primary role for routing
-                    'roles' => $roles, // All assigned roles
-                    'permissions' => $permissions, // All permissions
+                    'user' => $userArray,
+                    'role' => $role,
+                    'roles' => $roles,
+                    'permissions' => $permissions,
                     'onboarding_status' => $onboardingStatus,
                 ]);
             }
@@ -114,11 +117,13 @@ class PlatformAuthController extends Controller
             if (Auth::guard('customer')->attempt($credentials)) {
                 $user = Auth::guard('customer')->user();
                 $token = $user->createToken('auth-token')->plainTextToken;
-                $user->onboarding_status = 'active';
+                $userArray = $user->toArray();
+                $userArray['onboarding_status'] = 'active';
+                $userArray['email_verified_at'] = $user->email_verified_at;
 
                 return response()->json([
                     'token' => $token,
-                    'user' => $user,
+                    'user' => $userArray,
                     'role' => 'customer',
                     'onboarding_status' => 'active',
                 ]);
@@ -131,11 +136,13 @@ class PlatformAuthController extends Controller
             if (Auth::guard('investor')->attempt($credentials)) {
                 $user = Auth::guard('investor')->user();
                 $token = $user->createToken('auth-token')->plainTextToken;
-                $user->onboarding_status = 'active';
+                $userArray = $user->toArray();
+                $userArray['onboarding_status'] = 'active';
+                $userArray['email_verified_at'] = $user->email_verified_at;
 
                 return response()->json([
                     'token' => $token,
-                    'user' => $user,
+                    'user' => $userArray,
                     'role' => 'investor',
                     'onboarding_status' => 'active',
                 ]);
@@ -220,13 +227,14 @@ class PlatformAuthController extends Controller
                     \Illuminate\Support\Facades\Log::warning('Registration Email failed but user created: ' . $e->getMessage());
                 }
 
-                $user->email_verified_at = null;
-                $user->onboarding_status = 'pending_setup';
+                $userArray = $user->toArray();
+                $userArray['email_verified_at'] = null;
+                $userArray['onboarding_status'] = 'pending_setup';
 
                 return response()->json([
                     'message' => 'Business registered successfully',
                     'token' => $token,
-                    'user' => $user,
+                    'user' => $userArray,
                     'role' => 'business_owner',
                     'tenant_domain' => $tenant->domain,
                     'onboarding_status' => 'pending_setup',
@@ -258,12 +266,14 @@ class PlatformAuthController extends Controller
 
                 $token = $user->createToken('auth-token')->plainTextToken;
 
-                $user->onboarding_status = 'active';
+                $userArray = $user->toArray();
+                $userArray['onboarding_status'] = 'active';
+                $userArray['email_verified_at'] = $user->email_verified_at;
 
                 return response()->json([
                     'message' => 'Customer registered successfully',
                     'token' => $token,
-                    'user' => $user,
+                    'user' => $userArray,
                     'role' => 'customer',
                     'onboarding_status' => 'active',
                 ], 201);
