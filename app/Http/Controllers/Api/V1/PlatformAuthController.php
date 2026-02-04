@@ -165,19 +165,20 @@ class PlatformAuthController extends Controller
 
                 $domain = $request->domain ?? $request->business_slug . '.' . config('tenancy.preview_domain');
 
+                \Illuminate\Support\Facades\DB::beginTransaction();
+
                 // Logic adapted from RegisteredUserController
                 $user = \App\Models\User::create([
                     'name' => $request->name,
                     'email' => $request->email,
-                    'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+                    'password' => $request->password, // Model setter/cast handles hashing
                     'phone' => $request->phone,
                     'country' => $request->country,
                     'mobile' => $request->phone,
                 ]);
 
-                // Assign Business Owner Role explicitly
+                // Associate with role if applicable
                 if (class_exists(\Spatie\Permission\Models\Role::class)) {
-                    // Check if role exists before assigning
                     $roleExists = \Spatie\Permission\Models\Role::where('name', 'Business Owner')->exists();
                     if ($roleExists) {
                         $user->assignRole('Business Owner');
@@ -189,8 +190,8 @@ class PlatformAuthController extends Controller
                     'slug' => $request->business_slug,
                     'domain' => $domain,
                     'owner_user_id' => $user->id,
-                    'mobile' => $request->phone, // Map to column
-                    'country' => $request->country, // Map to column
+                    'mobile' => $request->phone,
+                    'country' => $request->country,
                     'data' => [
                         'phone_country_code' => $request->phone_country_code,
                     ],
@@ -198,13 +199,20 @@ class PlatformAuthController extends Controller
                     'onboarding_status' => 'pending_setup',
                 ]);
 
-                // Explicitly send verification email only if enabled
-                $settings = \App\Models\PlatformSetting::current();
-                if ($settings->email_settings['enable_registration_email'] ?? true) {
-                    $user->sendEmailVerificationNotification();
-                }
-
                 $token = $user->createToken('auth-token')->plainTextToken;
+
+                \Illuminate\Support\Facades\DB::commit();
+
+                // Side effects after commit (to allow registration even if email fails - or keep it inside if it must succeed)
+                // Let's keep email after commit so if it fails, the user is still registered and can verify later.
+                try {
+                    $settings = \App\Models\PlatformSetting::current();
+                    if ($settings->email_settings['enable_registration_email'] ?? true) {
+                        $user->sendEmailVerificationNotification();
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Registration Email failed but user created: ' . $e->getMessage());
+                }
 
                 return response()->json([
                     'message' => 'Business registered successfully',
@@ -217,6 +225,7 @@ class PlatformAuthController extends Controller
                 ], 201);
             }
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
             \Illuminate\Support\Facades\Log::error('Registration Error: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Registration failed: ' . $e->getMessage(),

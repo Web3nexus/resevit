@@ -104,6 +104,25 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         ];
     }
 
+    /**
+     * Hash password automatically when setting the attribute.
+     */
+    public function setPasswordAttribute(?string $value): void
+    {
+        if ($value === null || $value === '') {
+            $this->attributes['password'] = $value;
+            return;
+        }
+
+        // Avoid double-hashing if a hashed value is provided.
+        if (preg_match('/^\$2y\$|^\$argon2i\$|^\$argon2id\$/', $value)) {
+            $this->attributes['password'] = $value;
+            return;
+        }
+
+        $this->attributes['password'] = \Illuminate\Support\Facades\Hash::make($value);
+    }
+
     use \App\Traits\HasTwoFactorAuthentication;
 
     public function transactions()
