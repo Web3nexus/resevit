@@ -61,7 +61,7 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
                                 ->required()
                                 ->placeholder('Main Branch')
                                 ->live(onBlur: true)
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('branch_slug', Str::slug($state))),
+                                ->afterStateUpdated(fn($state, callable $set) => $set('branch_slug', Str::slug($state))),
                             TextInput::make('branch_slug')
                                 ->label('Branch URL Slug')
                                 ->required()
@@ -85,7 +85,24 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
                                 ->label('Enable Online Food Ordering')
                                 ->default(true),
                         ]),
-                ]),
+                ])
+                    ->submitAction(
+                        \Filament\Actions\Action::make('submit')
+                            ->label('Complete Setup')
+                            ->color('primary')
+                            ->size('lg')
+                            ->submit('submit')
+                    )
+                    ->nextAction(
+                        fn(\Filament\Actions\Action $action) => $action
+                            ->label('Next Step')
+                            ->color('primary')
+                    )
+                    ->previousAction(
+                        fn(\Filament\Actions\Action $action) => $action
+                            ->label('Back')
+                            ->color('gray')
+                    ),
             ])
             ->statePath('data');
     }
