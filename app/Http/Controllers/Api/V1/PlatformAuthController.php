@@ -95,16 +95,16 @@ class PlatformAuthController extends Controller
                     }
                 }
 
+                // Ensure onboarding_status is part of the user object for the frontend
+                $user->onboarding_status = $onboardingStatus;
+
                 return response()->json([
                     'token' => $token,
                     'user' => $user,
                     'role' => $role, // Primary role for routing
                     'roles' => $roles, // All assigned roles
                     'permissions' => $permissions, // All permissions
-                    'email_verified_at' => $user->email_verified_at,
-                    // Note: 'business_owner' user creates a tenant. Staff belongs to tenant.
-                    // This logic might need refinement if Staff logins are on Tenant URLs.
-                    // But for Central App login:
+                    'onboarding_status' => $onboardingStatus,
                 ]);
             }
         }
@@ -114,10 +114,13 @@ class PlatformAuthController extends Controller
             if (Auth::guard('customer')->attempt($credentials)) {
                 $user = Auth::guard('customer')->user();
                 $token = $user->createToken('auth-token')->plainTextToken;
+                $user->onboarding_status = 'active';
+
                 return response()->json([
                     'token' => $token,
                     'user' => $user,
                     'role' => 'customer',
+                    'onboarding_status' => 'active',
                 ]);
             }
         }
@@ -128,10 +131,13 @@ class PlatformAuthController extends Controller
             if (Auth::guard('investor')->attempt($credentials)) {
                 $user = Auth::guard('investor')->user();
                 $token = $user->createToken('auth-token')->plainTextToken;
+                $user->onboarding_status = 'active';
+
                 return response()->json([
                     'token' => $token,
                     'user' => $user,
                     'role' => 'investor',
+                    'onboarding_status' => 'active',
                 ]);
             }
         }
@@ -214,6 +220,9 @@ class PlatformAuthController extends Controller
                     \Illuminate\Support\Facades\Log::warning('Registration Email failed but user created: ' . $e->getMessage());
                 }
 
+                $user->email_verified_at = null;
+                $user->onboarding_status = 'pending_setup';
+
                 return response()->json([
                     'message' => 'Business registered successfully',
                     'token' => $token,
@@ -221,7 +230,6 @@ class PlatformAuthController extends Controller
                     'role' => 'business_owner',
                     'tenant_domain' => $tenant->domain,
                     'onboarding_status' => 'pending_setup',
-                    'email_verified_at' => null,
                 ], 201);
             }
         } catch (\Exception $e) {
@@ -249,6 +257,8 @@ class PlatformAuthController extends Controller
                 // $user->assignRole('customer');
 
                 $token = $user->createToken('auth-token')->plainTextToken;
+
+                $user->onboarding_status = 'active';
 
                 return response()->json([
                     'message' => 'Customer registered successfully',
