@@ -20,7 +20,7 @@ class PlatformAuthController extends Controller
 {
     public function bootstrap()
     {
-        $settings = PlatformSetting::current();
+        $settings = \App\Models\PlatformSetting::current();
 
         // 1. Branding
         $branding = [
@@ -45,7 +45,7 @@ class PlatformAuthController extends Controller
         ];
 
         // 4. Pricing Plans (for the "pricing or something" part)
-        $plans = PricingPlan::where('is_active', true)->orderBy('order')->get();
+        $plans = \App\Models\PricingPlan::where('is_active', true)->orderBy('order')->get();
 
         return response()->json([
             'branding' => $branding,
@@ -166,10 +166,10 @@ class PlatformAuthController extends Controller
                 $domain = $request->domain ?? $request->business_slug . '.' . config('tenancy.preview_domain');
 
                 // Logic adapted from RegisteredUserController
-                $user = User::create([
+                $user = \App\Models\User::create([
                     'name' => $request->name,
                     'email' => $request->email,
-                    'password' => Hash::make($request->password),
+                    'password' => \Illuminate\Support\Facades\Hash::make($request->password),
                     'phone' => $request->phone,
                     'country' => $request->country,
                     'mobile' => $request->phone,
@@ -184,7 +184,7 @@ class PlatformAuthController extends Controller
                     }
                 }
 
-                $tenant = Tenant::create([
+                $tenant = \App\Models\Tenant::create([
                     'name' => $request->business_name,
                     'slug' => $request->business_slug,
                     'domain' => $domain,
@@ -199,7 +199,7 @@ class PlatformAuthController extends Controller
                 ]);
 
                 // Explicitly send verification email only if enabled
-                $settings = PlatformSetting::current();
+                $settings = \App\Models\PlatformSetting::current();
                 if ($settings->email_settings['enable_registration_email'] ?? true) {
                     $user->sendEmailVerificationNotification();
                 }
