@@ -155,13 +155,15 @@ class PlatformAuthController extends Controller
                     'email' => 'unique:users,email',
                     'business_name' => 'required|string',
                     'business_slug' => 'required|string|unique:tenants,slug',
-                    'domain' => 'required|string|unique:tenants,domain',
+                    'domain' => 'nullable|string|unique:tenants,domain',
                     'name' => 'required|string',
                     'country' => 'required|string',
                     'phone' => 'required|string',
                     'phone_country_code' => 'required|string',
                     'staff_range' => 'required|string',
                 ]);
+
+                $domain = $request->domain ?? $request->business_slug . '.' . config('tenancy.preview_domain');
 
                 // Logic adapted from RegisteredUserController
                 $user = User::create([
@@ -185,7 +187,7 @@ class PlatformAuthController extends Controller
                 $tenant = Tenant::create([
                     'name' => $request->business_name,
                     'slug' => $request->business_slug,
-                    'domain' => $request->domain,
+                    'domain' => $domain,
                     'owner_user_id' => $user->id,
                     'mobile' => $request->phone, // Map to column
                     'country' => $request->country, // Map to column
