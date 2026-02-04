@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Filament\Panel;
+use Laravel\Sanctum\HasApiTokens;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -23,7 +24,7 @@ use Spatie\Permission\Traits\HasRoles;
 class Investor extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\InvestorFactory> */
-    use HasFactory, Notifiable, HasRoles, \App\Traits\HasTwoFactorAuthentication;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, \App\Traits\HasTwoFactorAuthentication;
 
     protected $connection = 'landlord';
 
