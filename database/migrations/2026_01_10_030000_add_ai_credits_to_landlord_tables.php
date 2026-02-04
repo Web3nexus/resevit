@@ -10,13 +10,17 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::connection('landlord')->table('tenants', function (Blueprint $table) {
-            $table->decimal('ai_credits', 15, 6)->default(0)->after('status');
-        });
+        if (!Schema::connection('landlord')->hasColumn('tenants', 'ai_credits')) {
+            Schema::connection('landlord')->table('tenants', function (Blueprint $table) {
+                $table->decimal('ai_credits', 15, 6)->default(0)->after('status');
+            });
+        }
 
-        Schema::connection('landlord')->table('pricing_plans', function (Blueprint $table) {
-            $table->decimal('monthly_ai_credits', 15, 6)->default(0)->after('price_yearly');
-        });
+        if (!Schema::connection('landlord')->hasColumn('pricing_plans', 'monthly_ai_credits')) {
+            Schema::connection('landlord')->table('pricing_plans', function (Blueprint $table) {
+                $table->decimal('monthly_ai_credits', 15, 6)->default(0)->after('price_yearly');
+            });
+        }
     }
 
     /**

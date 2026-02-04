@@ -11,15 +11,24 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::connection('landlord')->table('pricing_plans', function (Blueprint $table) {
-            // Add product IDs for both environments
-            $table->string('stripe_product_id_test')->nullable()->after('stripe_yearly_id');
-            $table->string('stripe_product_id_live')->nullable()->after('stripe_product_id_test');
-
-            // Add price IDs for both environments (monthly and yearly)
-            $table->string('stripe_price_id_test')->nullable()->after('stripe_product_id_live');
-            $table->string('stripe_price_id_live')->nullable()->after('stripe_price_id_test');
-            $table->string('stripe_yearly_price_id_test')->nullable()->after('stripe_price_id_live');
-            $table->string('stripe_yearly_price_id_live')->nullable()->after('stripe_yearly_price_id_test');
+            if (!Schema::connection('landlord')->hasColumn('pricing_plans', 'stripe_product_id_test')) {
+                $table->string('stripe_product_id_test')->nullable()->after('stripe_yearly_id');
+            }
+            if (!Schema::connection('landlord')->hasColumn('pricing_plans', 'stripe_product_id_live')) {
+                $table->string('stripe_product_id_live')->nullable()->after('stripe_product_id_test');
+            }
+            if (!Schema::connection('landlord')->hasColumn('pricing_plans', 'stripe_price_id_test')) {
+                $table->string('stripe_price_id_test')->nullable()->after('stripe_product_id_live');
+            }
+            if (!Schema::connection('landlord')->hasColumn('pricing_plans', 'stripe_price_id_live')) {
+                $table->string('stripe_price_id_live')->nullable()->after('stripe_price_id_test');
+            }
+            if (!Schema::connection('landlord')->hasColumn('pricing_plans', 'stripe_yearly_price_id_test')) {
+                $table->string('stripe_yearly_price_id_test')->nullable()->after('stripe_price_id_live');
+            }
+            if (!Schema::connection('landlord')->hasColumn('pricing_plans', 'stripe_yearly_price_id_live')) {
+                $table->string('stripe_yearly_price_id_live')->nullable()->after('stripe_yearly_price_id_test');
+            }
         });
 
         // Migrate existing stripe_id and stripe_yearly_id to test environment

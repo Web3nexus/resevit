@@ -165,10 +165,10 @@ class PlatformAuthController extends Controller
         try {
             if ($type === 'business_owner') {
                 $request->validate([
-                    'email' => 'unique:users,email',
+                    'email' => 'unique:' . \App\Models\User::class . ',email',
                     'business_name' => 'required|string',
-                    'business_slug' => 'required|string|unique:tenants,slug',
-                    'domain' => 'nullable|string|unique:tenants,domain',
+                    'business_slug' => 'required|string|unique:' . \App\Models\Tenant::class . ',slug',
+                    'domain' => 'nullable|string|unique:' . \App\Models\Tenant::class . ',domain',
                     'name' => 'required|string',
                     'country' => 'required|string',
                     'phone' => 'required|string',
@@ -252,7 +252,7 @@ class PlatformAuthController extends Controller
         try {
             if ($type === 'customer') {
                 $request->validate([
-                    'email' => 'unique:customers,email',
+                    'email' => 'unique:' . \App\Models\Customer::class . ',email',
                     'name' => 'required|string',
                 ]);
 
@@ -286,7 +286,7 @@ class PlatformAuthController extends Controller
         try {
             if ($type === 'investor') {
                 $request->validate([
-                    'email' => 'unique:investors,email', // Assuming investors table
+                    'email' => 'unique:' . \App\Models\Investor::class . ',email', // Assuming investors table
                     'name' => 'required|string',
                 ]);
 

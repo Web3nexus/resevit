@@ -10,9 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::connection('landlord')->table('platform_settings', function (Blueprint $table) {
-            $table->enum('stripe_mode', ['test', 'live'])->default('test')->after('stripe_settings');
-        });
+        if (!Schema::connection('landlord')->hasColumn('platform_settings', 'stripe_mode')) {
+            Schema::connection('landlord')->table('platform_settings', function (Blueprint $table) {
+                $table->enum('stripe_mode', ['test', 'live'])->default('test')->after('stripe_settings');
+            });
+        }
 
         // Migrate existing stripe_settings to new structure
         $this->migrateExistingStripeSettings();
@@ -45,10 +47,10 @@ return new class extends Migration {
                 $newStructure = [
                     'mode' => 'test',
                     'test' => [
-                            'publishable_key' => $stripeSettings['publishable_key'] ?? '',
-                            'secret_key' => $stripeSettings['secret_key'] ?? '',
-                            'webhook_secret' => $stripeSettings['webhook_secret'] ?? '',
-                        ],
+                        'publishable_key' => $stripeSettings['publishable_key'] ?? '',
+                        'secret_key' => $stripeSettings['secret_key'] ?? '',
+                        'webhook_secret' => $stripeSettings['webhook_secret'] ?? '',
+                    ],
                     'live' => [
                         'publishable_key' => '',
                         'secret_key' => '',
@@ -60,9 +62,9 @@ return new class extends Migration {
                     ->table('platform_settings')
                     ->where('id', $settings->id)
                     ->update([
-                            'stripe_settings' => json_encode($newStructure),
-                            'stripe_mode' => 'test',
-                        ]);
+                        'stripe_settings' => json_encode($newStructure),
+                        'stripe_mode' => 'test',
+                    ]);
             }
         }
     }

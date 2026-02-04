@@ -10,9 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::connection('landlord')->table('platform_settings', function (Blueprint $table) {
-            $table->json('stripe_settings')->nullable();
-        });
+        if (!Schema::connection('landlord')->hasColumn('platform_settings', 'stripe_settings')) {
+            Schema::connection('landlord')->table('platform_settings', function (Blueprint $table) {
+                $table->json('stripe_settings')->nullable();
+            });
+        }
     }
 
     /**
