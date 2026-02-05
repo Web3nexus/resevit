@@ -24,8 +24,12 @@ class MenuController extends Controller
     {
         $query = MenuItem::query()
             ->with(['variants', 'addons'])
-            ->where('is_active', true)
-            ->where('is_available', true);
+            ->where('is_active', true);
+
+        // Only enforce is_available = true for public/customer view unless specified
+        if (!$request->has('include_unavailable') && !$request->user()?->hasAnyRole(['Business Owner', 'Staff', 'Manager'])) {
+            $query->where('is_available', true);
+        }
 
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
@@ -34,6 +38,7 @@ class MenuController extends Controller
         $items = $query->get();
 
         return response()->json([
+            'success' => true,
             'data' => $items
         ]);
     }

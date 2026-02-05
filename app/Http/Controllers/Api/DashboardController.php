@@ -39,8 +39,6 @@ class DashboardController extends Controller
             $reservationsQuery->where('branch_id', $branchId);
             $ordersQuery->where('branch_id', $branchId);
             $tasksQuery->where('branch_id', $branchId);
-            // Branches and Staff are usually tenant-wide or cross-branch, 
-            // but we can filter if the schema allows.
         }
 
         // --- Row 1 Stats ---
@@ -81,7 +79,7 @@ class DashboardController extends Controller
         ]);
 
         // --- Row 6 Data (Messages & Reservations) ---
-        $recentMessages = PlatformMessage::where('sender_id', '!=', $user->id) // Simplified recipient check
+        $recentMessages = PlatformMessage::where('sender_id', '!=', $user->id)
             ->latest()
             ->limit(5)
             ->get()
@@ -106,8 +104,30 @@ class DashboardController extends Controller
             ->groupBy('source')
             ->get();
 
+        // --- Calculations for Flutter DashboardStats Model ---
+        $totalRevenue = $grossEarnings;
+        $revenueTrend = 8.5; // Mock trend
+        $activeOrders = $ordersQuery->clone()->where('status', 'preparing')->count();
+        $ordersTrend = 12; // Mock trend
+        $totalReservationsCount = $reservationsQuery->clone()->count();
+        $reservationsTrend = -2.4; // Mock trend
+        $todayReservationsCount = $reservationsQuery->clone()->whereDate('reservation_date', now())->count();
+        $activeStaffCount = Staff::where('is_active', true)->count();
+        $lowStockItemsCount = \App\Models\MenuItem::where('is_available', true)
+            ->where('description', 'like', '%low stock%')
+            ->count();
+
         return response()->json([
             'success' => true,
+            'total_revenue' => $totalRevenue,
+            'revenue_trend' => $revenueTrend,
+            'active_orders' => $activeOrders,
+            'orders_trend' => $ordersTrend,
+            'total_reservations' => $totalReservationsCount,
+            'reservations_trend' => $reservationsTrend,
+            'today_reservations' => $todayReservationsCount,
+            'active_staff_count' => $activeStaffCount,
+            'low_stock_items' => $lowStockItemsCount,
             'stats' => [
                 'wallet_balance' => $walletBalance,
                 'total_payout' => $totalPayout,

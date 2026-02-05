@@ -14,15 +14,25 @@ class ReservationController extends Controller
 {
     public function index(Request $request)
     {
-        // For now, filtering by user if authenticated, else guest info matches
-        $query = Reservation::query()->with('table');
+        $query = Reservation::query()->with(['table', 'branch']);
 
         if ($request->has('email')) {
             $query->where('guest_email', $request->email);
         }
 
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('limit')) {
+            $query->limit($request->limit);
+        }
+
+        $reservations = $query->latest('reservation_time')->get();
+
         return response()->json([
-            'data' => $query->latest('reservation_time')->get(),
+            'success' => true,
+            'data' => $reservations,
         ]);
     }
 

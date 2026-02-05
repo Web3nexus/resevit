@@ -7,6 +7,11 @@ use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ReservationController;
 use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\ChatController;
+use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\InventoryController;
+use App\Http\Controllers\Api\V1\BranchController;
+use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\PayrollController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -80,5 +85,23 @@ Route::middleware([
 
         // Staff Management
         Route::apiResource('staff', \App\Http\Controllers\Api\V1\StaffController::class);
+
+        // Profile Endpoints
+        Route::get('/user', [ProfileController::class, 'show']);
+        Route::patch('/user', [ProfileController::class, 'update']);
+        Route::post('/user/photo', [ProfileController::class, 'uploadPhoto']);
+        Route::patch('/user/notifications', [ProfileController::class, 'updateNotifications']);
+
+        // Inventory
+        Route::apiResource('inventory', InventoryController::class);
+
+        // Branches
+        Route::apiResource('branches', BranchController::class);
+        Route::patch('/branches/{branch}/hours', [BranchController::class, 'updateHours']);
+
+        // Finance
+        Route::get('/payments', [PaymentController::class, 'index']);
+        Route::get('/payroll', [PayrollController::class, 'index']);
+        Route::post('/payroll/staff/{staff}/payout', [PayrollController::class, 'processPayout']);
     });
 });
