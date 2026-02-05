@@ -27,9 +27,14 @@ class ForceRepairTenantDatabase extends Command
         // Initialize tenancy
         tenancy()->initialize($tenant);
 
-        // Step 1: Clear migrations table to force re-run
+        // Step 1: Clear migrations table to force re-run (if it exists)
         $this->info("📋 Clearing migrations history...");
-        DB::table('migrations')->truncate();
+        if (DB::getSchemaBuilder()->hasTable('migrations')) {
+            DB::table('migrations')->truncate();
+            $this->info("✓ Migrations history cleared.");
+        } else {
+            $this->info("✓ No migrations table found (will be created).");
+        }
 
         // Step 2: Run all tenant migrations fresh
         $this->info("🚀 Running all tenant migrations...");
