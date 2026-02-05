@@ -28,7 +28,7 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
 
     public function mount(): void
     {
-        if (tenant('onboarding_completed')) {
+        if (tenant('onboarding_status') === 'active') {
             $this->redirect(route('filament.dashboard.pages.dashboard'));
 
             return;
@@ -124,9 +124,9 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
         // Update tenant settings - use the landlord connection
         /** @var \App\Models\Tenant $tenant */
         $tenant = \App\Models\Tenant::on('landlord')->find(tenant('id'));
-        $tenant->fill([
-            'onboarding_completed' => true,
-        ])->save();
+        $tenant->update([
+            'onboarding_status' => 'active',
+        ]);
 
         Notification::make()
             ->title('Setup Complete!')

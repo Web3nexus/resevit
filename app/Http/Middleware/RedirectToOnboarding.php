@@ -15,7 +15,7 @@ class RedirectToOnboarding
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (tenant() && !tenant('onboarding_completed')) {
+        if (tenant() && tenant('onboarding_status') !== 'active') {
             $onboardingUrl = route('filament.dashboard.pages.onboarding');
 
             // Avoid redirect loop
