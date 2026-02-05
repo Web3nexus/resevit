@@ -9,14 +9,16 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Schemas\Schema;
+use BackedEnum;
+use UnitEnum;
 
 class StaffResource extends Resource
 {
     protected static ?string $model = Staff::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationGroup = 'System Management';
+    protected static string|UnitEnum|null $navigationGroup = 'System Management';
 
     protected static ?int $navigationSort = 5;
 
@@ -68,7 +70,7 @@ class StaffResource extends Resource
                     ->label('Availability Schedule')
                     ->keyLabel('Day')
                     ->valueLabel('Hours'),
-                Forms\Components\Section::make('Banking Information')
+                \Filament\Schemas\Components\Section::make('Banking Information')
                     ->schema([
                         Forms\Components\TextInput::make('bank_name')
                             ->maxLength(255),
