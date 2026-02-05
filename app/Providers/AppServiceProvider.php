@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         $this->commands([
             \App\Console\Commands\SmartTenantsMigrate::class,
             \App\Console\Commands\FixMissingBranchesTable::class,
+            \App\Console\Commands\ForceRepairTenantDatabase::class,
         ]);
 
         // Register model observers
