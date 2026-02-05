@@ -9,7 +9,35 @@ use Filament\Widgets\Widget;
 
 class SetupProgressWidget extends Widget
 {
-    protected static ?int $sort = 12;
+    protected static ?int $sort = 0;
+
+    public static function canView(): bool
+    {
+        if (session('show_setup_guide', false)) {
+            return true;
+        }
+
+        // Quick check for completion
+        $settings = \App\Models\ReservationSetting::getInstance();
+        $hasProfile = !empty($settings->business_name) && !empty($settings->business_address);
+        if (!$hasProfile)
+            return true;
+
+        $hasMenu = \App\Models\MenuItem::count() > 0;
+        if (!$hasMenu)
+            return true;
+
+        $hasWebsite = \App\Models\TenantWebsite::where('tenant_id', tenant('id'))->exists();
+        if (!$hasWebsite)
+            return true;
+
+        $isPublished = \App\Models\TenantWebsite::where('tenant_id', tenant('id'))->where('is_published', true)->exists();
+        if (!$isPublished)
+            return true;
+
+        return false;
+    }
+
     protected string $view = 'filament.dashboard.widgets.setup-progress-widget';
 
     protected int|string|array $columnSpan = 'full';
