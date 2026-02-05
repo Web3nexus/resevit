@@ -30,6 +30,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register custom commands explicitly
+        $this->commands([
+            \App\Console\Commands\SmartTenantsMigrate::class,
+        ]);
+
         // Register model observers
         \App\Models\Reservation::observe(\App\Observers\ReservationObserver::class);
 
