@@ -13,7 +13,7 @@ use Stancl\Tenancy\Exceptions\TenantDatabaseDoesNotExistException;
 
 class SmartTenantsMigrate extends Migrate
 {
-    protected $signature = 'tenants:smart-migrate {--tenants=* : The tenant(s) to migrate} {--path=* : The path(s) to the migrations files to be executed} {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths} {--schema-path= : The path to a schema dump file} {--pretend : Dump the SQL queries that would be run} {--step : Force the migrations to be run so they can be rolled back individually} {--force : Force the operation to run when in production} {--graceful : Return a successful exit code even if an error occurs}';
+    protected $signature = 'tenants:smart-migrate {--tenants=* : The tenant(s) to migrate} {--path=* : The path(s) to the migrations files to be executed} {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths} {--schema-path= : The path to a schema dump file} {--pretend : Dump the SQL queries that would be run} {--step : Force the migrations to be run so they can be rolled back individually} {--force : Force the operation to run when in production} {--graceful : Return a successful exit code even if an error occurs} {--database= : The database connection to use} {--seed : Indicates if the seed task should be re-run} {--seeder= : The class name of the root seeder} {--isolated : Exclude the command from other isolated commands}';
 
     protected $description = 'Run migrations for tenant(s), skipping broken ones.';
 
