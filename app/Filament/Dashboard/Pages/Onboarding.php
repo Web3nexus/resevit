@@ -28,9 +28,28 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
 
     public function mount(): void
     {
-        if (tenant('onboarding_status') === 'active') {
-            $this->redirect(route('filament.dashboard.pages.dashboard'));
+        $tenant = tenant();
 
+        // Skip if already active
+        if ($tenant->onboarding_status === 'active' || $tenant->onboarding_completed) {
+            $this->redirect(route('filament.dashboard.pages.dashboard'));
+            return;
+        }
+
+        // Automatic skip if branches already exist (legacy data recovery)
+        if (Branch::exists()) {
+            $tenant->update([
+                'onboarding_status' => 'active',
+                'onboarding_completed' => true,
+            ]);
+
+            Notification::make()
+                ->title('Setup restored!')
+                ->body('We found your existing branch data.')
+                ->success()
+                ->send();
+
+            $this->redirect(route('filament.dashboard.pages.dashboard'));
             return;
         }
 
