@@ -20,10 +20,16 @@ use Filament\Schemas\Components\View;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Filament\Support\Enums\MaxWidth;
 
 class EditProfile extends Page implements HasSchemas
 {
     use InteractsWithSchemas;
+
+    public function getMaxWidth(): MaxWidth
+    {
+        return MaxWidth::Full;
+    }
 
     protected string $view = 'filament.dashboard.pages.edit-profile';
 

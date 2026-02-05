@@ -53,7 +53,8 @@ class ConditionalTenancy
         // DEBUG LOGGING
         \Illuminate\Support\Facades\Log::info("ConditionalTenancy Debug: Host [$host], Central Domains: " . implode(', ', $centralDomains));
 
-        if (in_array($host, $centralDomains)) {
+        $previewDomain = config('tenancy.preview_domain');
+        if ($host === $previewDomain || in_array($host, $centralDomains)) {
             \Illuminate\Support\Facades\Log::info('ConditionalTenancy: Central domain detected, skipping tenancy for: ' . $request->path());
 
             return $next($request);

@@ -5,6 +5,8 @@ namespace App\Filament\Dashboard\Pages;
 use App\Models\TenantWebsite;
 use App\Models\WebsiteTemplate;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Tabs\Tab;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
@@ -82,79 +84,91 @@ class WebsiteBuilder extends Page implements HasSchemas
                     ])
                     ->collapsible()
                     ->collapsed(),
-                \Filament\Forms\Components\Builder::make('sections')
-                    ->blocks([
-                        \Filament\Forms\Components\Builder\Block::make('nav')
+                \Filament\Forms\Components\Tabs::make('Website Sections')
+                    ->tabs([
+                        \Filament\Forms\Components\Tabs\Tab::make('Header & Branding')
                             ->schema([
-                                \Filament\Forms\Components\TextInput::make('logo_text')->required(),
-                                \Filament\Forms\Components\Repeater::make('links')
-                                    ->schema([
-                                        \Filament\Forms\Components\TextInput::make('label')->required(),
-                                        \Filament\Forms\Components\TextInput::make('url')->required(),
-                                    ])
-                                    ->itemLabel(fn(array $state): ?string => $state['label'] ?? null),
+                                \Filament\Forms\Components\TextInput::make('business_name')
+                                    ->required(),
+                                \Filament\Forms\Components\FileUpload::make('logo')
+                                    ->image()
+                                    ->directory('website/logos'),
                             ]),
-                        \Filament\Forms\Components\Builder\Block::make('hero')
+                        \Filament\Forms\Components\Tabs\Tab::make('Hero Section')
                             ->schema([
-                                \Filament\Forms\Components\TextInput::make('title')->required(),
-                                \Filament\Forms\Components\TextInput::make('subtitle'),
-                                \Filament\Forms\Components\TextInput::make('button_text'),
-                                \Filament\Forms\Components\TextInput::make('button_link'),
-                                \Filament\Forms\Components\TextInput::make('button_2_text'),
-                                \Filament\Forms\Components\TextInput::make('button_2_link'),
-                                \Filament\Forms\Components\FileUpload::make('background_image')->image()->directory('website'),
+                                \Filament\Forms\Components\TextInput::make('hero_title')
+                                    ->label('Hero Title'),
+                                \Filament\Forms\Components\TextInput::make('hero_subtitle')
+                                    ->label('Hero Subtitle'),
+                                \Filament\Forms\Components\TextInput::make('hero_tagline')
+                                    ->label('Hero Tagline'),
+                                \Filament\Forms\Components\TextInput::make('hero_promo')
+                                    ->label('Promo Badge (e.g. 20% OFF)'),
+                                \Filament\Forms\Components\FileUpload::make('hero_image')
+                                    ->image()
+                                    ->directory('website/hero'),
                             ]),
-                        \Filament\Forms\Components\Builder\Block::make('about')
+                        \Filament\Forms\Components\Tabs\Tab::make('About Section')
                             ->schema([
-                                \Filament\Forms\Components\TextInput::make('title')->required(),
-                                \Filament\Forms\Components\Textarea::make('text')->required(),
-                                \Filament\Forms\Components\FileUpload::make('image')->image()->directory('website'),
+                                \Filament\Forms\Components\TextInput::make('about_title')
+                                    ->label('About Title'),
+                                \Filament\Forms\Components\Textarea::make('about_text')
+                                    ->label('About Text')
+                                    ->rows(5),
+                                \Filament\Forms\Components\FileUpload::make('about_image')
+                                    ->image()
+                                    ->directory('website/about'),
                             ]),
-                        \Filament\Forms\Components\Builder\Block::make('features')
+                        \Filament\Forms\Components\Tabs\Tab::make('Menu & Products')
                             ->schema([
-                                \Filament\Forms\Components\TextInput::make('title')->required(),
-                                \Filament\Forms\Components\Repeater::make('items')
+                                \Filament\Forms\Components\Repeater::make('menu_sections')
+                                    ->label('Menu Highlights')
                                     ->schema([
                                         \Filament\Forms\Components\TextInput::make('title')->required(),
-                                        \Filament\Forms\Components\Textarea::make('text')->required(),
-                                        \Filament\Forms\Components\TextInput::make('icon'),
+                                        \Filament\Forms\Components\TextInput::make('price'),
+                                        \Filament\Forms\Components\FileUpload::make('image')->image(),
                                     ])
+                                    ->collapsible()
                                     ->itemLabel(fn(array $state): ?string => $state['title'] ?? null),
-                            ]),
-                        \Filament\Forms\Components\Builder\Block::make('menu')
-                            ->schema([
-                                \Filament\Forms\Components\TextInput::make('title')->required()->default('Signature Dishes'),
-                                \Filament\Forms\Components\Select::make('source')
-                                    ->options([
-                                        'manual' => 'Manual Entry',
-                                        'database' => 'Pull from Database (Menu Items)',
-                                    ])
-                                    ->default('manual')
-                                    ->reactive(),
-                                \Filament\Forms\Components\Repeater::make('items')
+                                \Filament\Forms\Components\Repeater::make('special_menu')
+                                    ->label('Special Menu')
                                     ->schema([
                                         \Filament\Forms\Components\TextInput::make('name')->required(),
-                                        \Filament\Forms\Components\TextInput::make('description'),
-                                        \Filament\Forms\Components\TextInput::make('price')->required(),
-                                        \Filament\Forms\Components\FileUpload::make('image')->image()->directory('website'),
+                                        \Filament\Forms\Components\TextInput::make('desc'),
+                                        \Filament\Forms\Components\TextInput::make('price'),
                                     ])
-                                    ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
-                                    ->hidden(fn($get) => $get('source') === 'database'),
+                                    ->collapsible()
+                                    ->itemLabel(fn(array $state): ?string => $state['name'] ?? null),
                             ]),
-                        \Filament\Forms\Components\Builder\Block::make('contact')
+                        \Filament\Forms\Components\Tabs\Tab::make('Services & Features')
                             ->schema([
-                                \Filament\Forms\Components\TextInput::make('title')->required(),
-                                \Filament\Forms\Components\TextInput::make('address'),
-                                \Filament\Forms\Components\TextInput::make('phone'),
-                                \Filament\Forms\Components\TextInput::make('email'),
+                                \Filament\Forms\Components\Repeater::make('services')
+                                    ->schema([
+                                        \Filament\Forms\Components\TextInput::make('title')->required(),
+                                        \Filament\Forms\Components\Textarea::make('desc'),
+                                        \Filament\Forms\Components\TextInput::make('icon')->helperText('Icon name (e.g. coffee, leaf, truck)'),
+                                    ])
+                                    ->collapsible()
+                                    ->itemLabel(fn(array $state): ?string => $state['title'] ?? null),
+                                \Filament\Forms\Components\Repeater::make('how_it_works')
+                                    ->label('How it Works')
+                                    ->schema([
+                                        \Filament\Forms\Components\TextInput::make('title')->required(),
+                                        \Filament\Forms\Components\Textarea::make('desc'),
+                                        \Filament\Forms\Components\TextInput::make('icon'),
+                                    ])
+                                    ->collapsible()
+                                    ->itemLabel(fn(array $state): ?string => $state['title'] ?? null),
                             ]),
-                        \Filament\Forms\Components\Builder\Block::make('footer')
+                        \Filament\Forms\Components\Tabs\Tab::make('Footer')
                             ->schema([
-                                \Filament\Forms\Components\TextInput::make('text')->required(),
+                                \Filament\Forms\Components\Textarea::make('footer_text')
+                                    ->label('Footer Text'),
+                                \Filament\Forms\Components\Repeater::make('working_hours')
+                                    ->simple(\Filament\Forms\Components\TextInput::make('text')),
                             ]),
                     ])
-                    ->collapsible()
-                    ->collapsed(),
+                    ->columnSpanFull(),
             ])
             ->statePath('builderData');
     }

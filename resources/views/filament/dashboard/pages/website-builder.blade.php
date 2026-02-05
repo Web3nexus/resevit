@@ -122,7 +122,7 @@
                         </div>
                         
                         <iframe 
-                            src="http://{{ tenant('slug') }}.{{ config('tenancy.preview_domain') }}" 
+                            src="https://{{ tenant('slug') }}.{{ config('tenancy.preview_domain') }}" 
                             class="w-full h-full border-none bg-white"
                             id="preview-iframe"
                         ></iframe>
