@@ -345,6 +345,26 @@ class PlatformAuthController extends Controller
         return view('emails.rendered-text', ['content' => 'Email verified successfully! You can return to the app.']);
     }
 
+    public function changePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            return response()->json(['message' => 'Current password does not match'], 422);
+        }
+
+        $user->update([
+            'password' => $validated['new_password'],
+        ]);
+
+        return response()->json(['message' => 'Password changed successfully']);
+    }
+
     /**
      * Resend the email verification notification.
      */

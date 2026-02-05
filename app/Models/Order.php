@@ -14,6 +14,7 @@ class Order extends Model
     use BelongsToBranch;
 
     protected $fillable = [
+        'order_number',
         'table_id',
         'staff_id',
         'branch_id',
@@ -26,10 +27,13 @@ class Order extends Model
         'notes',
         'items',
         'subtotal',
+        'items_total',
         'tax',
+        'tax_total',
         'service_fee',
         'delivery_fee',
         'total',
+        'total_amount',
         'payment_intent_id',
         'payment_status',
         'paid_at',
@@ -47,7 +51,9 @@ class Order extends Model
         'total_amount' => 'decimal:2',
         'items' => 'array',
         'subtotal' => 'decimal:2',
+        'items_total' => 'decimal:2',
         'tax' => 'decimal:2',
+        'tax_total' => 'decimal:2',
         'service_fee' => 'decimal:2',
         'delivery_fee' => 'decimal:2',
         'total' => 'decimal:2',
@@ -103,6 +109,6 @@ class Order extends Model
     // Accessors
     public function getOrderNumberAttribute(): string
     {
-        return 'ORD-'.str_pad($this->id, 6, '0', STR_PAD_LEFT);
+        return 'ORD-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
     }
 }

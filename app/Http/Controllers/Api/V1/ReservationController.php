@@ -43,18 +43,18 @@ class ReservationController extends Controller
         $dayOfWeek = strtolower($carbonDate->format('l'));
         $hours = $settings->business_hours[$dayOfWeek] ?? null;
 
-        if (! $hours || ($hours['closed'] ?? false)) {
+        if (!$hours || ($hours['closed'] ?? false)) {
             return response()->json(['data' => [], 'message' => 'Closed on this day'], 200);
         }
 
-        $startTime = Carbon::parse($date.' '.$hours['open']);
-        $endTime = Carbon::parse($date.' '.$hours['close']);
+        $startTime = Carbon::parse($date . ' ' . $hours['open']);
+        $endTime = Carbon::parse($date . ' ' . $hours['close']);
         $interval = 30; // 30 minute slots
         $slots = [];
 
         $tables = Table::where('capacity', '>=', $partySize)
             ->where('status', 'available')
-            ->when($request->branch_id, fn ($q) => $q->where('branch_id', $request->branch_id))
+            ->when($request->branch_id, fn($q) => $q->where('branch_id', $request->branch_id))
             ->get();
 
         if ($tables->isEmpty()) {
@@ -86,7 +86,7 @@ class ReservationController extends Controller
                     })
                     ->exists();
 
-                if (! $overlapping) {
+                if (!$overlapping) {
                     $isAvailable = true;
                     break;
                 }
@@ -135,7 +135,7 @@ class ReservationController extends Controller
             })
             ->first();
 
-        if (! $table) {
+        if (!$table) {
             return response()->json(['message' => 'No tables available for this time'], 422);
         }
 
@@ -151,13 +151,31 @@ class ReservationController extends Controller
             'status' => $settings->auto_confirm_enabled ? 'confirmed' : 'pending',
             'confirmation_code' => Reservation::generateConfirmationCode(),
             'special_requests' => $validated['special_requests'] ?? null,
-            'source' => 'mobile_app',
+            'source' => $request->input('source', 'mobile_app'),
         ]);
 
         return response()->json([
             'message' => 'Reservation created successfully',
             'data' => $reservation,
         ], 201);
+    }
+
+    public function update(Request $request, Reservation $reservation)
+    {
+        $validated = $request->validate([
+            'status' => 'nullable|string|in:pending,confirmed,arrived,completed,cancelled',
+            'table_id' => 'nullable|exists:tables,id',
+            'party_size' => 'nullable|integer|min:1',
+            'reservation_time' => 'nullable|date',
+            'special_requests' => 'nullable|string',
+        ]);
+
+        $reservation->update($validated);
+
+        return response()->json([
+            'message' => 'Reservation updated successfully',
+            'data' => $reservation->load(['table', 'branch']),
+        ]);
     }
 
     public function show(Reservation $reservation)

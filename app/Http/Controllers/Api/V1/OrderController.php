@@ -75,8 +75,8 @@ class OrderController extends Controller
                     'menu_item_id' => $menuItem->id,
                     'quantity' => $itemData['quantity'],
                     'variant_id' => $itemData['variant_id'] ?? null,
-                    'price' => $unitPrice,
-                    'total_price' => $totalItemPrice,
+                    'unit_price' => $unitPrice,
+                    'subtotal' => $totalItemPrice,
                     'addons' => $addons,
                 ];
             }
@@ -94,8 +94,8 @@ class OrderController extends Controller
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'] ?? null,
                 'customer_email' => $validated['customer_email'] ?? null,
-                'items_total' => $calculatedItemsTotal,
-                'tax_total' => $taxTotal,
+                'subtotal' => $calculatedItemsTotal,
+                'tax' => $taxTotal,
                 'delivery_fee' => $deliveryFee,
                 'total_amount' => $totalAmount,
                 'order_type' => $validated['order_type'],
@@ -110,8 +110,8 @@ class OrderController extends Controller
                     'menu_item_id' => $itemData['menu_item_id'],
                     'quantity' => $itemData['quantity'],
                     'variant_id' => $itemData['variant_id'],
-                    'price' => $itemData['price'],
-                    'total_price' => $itemData['total_price'],
+                    'unit_price' => $itemData['unit_price'],
+                    'subtotal' => $itemData['subtotal'],
                 ]);
 
                 foreach ($itemData['addons'] as $addonData) {
@@ -140,9 +140,17 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * Display a listing of the resource.
+     */
     public function index(Request $request)
     {
+        $user = $request->user();
         $query = Order::query()->latest();
+
+        if ($user && $user->hasRole('customer')) {
+            $query->where('customer_email', $user->email);
+        }
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -154,7 +162,7 @@ class OrderController extends Controller
         }
 
         return response()->json([
-            'data' => $query->paginate(20)
+            'data' => $query->with(['items.menuItem', 'items.variant', 'items.addons'])->paginate(20)
         ]);
     }
 

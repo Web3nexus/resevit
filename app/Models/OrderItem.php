@@ -16,13 +16,13 @@ class OrderItem extends Model
         'menu_item_id',
         'variant_id',
         'quantity',
+        'unit_price',
+        'subtotal',
         'special_instructions',
     ];
 
     protected $guarded = [
         'id',
-        'unit_price',  // Should come from menu item
-        'subtotal',    // Calculated field
         'created_at',
         'updated_at',
     ];

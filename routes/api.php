@@ -30,7 +30,19 @@ Route::prefix('v1')->group(function () {
             return $request->user();
         });
 
+        Route::patch('/user', function (Request $request) {
+            $user = $request->user();
+            $validated = $request->validate([
+                'name' => 'nullable|string|max:255',
+                'email' => 'nullable|email|unique:users,email,' . $user->id,
+                'phone' => 'nullable|string',
+            ]);
+            $user->update($validated);
+            return response()->json($user);
+        });
+
         Route::post('/auth/email/resend', [PlatformAuthController::class, 'resendVerificationEmail']);
+        Route::post('/auth/password/change', [PlatformAuthController::class, 'changePassword']);
 
         // Investor Routes
         Route::get('/investor/opportunities', [InvestorController::class, 'opportunities']);

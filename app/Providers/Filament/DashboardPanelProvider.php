@@ -99,6 +99,15 @@ class DashboardPanelProvider extends PanelProvider
                 $setting = \App\Models\PlatformSetting::current();
                 return $setting && $setting->logo_path ? \App\Helpers\StorageHelper::getUrl($setting->logo_path) : null;
             })
+            ->darkModeBrandLogo(function () {
+                $tenant = tenant();
+                if ($tenant && $tenant->whitelabel_active && $tenant->whitelabel_logo_dark) {
+                    return \App\Helpers\StorageHelper::getUrl($tenant->whitelabel_logo_dark);
+                }
+
+                $setting = \App\Models\PlatformSetting::current();
+                return $setting && $setting->logo_dark_path ? \App\Helpers\StorageHelper::getUrl($setting->logo_dark_path) : null;
+            })
             ->favicon(function () {
                 $tenant = tenant();
                 if ($tenant && $tenant->whitelabel_active && $tenant->whitelabel_logo) {

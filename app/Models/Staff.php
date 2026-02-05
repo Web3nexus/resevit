@@ -22,7 +22,9 @@ class Staff extends Model
         'branch_id',
         'user_id',
         'position',
+        'date_of_birth',
         'phone',
+        'address',
         'emergency_contact',
         'hire_date',
         'hourly_rate',
@@ -38,6 +40,7 @@ class Staff extends Model
     protected $casts = [
         'availability' => 'array',
         'hire_date' => 'date',
+        'date_of_birth' => 'date',
         'hourly_rate' => 'decimal:2',
     ];
 
