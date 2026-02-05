@@ -173,9 +173,9 @@
                 ] as $service)
                     <div class="flex flex-col items-center gap-4 group hover:-translate-y-2 transition duration-300">
                         <div class="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-4xl group-hover:bg-white/20 transition">
-                            {{ $service['icon'] }}
+                            {{ $service['icon'] ?? '✨' }}
                         </div>
-                        <span class="font-bold tracking-widest uppercase text-sm">{{ $service['label'] }}</span>
+                        <span class="font-bold tracking-widest uppercase text-sm">{{ $service['label'] ?? 'Service' }}</span>
                     </div>
                 @endforeach
             </div>
@@ -349,10 +349,10 @@
                     <div class="text-center group" data-aos="fade-up">
                         <div class="relative w-72 h-72 mx-auto mb-8">
                             <div class="absolute inset-0 border-2 border-primary/20 rounded-full scale-110 group-hover:scale-100 transition duration-500"></div>
-                            <img src="{{ $member['image'] }}" class="w-full h-full object-cover rounded-full shadow-xl">
+                            <img src="{{ $member['image'] ?? 'https://randomuser.me/api/portraits/thumb/men/1.jpg' }}" class="w-full h-full object-cover rounded-full shadow-xl">
                         </div>
-                        <h4 class="font-serif font-bold text-2xl mb-2">{{ $member['name'] }}</h4>
-                        <span class="text-primary text-sm font-bold italic tracking-widest uppercase">{{ $member['role'] }}</span>
+                        <h4 class="font-serif font-bold text-2xl mb-2">{{ $member['name'] ?? 'Chefs Team' }}</h4>
+                        <span class="text-primary text-sm font-bold italic tracking-widest uppercase">{{ $member['role'] ?? 'Expert' }}</span>
                         <div class="flex justify-center gap-4 mt-6">
                             @foreach(['FB', 'TW', 'IG'] as $social)
                                 <a href="#" class="w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:bg-primary hover:border-primary hover:text-white transition transform hover:-translate-y-1 text-xs font-bold">{{ $social }}</a>
@@ -410,14 +410,14 @@
                 ] as $post)
                     <div class="flex gap-8 items-center bg-white p-6 rounded-sm shadow-sm hover:shadow-xl transition text-left group" data-aos="fade-up">
                         <div class="w-40 h-40 shrink-0 overflow-hidden rounded-sm">
-                            <img src="{{ $post['image'] }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                            <img src="{{ $post['image'] ?? 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=2070' }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
                         </div>
                         <div>
-                            <span class="text-primary font-bold text-xs tracking-widest uppercase mb-2 block italic">{{ $post['date'] }}</span>
-                            <h4 class="font-serif font-bold text-2xl mb-4 leading-tight group-hover:text-primary transition">{{ $post['title'] }}</h4>
+                            <span class="text-primary font-bold text-xs tracking-widest uppercase mb-2 block italic">{{ $post['date'] ?? now()->format('M d, Y') }}</span>
+                            <h4 class="font-serif font-bold text-2xl mb-4 leading-tight group-hover:text-primary transition">{{ $post['title'] ?? 'Recent Update' }}</h4>
                             <div class="flex items-center gap-3">
                                 <img src="https://randomuser.me/api/portraits/thumb/men/1.jpg" class="w-6 h-6 rounded-full">
-                                <span class="text-gray-400 text-xs italic">By {{ $post['author'] }}</span>
+                                <span class="text-gray-400 text-xs italic">By {{ $post['author'] ?? 'Admin' }}</span>
                             </div>
                         </div>
                     </div>

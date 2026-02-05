@@ -92,7 +92,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                                         \Filament\Forms\Components\TextInput::make('label')->required(),
                                         \Filament\Forms\Components\TextInput::make('url')->required(),
                                     ])
-                                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
+                                    ->itemLabel(fn(array $state): ?string => $state['label'] ?? null),
                             ]),
                         \Filament\Forms\Components\Builder\Block::make('hero')
                             ->schema([
@@ -119,7 +119,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                                         \Filament\Forms\Components\Textarea::make('text')->required(),
                                         \Filament\Forms\Components\TextInput::make('icon'),
                                     ])
-                                    ->itemLabel(fn (array $state): ?string => $state['title'] ?? null),
+                                    ->itemLabel(fn(array $state): ?string => $state['title'] ?? null),
                             ]),
                         \Filament\Forms\Components\Builder\Block::make('menu')
                             ->schema([
@@ -138,8 +138,8 @@ class WebsiteBuilder extends Page implements HasSchemas
                                         \Filament\Forms\Components\TextInput::make('price')->required(),
                                         \Filament\Forms\Components\FileUpload::make('image')->image()->directory('website'),
                                     ])
-                                    ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-                                    ->hidden(fn ($get) => $get('source') === 'database'),
+                                    ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+                                    ->hidden(fn($get) => $get('source') === 'database'),
                             ]),
                         \Filament\Forms\Components\Builder\Block::make('contact')
                             ->schema([
@@ -190,7 +190,7 @@ class WebsiteBuilder extends Page implements HasSchemas
 
     public function createWebsite()
     {
-        if (! $this->selectedTemplate) {
+        if (!$this->selectedTemplate) {
             return;
         }
 
@@ -208,7 +208,7 @@ class WebsiteBuilder extends Page implements HasSchemas
             $content['phone'] = $settings->business_phone;
         }
         // Basic Footer Text Injection
-        $content['footer_text'] = '© '.date('Y').' '.$content['business_name'].'. All Rights Reserved.';
+        $content['footer_text'] = '© ' . date('Y') . ' ' . $content['business_name'] . '. All Rights Reserved.';
 
         // Save
         $this->website = TenantWebsite::updateOrCreate(
@@ -245,7 +245,7 @@ class WebsiteBuilder extends Page implements HasSchemas
 
     public function toggleEditor()
     {
-        $this->isEditing = ! $this->isEditing;
+        $this->isEditing = !$this->isEditing;
         if ($this->isEditing) {
             $this->builderData = $this->website->content;
         }
@@ -258,14 +258,14 @@ class WebsiteBuilder extends Page implements HasSchemas
                 ->label('Preview Website')
                 ->color('gray')
                 ->icon('heroicon-o-arrow-top-right-on-square')
-                ->url(fn () => 'http://'.tenant('slug').'.'.config('tenancy.preview_domain'), shouldOpenInNewTab: true)
-                ->visible(fn () => $this->website !== null),
+                ->url(fn() => 'https://' . tenant('slug') . '.' . config('tenancy.preview_domain'), shouldOpenInNewTab: true)
+                ->visible(fn() => $this->website !== null),
             Action::make('changeTemplate')
                 ->label('Change Template')
                 ->color('gray')
                 ->icon('heroicon-o-swatch')
-                ->action(fn () => $this->browsingTemplates = true)
-                ->visible(fn () => $this->website !== null && ! $this->browsingTemplates),
+                ->action(fn() => $this->browsingTemplates = true)
+                ->visible(fn() => $this->website !== null && !$this->browsingTemplates),
         ];
     }
 

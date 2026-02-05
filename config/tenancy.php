@@ -26,7 +26,7 @@ return [
      * The domain suffix used for temporary/preview websites.
      * e.g. [slug].resevit-preview.test
      */
-    'preview_domain' => 'preview.resevit-backend.test',
+    'preview_domain' => env('TENANCY_PREVIEW_DOMAIN', 'preview.resevit-backend.test'),
 
     /**
      * Tenancy bootstrappers are executed when tenancy is initialized.

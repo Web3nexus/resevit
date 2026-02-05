@@ -46,7 +46,7 @@ class TenantResource extends Resource
                             ->unique(ignoreRecord: true),
                         \Filament\Forms\Components\TextInput::make('domain')
                             ->maxLength(255)
-                            ->helperText('Leave blank to auto-generate from slug (e.g. slug.preview.resevit-backend.test)'),
+                            ->helperText('Leave blank to auto-generate from slug (e.g. slug.' . config('tenancy.preview_domain') . ')'),
                         \Filament\Forms\Components\Select::make('owner_user_id')
                             ->relationship('owner', 'name')
                             ->searchable()
