@@ -190,7 +190,8 @@ class TenantResource extends Resource
                 \Filament\Actions\BulkActionGroup::make([
                     \Filament\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->selectCurrentPageOnly();
     }
 
     public static function getRelations(): array
