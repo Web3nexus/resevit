@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 
 class SalesMetricsWidget extends BaseWidget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 4;
 
     protected function getStats(): array
     {
@@ -54,18 +54,18 @@ class SalesMetricsWidget extends BaseWidget
 
         return [
             Stat::make('Total Sales', number_format($totalSales))
-                ->description(($salesTrend >= 0 ? '+' : '').number_format($salesTrend, 1).'% from last month')
+                ->description(($salesTrend >= 0 ? '+' : '') . number_format($salesTrend, 1) . '% from last month')
                 ->descriptionIcon($salesTrend >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($salesTrend >= 0 ? 'success' : 'danger')
                 ->chart($this->getSalesChartData()),
 
-            Stat::make('Average Order Value', '$'.number_format($averageOrderValue, 2))
+            Stat::make('Average Order Value', '$' . number_format($averageOrderValue, 2))
                 ->description('Per order this month')
                 ->descriptionIcon('heroicon-m-shopping-cart')
                 ->color('info'),
 
-            Stat::make('Online Orders', number_format($onlinePercentage, 1).'%')
-                ->description($onlineOrders.' of '.$totalSales.' orders')
+            Stat::make('Online Orders', number_format($onlinePercentage, 1) . '%')
+                ->description($onlineOrders . ' of ' . $totalSales . ' orders')
                 ->descriptionIcon('heroicon-m-globe-alt')
                 ->color('success'),
         ];

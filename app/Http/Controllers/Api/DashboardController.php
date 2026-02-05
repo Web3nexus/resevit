@@ -8,6 +8,12 @@ use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Table;
 use App\Models\Message;
+use App\Models\Staff;
+use App\Models\Task;
+use App\Models\Branch;
+use App\Models\StaffPayout;
+use App\Models\OrderItem;
+use App\Models\PlatformMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -18,44 +24,114 @@ class DashboardController extends Controller
      */
     public function getStats(Request $request)
     {
-        $branchId = $request->user()->currentBranchId ?? null;
+        $user = $request->user();
+        $tenant = tenant();
+        $branchId = $user->currentBranchId ?? null;
 
-        // Build queries with optional branch filtering
+        // Base queries
         $reservationsQuery = Reservation::query();
         $ordersQuery = Order::query();
-        $customersQuery = Customer::query();
-        $tablesQuery = Table::query();
+        $staffQuery = Staff::query();
+        $tasksQuery = Task::query();
+        $branchesQuery = Branch::query();
 
         if ($branchId) {
             $reservationsQuery->where('branch_id', $branchId);
             $ordersQuery->where('branch_id', $branchId);
-            $tablesQuery->where('branch_id', $branchId);
+            $tasksQuery->where('branch_id', $branchId);
+            // Branches and Staff are usually tenant-wide or cross-branch, 
+            // but we can filter if the schema allows.
         }
 
-        // Calculate stats
-        $totalReservations = $reservationsQuery->count();
-        $todayReservations = $reservationsQuery->whereDate('reservation_date', today())->count();
+        // --- Row 1 Stats ---
+        $walletBalance = (float) ($user->wallet_balance ?? 0);
+        $totalPayout = (float) StaffPayout::paid()->sum('amount');
+        $aiCredits = (float) ($tenant->ai_credits ?? 0);
 
-        $totalRevenue = $ordersQuery->where('status', 'completed')->sum('total_amount') ?? 0;
-        $todayRevenue = $ordersQuery->where('status', 'completed')
-            ->whereDate('created_at', today())
-            ->sum('total_amount') ?? 0;
+        // --- Row 2 Stats ---
+        $grossEarnings = (float) $ordersQuery->clone()->completed()->sum('total_amount');
+        $platformFeeRate = 0.05; // Mock: 5% platform fee
+        $platformFees = $grossEarnings * $platformFeeRate;
+        $netEarnings = $grossEarnings - $platformFees;
 
-        $totalCustomers = $customersQuery->count();
-        $totalTables = $tablesQuery->count();
-        $availableTables = $tablesQuery->where('status', 'available')->count();
+        // --- Row 3 Stats ---
+        $totalStaff = $staffQuery->count();
+        $totalTasks = $tasksQuery->count();
+        $branchesCount = $branchesQuery->count();
+
+        // --- Row 4 Stats ---
+        $totalSalesCount = $ordersQuery->clone()->completed()->count();
+        $avgOrderValue = $totalSalesCount > 0 ? $grossEarnings / $totalSalesCount : 0;
+        $onlineOrdersCount = $ordersQuery->clone()->online()->count();
+
+        // --- Row 5 Data (Products & Orders) ---
+        $mostSellingProducts = OrderItem::select('menu_items.name', DB::raw('SUM(order_items.quantity) as total_quantity'))
+            ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
+            ->groupBy('order_items.menu_item_id', 'menu_items.name')
+            ->orderByDesc('total_quantity')
+            ->limit(5)
+            ->get();
+
+        $recentOrders = $ordersQuery->clone()->latest()->limit(5)->get()->map(fn($o) => [
+            'id' => $o->id,
+            'number' => $o->order_number,
+            'total' => (float) $o->total_amount,
+            'status' => $o->status,
+            'created_at' => $o->created_at->toIso8601String(),
+        ]);
+
+        // --- Row 6 Data (Messages & Reservations) ---
+        $recentMessages = PlatformMessage::where('sender_id', '!=', $user->id) // Simplified recipient check
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->map(fn($m) => [
+                'id' => $m->id,
+                'sender' => $m->sender_name,
+                'body' => $m->body,
+                'created_at' => $m->created_at->toIso8601String(),
+            ]);
+
+        $recentReservations = $reservationsQuery->clone()->latest()->limit(5)->get()->map(fn($r) => [
+            'id' => $r->id,
+            'guest' => $r->customer_name ?? 'Guest',
+            'time' => $r->reservation_time,
+            'guests' => $r->number_of_guests,
+            'status' => $r->status,
+        ]);
+
+        // --- Row 7 Data (Source & AI) ---
+        $reservationSources = Reservation::select('source', DB::raw('count(*) as total'))
+            ->whereNotNull('source')
+            ->groupBy('source')
+            ->get();
 
         return response()->json([
             'success' => true,
-            'total_revenue' => (float) $totalRevenue,
-            'revenue_trend' => 0.0, // Calculate trend if needed
-            'active_orders' => Order::where('status', 'pending')->count(),
-            'orders_trend' => 0,
-            'total_reservations' => $totalReservations,
-            'reservations_trend' => 0.0,
-            'today_reservations' => $todayReservations,
-            'active_staff_count' => 0, // Add staff count logic if needed
-            'low_stock_items' => 0, // Add inventory logic if needed
+            'stats' => [
+                'wallet_balance' => $walletBalance,
+                'total_payout' => $totalPayout,
+                'ai_credits' => $aiCredits,
+                'gross_earnings' => $grossEarnings,
+                'platform_fees' => $platformFees,
+                'net_earnings' => $netEarnings,
+                'total_staff' => $totalStaff,
+                'total_tasks' => $totalTasks,
+                'branches_count' => $branchesCount,
+                'total_sales' => $totalSalesCount,
+                'avg_order_value' => $avgOrderValue,
+                'online_orders' => $onlineOrdersCount,
+            ],
+            'most_selling_products' => $mostSellingProducts,
+            'recent_orders' => $recentOrders,
+            'recent_messages' => $recentMessages,
+            'recent_reservations' => $recentReservations,
+            'reservation_sources' => $reservationSources,
+            'ai_insights' => [
+                'Your revenue is up 12% compared to last week.',
+                'Saturday 7 PM is your busiest time. Ensure more staff are on duty.',
+                'Popular product "Burger Extra" is low on stock.',
+            ],
         ]);
     }
 

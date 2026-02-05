@@ -9,7 +9,10 @@ use Illuminate\Support\Facades\DB;
 class ReservationSourceWidget extends ChartWidget
 {
     protected ?string $heading = 'Reservation Sources';
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 9;
+
+    protected int|string|array $columnSpan = 1;
+
     protected ?string $maxHeight = '300px';
 
     protected function getData(): array

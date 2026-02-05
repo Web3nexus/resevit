@@ -40,18 +40,18 @@ class EarningsSummaryWidget extends BaseWidget
             : 0;
 
         return [
-            Stat::make('Gross Earnings', '$'.number_format($grossEarnings, 2))
-                ->description(($trend >= 0 ? '+' : '').number_format($trend, 1).'% from last month')
+            Stat::make('Gross Earnings', '$' . number_format($grossEarnings, 2))
+                ->description(($trend >= 0 ? '+' : '') . number_format($trend, 1) . '% from last month')
                 ->descriptionIcon($trend >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($trend >= 0 ? 'success' : 'danger')
                 ->chart($this->getChartData()),
 
-            Stat::make('Platform Fees', '$'.number_format($platformFee, 2))
+            Stat::make('Platform Fees', '$' . number_format($platformFee, 2))
                 ->description('3% of gross earnings')
                 ->descriptionIcon('heroicon-m-credit-card')
                 ->color('warning'),
 
-            Stat::make('Net Earnings', '$'.number_format($netEarnings, 2))
+            Stat::make('Net Earnings', '$' . number_format($netEarnings, 2))
                 ->description('After platform fees')
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),

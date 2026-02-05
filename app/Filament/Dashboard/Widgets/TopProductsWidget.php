@@ -12,9 +12,9 @@ class TopProductsWidget extends BaseWidget
 {
     protected static ?string $heading = 'Most Selling Products';
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 5;
 
-    protected int|string|array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 1;
 
     public function table(Table $table): Table
     {
@@ -30,7 +30,7 @@ class TopProductsWidget extends BaseWidget
             if (is_array($order->items)) {
                 foreach ($order->items as $item) {
                     $menuItemId = $item['menu_item_id'] ?? null;
-                    if (! $menuItemId) {
+                    if (!$menuItemId) {
                         continue;
                     }
 

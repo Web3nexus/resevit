@@ -10,7 +10,7 @@ class RevenueOverviewWidget extends ChartWidget
 {
     protected ?string $heading = 'Revenue Overview';
 
-    protected static ?int $sort = 1;
+    protected static ?int $sort = 11;
 
     protected int|string|array $columnSpan = 'full';
 
@@ -55,7 +55,7 @@ class RevenueOverviewWidget extends ChartWidget
         });
 
         $labels = $grouped->keys()->toArray();
-        $data = $grouped->map(fn ($group) => $group->sum('total'))->values()->toArray();
+        $data = $grouped->map(fn($group) => $group->sum('total'))->values()->toArray();
 
         return [
             'datasets' => [

@@ -14,6 +14,7 @@ class FinanceOverviewWidget extends BaseWidget
     protected function getStats(): array
     {
         $user = Auth::user();
+        $tenant = tenant();
         $totalPaid = StaffPayout::where('status', 'paid')->sum('amount');
 
         return [
@@ -25,6 +26,10 @@ class FinanceOverviewWidget extends BaseWidget
                 ->description('Total amount paid to staff')
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('primary'),
+            Stat::make('AI Credit Balance', number_format($tenant->ai_credits ?? 0, 0))
+                ->description('Remaining credits')
+                ->descriptionIcon('heroicon-m-cpu-chip')
+                ->color(($tenant->ai_credits ?? 0) > 1000 ? 'success' : 'warning'),
         ];
     }
 }

@@ -9,6 +9,7 @@ use Filament\Widgets\Widget;
 
 class SetupProgressWidget extends Widget
 {
+    protected static ?int $sort = 12;
     protected string $view = 'filament.dashboard.widgets.setup-progress-widget';
 
     protected int|string|array $columnSpan = 'full';
@@ -25,7 +26,7 @@ class SetupProgressWidget extends Widget
     public function calculateProgress()
     {
         $settings = ReservationSetting::getInstance();
-        $hasProfile = ! empty($settings->business_name) && ! empty($settings->business_address);
+        $hasProfile = !empty($settings->business_name) && !empty($settings->business_address);
         $hasMenu = MenuItem::count() > 0;
         $hasWebsite = TenantWebsite::where('tenant_id', tenant('id'))->exists();
         $isPublished = TenantWebsite::where('tenant_id', tenant('id'))->where('is_published', true)->exists();
@@ -61,7 +62,7 @@ class SetupProgressWidget extends Widget
             ],
         ];
 
-        $completedCount = collect($steps)->filter(fn ($step) => $step['completed'])->count();
+        $completedCount = collect($steps)->filter(fn($step) => $step['completed'])->count();
         $this->progress = round(($completedCount / count($steps)) * 100);
         $this->steps = $steps;
     }
