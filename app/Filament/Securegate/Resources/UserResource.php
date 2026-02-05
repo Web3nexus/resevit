@@ -24,9 +24,9 @@ class UserResource extends Resource
 
     protected static ?string $modelLabel = 'Business Owner';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-building-storefront';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-storefront';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Internal Users';
+    protected static string|UnitEnum|null $navigationGroup = 'Internal Users';
 
     protected static ?int $navigationSort = 2;
 
@@ -240,7 +240,9 @@ class UserResource extends Resource
                 \Filament\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                // Bulk actions can be added here
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
+                ]),
             ])
             ->emptyStateHeading('No business owners yet')
             ->emptyStateDescription('Business owners will appear here once they register and create tenants.')
