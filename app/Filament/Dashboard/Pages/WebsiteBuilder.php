@@ -5,8 +5,8 @@ namespace App\Filament\Dashboard\Pages;
 use App\Models\TenantWebsite;
 use App\Models\WebsiteTemplate;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
+use Filament\Schemas\Components\Tabs as SchemaTabs;
+use Filament\Schemas\Components\Tabs\Tab as SchemaTab;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
@@ -84,9 +84,9 @@ class WebsiteBuilder extends Page implements HasSchemas
                     ])
                     ->collapsible()
                     ->collapsed(),
-                \Filament\Forms\Components\Tabs::make('Website Sections')
+                SchemaTabs::make('Website Sections')
                     ->tabs([
-                        \Filament\Forms\Components\Tabs\Tab::make('Header & Branding')
+                        SchemaTab::make('Header & Branding')
                             ->schema([
                                 \Filament\Forms\Components\TextInput::make('business_name')
                                     ->required(),
@@ -94,7 +94,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                                     ->image()
                                     ->directory('website/logos'),
                             ]),
-                        \Filament\Forms\Components\Tabs\Tab::make('Hero Section')
+                        SchemaTab::make('Hero Section')
                             ->schema([
                                 \Filament\Forms\Components\TextInput::make('hero_title')
                                     ->label('Hero Title'),
@@ -108,7 +108,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                                     ->image()
                                     ->directory('website/hero'),
                             ]),
-                        \Filament\Forms\Components\Tabs\Tab::make('About Section')
+                        SchemaTab::make('About Section')
                             ->schema([
                                 \Filament\Forms\Components\TextInput::make('about_title')
                                     ->label('About Title'),
@@ -119,7 +119,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                                     ->image()
                                     ->directory('website/about'),
                             ]),
-                        \Filament\Forms\Components\Tabs\Tab::make('Menu & Products')
+                        SchemaTab::make('Menu & Products')
                             ->schema([
                                 \Filament\Forms\Components\Repeater::make('menu_sections')
                                     ->label('Menu Highlights')
@@ -140,7 +140,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                                     ->collapsible()
                                     ->itemLabel(fn(array $state): ?string => $state['name'] ?? null),
                             ]),
-                        \Filament\Forms\Components\Tabs\Tab::make('Services & Features')
+                        SchemaTab::make('Services & Features')
                             ->schema([
                                 \Filament\Forms\Components\Repeater::make('services')
                                     ->schema([
@@ -160,7 +160,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                                     ->collapsible()
                                     ->itemLabel(fn(array $state): ?string => $state['title'] ?? null),
                             ]),
-                        \Filament\Forms\Components\Tabs\Tab::make('Footer')
+                        SchemaTab::make('Footer')
                             ->schema([
                                 \Filament\Forms\Components\Textarea::make('footer_text')
                                     ->label('Footer Text'),
