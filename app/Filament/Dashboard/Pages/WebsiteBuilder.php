@@ -268,6 +268,28 @@ class WebsiteBuilder extends Page implements HasSchemas
     public function getHeaderActions(): array
     {
         return [
+            Action::make('publish')
+                ->label('Publish Website')
+                ->color('success')
+                ->icon('heroicon-o-rocket-launch')
+                ->action(function () {
+                    $this->website->update([
+                        'is_published' => true,
+                        'published_at' => now(),
+                    ]);
+                    Notification::make()->title('Website Published!')->success()->send();
+                })
+                ->visible(fn() => $this->website !== null && !$this->website->is_published),
+            Action::make('unpublish')
+                ->label('Unpublish')
+                ->color('danger')
+                ->icon('heroicon-o-eye-slash')
+                ->requiresConfirmation()
+                ->action(function () {
+                    $this->website->update(['is_published' => false]);
+                    Notification::make()->title('Website Unpublished')->warning()->send();
+                })
+                ->visible(fn() => $this->website !== null && $this->website->is_published),
             Action::make('preview')
                 ->label('Preview Website')
                 ->color('gray')

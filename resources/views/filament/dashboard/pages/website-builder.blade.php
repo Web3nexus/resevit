@@ -72,7 +72,19 @@
                         </div>
                         <div>
                             <h2 class="text-xl font-bold text-gray-900 dark:text-white">Your Website is Live</h2>
-                            <p class="text-gray-500 text-sm">Active Template: <span class="text-primary-600 font-semibold">{{ $website->template->name }}</span></p>
+                            <p class="text-gray-500 text-sm">Active Template: <span class="text-primary-600 font-semibold">{{ $website->template->name }}</span>
+                                @if($website->is_published)
+                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-400">
+                                        <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-success-500"></span>
+                                        Published
+                                    </span>
+                                @else
+                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
+                                        <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-gray-500"></span>
+                                        Draft (Only you can see this)
+                                    </span>
+                                @endif
+                            </p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3 w-full md:w-auto">
