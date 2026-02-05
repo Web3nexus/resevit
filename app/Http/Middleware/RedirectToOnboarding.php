@@ -15,11 +15,30 @@ class RedirectToOnboarding
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (tenant() && tenant('onboarding_status') !== 'active') {
-            $onboardingUrl = route('filament.dashboard.pages.onboarding');
+        $tenant = tenant();
 
-            // Avoid redirect loop
-            if ($request->url() !== $onboardingUrl && !str_contains($request->url(), 'livewire')) {
+        // Only redirect if both indicators show onboarding is NOT complete
+        $isComplete = $tenant && ($tenant->onboarding_status === 'active' || $tenant->onboarding_completed);
+
+        if ($tenant && !$isComplete) {
+            $onboardingRoute = 'filament.dashboard.pages.onboarding';
+            $onboardingUrl = route($onboardingRoute);
+
+            // Avoid redirect loop for the onboarding page itself and livewire/internal requests
+            if (
+                !$request->routeIs($onboardingRoute) &&
+                !$request->routeIs('filament.dashboard.auth.*') &&
+                !str_contains($request->url(), 'livewire') &&
+                !$request->ajax()
+            ) {
+
+                \Illuminate\Support\Facades\Log::info('Redirecting to onboarding', [
+                    'tenant_id' => $tenant->id,
+                    'status' => $tenant->onboarding_status,
+                    'url' => $request->url(),
+                    'route' => $request->route()?->getName(),
+                ]);
+
                 return redirect($onboardingUrl);
             }
         }

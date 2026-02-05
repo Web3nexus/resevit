@@ -122,10 +122,8 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
             'tenant_id' => tenant('id'),
         ]);
 
-        // Update tenant settings - use the landlord connection
-        /** @var \App\Models\Tenant $tenant */
-        $tenant = \App\Models\Tenant::on('landlord')->find(tenant('id'));
-        $tenant->update([
+        // Update tenant settings
+        tenant()->update([
             'onboarding_status' => 'active',
             'onboarding_completed' => true,
         ]);

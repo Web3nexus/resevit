@@ -115,6 +115,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'dashboard_custom_domain',
         'staff_range',
         'onboarding_status',
+        'onboarding_completed',
         'ai_credits',
     ];
 
@@ -203,6 +204,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'dashboard_custom_domain',
             'staff_range',
             'onboarding_status',
+            'onboarding_completed',
         ];
     }
 }
