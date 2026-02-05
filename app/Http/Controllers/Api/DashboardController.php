@@ -47,25 +47,15 @@ class DashboardController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'reservations' => [
-                    'total' => $totalReservations,
-                    'today' => $todayReservations,
-                ],
-                'revenue' => [
-                    'total' => number_format($totalRevenue, 2),
-                    'today' => number_format($todayRevenue, 2),
-                    'currency' => 'USD',
-                ],
-                'customers' => [
-                    'total' => $totalCustomers,
-                ],
-                'tables' => [
-                    'total' => $totalTables,
-                    'available' => $availableTables,
-                    'occupied' => $totalTables - $availableTables,
-                ],
-            ],
+            'total_revenue' => (float) $totalRevenue,
+            'revenue_trend' => 0.0, // Calculate trend if needed
+            'active_orders' => Order::where('status', 'pending')->count(),
+            'orders_trend' => 0,
+            'total_reservations' => $totalReservations,
+            'reservations_trend' => 0.0,
+            'today_reservations' => $todayReservations,
+            'active_staff_count' => 0, // Add staff count logic if needed
+            'low_stock_items' => 0, // Add inventory logic if needed
         ]);
     }
 
