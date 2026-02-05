@@ -28,13 +28,13 @@ class FixMissingBranchesTable extends Command
 
         // Create branches table
         $this->createBranchesTable();
-        
+
         // Create permission tables
         $this->createPermissionTables();
-        
+
         // Create staff table
         $this->createStaffTable();
-        
+
         // Create staff work logs
         $this->createStaffWorkLogsTable();
 
@@ -178,7 +178,7 @@ class FixMissingBranchesTable extends Command
         $this->info("Creating 'staff' table...");
         Schema::create('staff', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('user_id'); // No FK constraint - users table is in landlord DB
             $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
             $table->string('position');
             $table->date('date_of_birth')->nullable();
@@ -196,6 +196,7 @@ class FixMissingBranchesTable extends Command
             $table->string('swift_bic')->nullable();
             $table->timestamps();
             $table->softDeletes();
+            $table->index('user_id');
             $table->index('branch_id');
         });
         $this->info("✓ Staff table created.");
