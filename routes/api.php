@@ -27,7 +27,7 @@ Route::prefix('v1')->group(function () {
     // Protected User Info
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', function (Request $request) {
-            return $request->user();
+            return $request->user()->makeVisible(['onboarding_status']);
         });
 
         Route::patch('/user', function (Request $request) {

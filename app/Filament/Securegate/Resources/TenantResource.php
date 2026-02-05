@@ -70,6 +70,13 @@ class TenantResource extends Resource
                             ])
                             ->required()
                             ->default('active'),
+                        \Filament\Forms\Components\Select::make('onboarding_status')
+                            ->options([
+                                'pending_setup' => 'Pending Setup (Wizard)',
+                                'active' => 'Active (Setup Complete)',
+                            ])
+                            ->required()
+                            ->default('pending_setup'),
                     ])
                     ->columns(3)
                     ->columnSpanFull(),
@@ -159,6 +166,14 @@ class TenantResource extends Resource
                         'active' => 'success',
                         'suspended' => 'danger',
                         'pending' => 'warning',
+                        default => 'gray',
+                    })
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('onboarding_status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'active' => 'success',
+                        'pending_setup' => 'warning',
                         default => 'gray',
                     })
                     ->sortable(),

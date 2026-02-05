@@ -172,4 +172,21 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     {
         $this->notify(new \App\Notifications\Auth\VerifyEmail);
     }
+
+    /**
+     * Get the onboarding status from the first tenant.
+     */
+    public function getOnboardingStatusAttribute()
+    {
+        if ($this->hasRole('Business Owner')) {
+            $tenant = $this->tenants()->first();
+            return $tenant?->onboarding_status ?? 'active';
+        }
+        return 'active';
+    }
+
+    /**
+     * Append onboarding_status to JSON.
+     */
+    protected $appends = ['onboarding_status'];
 }
