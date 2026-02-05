@@ -33,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
         // Register custom commands explicitly
         $this->commands([
             \App\Console\Commands\SmartTenantsMigrate::class,
+            \App\Console\Commands\FixMissingBranchesTable::class,
         ]);
 
         // Register model observers
