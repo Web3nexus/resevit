@@ -79,8 +79,13 @@ class TenantResource extends Resource
                         \Filament\Forms\Components\TextInput::make('mobile')
                             ->tel(),
                         \Filament\Forms\Components\TextInput::make('country'),
-                        \Filament\Forms\Components\TextInput::make('timezone'),
-                        \Filament\Forms\Components\TextInput::make('currency'),
+                        \Filament\Forms\Components\TextInput::make('country'),
+                        \Filament\Forms\Components\TextInput::make('timezone')
+                            ->required()
+                            ->default('UTC'),
+                        \Filament\Forms\Components\TextInput::make('currency')
+                            ->required()
+                            ->default('USD'),
                     ])
                     ->columns(2)
                     ->columnSpanFull(),

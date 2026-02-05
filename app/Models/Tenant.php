@@ -44,6 +44,14 @@ class Tenant extends BaseTenant implements TenantWithDatabase
                 $previewDomain = config('tenancy.preview_domain');
                 $tenant->domain = $tenant->slug . '.' . $previewDomain;
             }
+
+            if (empty($tenant->timezone)) {
+                $tenant->timezone = 'UTC';
+            }
+
+            if (empty($tenant->currency)) {
+                $tenant->currency = 'USD';
+            }
         });
 
         static::saved(function (Tenant $tenant) {
