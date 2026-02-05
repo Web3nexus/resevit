@@ -39,6 +39,11 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             if (empty($tenant->{$tenant->getKeyName()})) {
                 $tenant->{$tenant->getKeyName()} = (string) Str::uuid();
             }
+
+            if (empty($tenant->domain) && !empty($tenant->slug)) {
+                $previewDomain = config('tenancy.preview_domain');
+                $tenant->domain = $tenant->slug . '.' . $previewDomain;
+            }
         });
 
         static::saved(function (Tenant $tenant) {
@@ -47,8 +52,8 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             $dashboardBase = parse_url(config('app.url'), PHP_URL_HOST);
 
             $systemDomains = [
-                $tenant->slug.'.'.$previewDomain,
-                $tenant->slug.'.'.$dashboardBase,
+                $tenant->slug . '.' . $previewDomain,
+                $tenant->slug . '.' . $dashboardBase,
             ];
 
             $newCustomDomains = array_filter([
@@ -65,7 +70,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
 
             // 2. Cleanup old custom domains that are no longer selected
             $tenant->domains()->get()->each(function ($d) use ($allTenantDomains) {
-                if (! in_array($d->domain, $allTenantDomains)) {
+                if (!in_array($d->domain, $allTenantDomains)) {
                     $d->delete();
                 }
             });

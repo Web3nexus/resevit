@@ -28,5 +28,6 @@ class TenantDatabaseSeeder extends Seeder
         $this->call(TenantPermissionsSeeder::class);
         $this->call(TenantRolesSeeder::class);
         $this->call(TenantUserSeeder::class);
+        $this->call(StaffDemoSeeder::class);
     }
 }

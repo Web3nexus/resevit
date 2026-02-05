@@ -87,4 +87,12 @@ class Staff extends Model
     {
         return $this->hasMany(Task::class, 'assigned_to_staff_id');
     }
+
+    /**
+     * Get all work logs for this staff member.
+     */
+    public function workLogs(): HasMany
+    {
+        return $this->hasMany(StaffWorkLog::class);
+    }
 }
