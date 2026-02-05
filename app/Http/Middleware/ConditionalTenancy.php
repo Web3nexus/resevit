@@ -33,7 +33,7 @@ class ConditionalTenancy
 
         // Livewire assets (js) are central, but upload/update/preview are tenant-aware
         if ($request->is('livewire/*')) {
-            \Illuminate\Support\Facades\Log::info('ConditionalTenancy: Livewire request detected: '.$request->path());
+            \Illuminate\Support\Facades\Log::info('ConditionalTenancy: Livewire request detected: ' . $request->path());
 
             if ($request->is('livewire/livewire.js') || $request->is('livewire/livewire.min.js.map')) {
                 return $next($request);
@@ -51,15 +51,15 @@ class ConditionalTenancy
         $host = $request->getHost();
 
         // DEBUG LOGGING
-        \Illuminate\Support\Facades\Log::info("ConditionalTenancy Debug: Host [$host], Central Domains: ".implode(', ', $centralDomains));
+        \Illuminate\Support\Facades\Log::info("ConditionalTenancy Debug: Host [$host], Central Domains: " . implode(', ', $centralDomains));
 
-        if ($host === 'resevit-backend.test' || $host === 'preview.resevit-backend.test' || in_array($host, $centralDomains)) {
-            \Illuminate\Support\Facades\Log::info('ConditionalTenancy: Central domain detected, skipping tenancy for: '.$request->path());
+        if (in_array($host, $centralDomains)) {
+            \Illuminate\Support\Facades\Log::info('ConditionalTenancy: Central domain detected, skipping tenancy for: ' . $request->path());
 
             return $next($request);
         }
 
-        \Illuminate\Support\Facades\Log::info('ConditionalTenancy: Initializing tenancy for host: '.$host.' path: '.$request->path());
+        \Illuminate\Support\Facades\Log::info('ConditionalTenancy: Initializing tenancy for host: ' . $host . ' path: ' . $request->path());
 
         // Initialize tenancy for all other domains (tenants)
         return app(\Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class)
