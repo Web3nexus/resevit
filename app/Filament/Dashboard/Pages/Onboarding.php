@@ -126,6 +126,7 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
         $tenant = \App\Models\Tenant::on('landlord')->find(tenant('id'));
         $tenant->update([
             'onboarding_status' => 'active',
+            'onboarding_completed' => true,
         ]);
 
         Notification::make()

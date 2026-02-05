@@ -144,6 +144,16 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         return $this->belongsTo(BusinessCategory::class, 'business_category_id');
     }
 
+    public function branches()
+    {
+        return $this->hasMany(Branch::class, 'tenant_id');
+    }
+
+    public function staff()
+    {
+        return $this->hasMany(Staff::class, 'tenant_id');
+    }
+
     public function reviews()
     {
         return $this->hasMany(Review::class, 'tenant_id');

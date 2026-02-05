@@ -14,6 +14,8 @@ use Filament\Tables\Table;
 use Filament\Actions\ExportAction;
 use App\Filament\Exports\TenantExporter;
 use Filament\Schemas\Schema;
+use App\Filament\Securegate\Resources\TenantResource\RelationManagers\BranchesRelationManager;
+use App\Filament\Securegate\Resources\TenantResource\RelationManagers\StaffRelationManager;
 
 class TenantResource extends Resource
 {
@@ -212,7 +214,8 @@ class TenantResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            BranchesRelationManager::class,
+            StaffRelationManager::class,
         ];
     }
 
