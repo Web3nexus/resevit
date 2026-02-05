@@ -70,7 +70,7 @@ class InvestmentOpportunitiesTable
                         'crowdfunding' => 'Crowdfunding',
                     ]),
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('approve')
                     ->label('Approve')
                     ->icon('heroicon-o-check-circle')
@@ -91,7 +91,7 @@ class InvestmentOpportunitiesTable
                     }),
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

@@ -5,7 +5,9 @@ namespace App\Filament\Invest\Resources\InvestmentOpportunities\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
+use Filament\Support\Enums\FontWeight;
 
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
@@ -67,7 +69,8 @@ class InvestmentOpportunitiesTable
                     ])
                     ->default('active'),
             ])
-            ->recordActions([
+            ->actions([ // Renamed from recordActions
+                ViewAction::make(), // Added ViewAction
                 Action::make('invest')
                     ->label('Invest Now')
                     ->icon('heroicon-o-currency-dollar')
@@ -103,8 +106,10 @@ class InvestmentOpportunitiesTable
                     })
                     ->visible(fn($record) => $record->status === 'active'),
             ])
-            ->toolbarActions([
-                //
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }

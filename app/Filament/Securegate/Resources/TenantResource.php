@@ -79,7 +79,6 @@ class TenantResource extends Resource
                         \Filament\Forms\Components\TextInput::make('mobile')
                             ->tel(),
                         \Filament\Forms\Components\TextInput::make('country'),
-                        \Filament\Forms\Components\TextInput::make('country'),
                         \Filament\Forms\Components\TextInput::make('timezone')
                             ->required()
                             ->default('UTC'),

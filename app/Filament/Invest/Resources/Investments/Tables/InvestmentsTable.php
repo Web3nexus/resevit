@@ -7,6 +7,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 
@@ -48,11 +49,13 @@ class InvestmentsTable
                             ->when($data['until'], fn($query) => $query->whereDate('created_at', '<=', $data['until']));
                     })
             ])
-            ->recordActions([
-                //
+            ->actions([
+                ViewAction::make(),
             ])
-            ->toolbarActions([
-                //
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }
