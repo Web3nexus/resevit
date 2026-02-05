@@ -22,9 +22,9 @@ class InvestorResource extends Resource
 
     protected static ?string $modelLabel = 'Investor';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-banknotes';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static string | UnitEnum | null $navigationGroup = 'External Users';
+    protected static string|UnitEnum|null $navigationGroup = 'External Users';
 
     protected static ?int $navigationSort = 2;
 
@@ -131,11 +131,10 @@ class InvestorResource extends Resource
                             ->send();
                     }),
             ])
-            ->recordActions([
-                \Filament\Actions\ViewAction::make(),
-            ])
             ->bulkActions([
-                // Bulk actions can be added here
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
+                ]),
             ])
             ->emptyStateHeading('No investors yet')
             ->emptyStateDescription('Investors will appear here once they register on the platform.')

@@ -22,9 +22,9 @@ class AdminResource extends Resource
 
     protected static ?string $modelLabel = 'Admin User';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-shield-check';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Internal Users';
+    protected static string|UnitEnum|null $navigationGroup = 'Internal Users';
 
     protected static ?int $navigationSort = 1;
 
@@ -114,11 +114,15 @@ class AdminResource extends Resource
             ->filters([
                 //
             ])
-            ->recordActions([
-                // Row click will navigate to view/edit
+            ->actions([
+                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                // Bulk actions can be added here
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
+                ]),
             ])
             ->emptyStateHeading('No admin users yet')
             ->emptyStateDescription('Admin users will appear here once they are created.')

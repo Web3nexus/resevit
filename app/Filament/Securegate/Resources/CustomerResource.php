@@ -22,9 +22,9 @@ class CustomerResource extends Resource
 
     protected static ?string $modelLabel = 'Customer';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
 
-    protected static string | UnitEnum | null $navigationGroup = 'External Users';
+    protected static string|UnitEnum|null $navigationGroup = 'External Users';
 
     protected static ?int $navigationSort = 1;
 
@@ -144,11 +144,10 @@ class CustomerResource extends Resource
                         }
                     }),
             ])
-            ->recordActions([
-                \Filament\Actions\ViewAction::make(),
-            ])
             ->bulkActions([
-                // Bulk actions can be added here
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
+                ]),
             ])
             ->emptyStateHeading('No customers yet')
             ->emptyStateDescription('Customers will appear here once they register on the platform.')
