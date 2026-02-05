@@ -67,7 +67,15 @@ Route::middleware([
         Route::get('/chats/{chat}/messages', [ChatController::class, 'messages']);
         Route::post('/chats/messages', [ChatController::class, 'sendMessage']);
 
-        // Stats Endpoint
+        // Dashboard Endpoints
+        Route::get('/dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class, 'getStats']);
+        Route::get('/dashboard/reservations/recent', [\App\Http\Controllers\Api\DashboardController::class, 'getRecentReservations']);
+        Route::get('/dashboard/messages', [\App\Http\Controllers\Api\DashboardController::class, 'getMessages']);
+
+        // Bookings (alias for reservations for Flutter app)
+        Route::apiResource('bookings', ReservationController::class);
+
+        // Stats Endpoint (legacy)
         Route::get('/stats', [\App\Http\Controllers\Api\V1\StatsController::class, 'index']);
 
         // Staff Management
