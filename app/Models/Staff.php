@@ -35,6 +35,7 @@ class Staff extends Model
         'account_number',
         'branch_code',
         'swift_bic',
+        'tenant_id',
     ];
 
     protected $casts = [

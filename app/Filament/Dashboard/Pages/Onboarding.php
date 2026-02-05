@@ -119,6 +119,7 @@ class Onboarding extends Page implements \Filament\Schemas\Contracts\HasSchemas
             'phone' => $data['branch_phone'],
             'email' => $data['branch_email'],
             'is_active' => true,
+            'tenant_id' => tenant('id'),
         ]);
 
         // Update tenant settings - use the landlord connection

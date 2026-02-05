@@ -20,6 +20,7 @@ class Branch extends Model
         'email',
         'opening_hours',
         'is_active',
+        'tenant_id',
     ];
 
     protected $casts = [
