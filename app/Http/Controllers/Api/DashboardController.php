@@ -96,38 +96,39 @@ class DashboardController extends Controller
 
     /**
      * Get messages/notifications
+     * TODO: Implement when Message model is created
      */
     public function getMessages(Request $request)
     {
-        $userId = $request->user()->id;
+        // $userId = $request->user()->id;
 
-        // Get unread messages count
-        $unreadCount = Message::where('recipient_id', $userId)
-            ->where('is_read', false)
-            ->count();
+        // // Get unread messages count
+        // $unreadCount = Message::where('recipient_id', $userId)
+        //     ->where('is_read', false)
+        //     ->count();
 
-        // Get recent messages
-        $messages = Message::where('recipient_id', $userId)
-            ->with('sender')
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get()
-            ->map(function ($message) {
-                return [
-                    'id' => $message->id,
-                    'sender_name' => $message->sender->name ?? 'System',
-                    'subject' => $message->subject,
-                    'body' => $message->body,
-                    'is_read' => $message->is_read,
-                    'created_at' => $message->created_at->toIso8601String(),
-                ];
-            });
+        // // Get recent messages
+        // $messages = Message::where('recipient_id', $userId)
+        //     ->with('sender')
+        //     ->orderBy('created_at', 'desc')
+        //     ->limit(10)
+        //     ->get()
+        //     ->map(function ($message) {
+        //         return [
+        //             'id' => $message->id,
+        //             'sender_name' => $message->sender->name ?? 'System',
+        //             'subject' => $message->subject,
+        //             'body' => $message->body,
+        //             'is_read' => $message->is_read,
+        //             'created_at' => $message->created_at->toIso8601String(),
+        //         ];
+        //     });
 
         return response()->json([
             'success' => true,
             'data' => [
-                'unread_count' => $unreadCount,
-                'messages' => $messages,
+                'unread_count' => 0,
+                'messages' => [],
             ],
         ]);
     }
