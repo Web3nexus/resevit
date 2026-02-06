@@ -27,11 +27,16 @@ Route::prefix('v1')->group(function () {
     // Protected User Info
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', function (Request $request) {
-            $user = $request->user()->load(['currentTenant']);
+            $user = $request->user();
+            \Illuminate\Support\Facades\Log::info('API /user hit', ['id' => $user->id]);
 
             $tenantId = null;
-            if ($user->currentTenant) {
-                $tenantId = $user->currentTenant->id;
+            $tenant = \App\Models\Tenant::where('owner_user_id', $user->id)->first();
+            if ($tenant) {
+                $tenantId = $tenant->id;
+                \Illuminate\Support\Facades\Log::info('API /user: found tenant', ['tenant_id' => $tenantId]);
+            } else {
+                \Illuminate\Support\Facades\Log::warning('API /user: no tenant found for user', ['id' => $user->id]);
             }
 
             $user->makeVisible(['onboarding_status']);
