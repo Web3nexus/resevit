@@ -51,7 +51,19 @@ Route::prefix('v1')->group(function () {
 
             // 2. Prepare User Data
             $user->makeVisible(['onboarding_status']);
+
+            // Determine effective role for App (matches PlatformAuthController logic)
+            $role = 'staff';
+            if ($user->hasRole('Super Admin')) {
+                $role = 'super_admin';
+            } elseif ($user->hasRole('Business Owner')) {
+                $role = 'business_owner';
+            }
+
             $userData = $user->toArray();
+            $userData['role'] = $role;
+            $userData['roles'] = $user->getRoleNames();
+            $userData['permissions'] = $user->getAllPermissions()->pluck('name');
             $userData['tenant_id'] = $tenantId;
 
             // Add current_tenant as a map for Flutter User.fromJson
@@ -69,6 +81,7 @@ Route::prefix('v1')->group(function () {
             \Illuminate\Support\Facades\Log::info('DEBUG: /user returning data', [
                 'user_id' => $user->id,
                 'tenant_id' => $tenantId,
+                'role' => $role,
                 'has_current_tenant' => $tenant ? 'YES' : 'NO'
             ]);
 
