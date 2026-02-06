@@ -29,7 +29,13 @@ class ReservationController extends Controller
             $query->limit($request->limit);
         }
 
-        $reservations = $query->latest('reservation_time')->get();
+        $reservations = $query->latest('reservation_time')->get()->map(function ($r) {
+            $r->reservation_time_iso = $r->reservation_time ? $r->reservation_time->toIso8601String() : null;
+            // Overwrite reservation_time for the JSON response to satisfy Flutter's DateTime.parse
+            $data = $r->toArray();
+            $data['reservation_time'] = $r->reservation_time ? $r->reservation_time->toIso8601String() : null;
+            return $data;
+        });
 
         \Illuminate\Support\Facades\Log::info('DEBUG: ReservationController@index returning ' . $reservations->count() . ' reservations');
         return response()->json([
