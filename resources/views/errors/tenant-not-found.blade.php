@@ -37,7 +37,7 @@
             <div class="flex flex-wrap justify-center gap-5 pt-4">
                 <a href="{{ config('app.url') }}"
                     class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-bold rounded-2xl text-white bg-brand-primary hover:bg-brand-secondary transition-all shadow-xl hover:shadow-brand-primary/20 hover:-translate-y-1">
-                    <i class="fa-solid fa-house mr-2"></i> Go to resovit.com
+                    <i class="fa-solid fa-house mr-2"></i> Go to resevit.com
                 </a>
                 <button onclick="window.history.back()"
                     class="inline-flex items-center px-8 py-4 border-2 border-slate-200 text-lg font-bold rounded-2xl text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-md hover:-translate-y-1">
