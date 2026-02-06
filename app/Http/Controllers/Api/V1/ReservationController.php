@@ -14,6 +14,7 @@ class ReservationController extends Controller
 {
     public function index(Request $request)
     {
+        \Illuminate\Support\Facades\Log::info('DEBUG: ReservationController@index hit');
         $query = Reservation::query()->with(['table', 'branch']);
 
         if ($request->has('email')) {
@@ -30,6 +31,7 @@ class ReservationController extends Controller
 
         $reservations = $query->latest('reservation_time')->get();
 
+        \Illuminate\Support\Facades\Log::info('DEBUG: ReservationController@index returning ' . $reservations->count() . ' reservations');
         return response()->json([
             'success' => true,
             'data' => $reservations,

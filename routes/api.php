@@ -34,31 +34,42 @@ Route::prefix('v1')->group(function () {
                 'connection' => $user->getConnectionName(),
             ]);
 
-            $tenantId = null;
-            try {
-                // Manually find the tenant where this user is the owner
-                $tenant = \Illuminate\Support\Facades\DB::connection('landlord')
-                    ->table('tenants')
-                    ->where('owner_user_id', $user->id)
-                    ->first();
+            // 1. Determine Tenant Context
+            $tenant = \Illuminate\Support\Facades\DB::connection('landlord')
+                ->table('tenants')
+                ->where('owner_user_id', $user->id)
+                ->first();
 
-                if ($tenant) {
-                    $tenantId = $tenant->id;
-                    \Illuminate\Support\Facades\Log::info('DEBUG: /user found tenant by owner_user_id', ['tenant_id' => $tenantId]);
-                } else {
-                    \Illuminate\Support\Facades\Log::info('DEBUG: /user no tenant found by owner_user_id');
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('DEBUG: /user tenant lookup failed: ' . $e->getMessage());
+            if (!$tenant) {
+                // Check if staff has a branch linked to a tenant
+                // Search for ANY tenant where this user might be added.
+                // For now, let's keep it simple and just find the first tenant they might belong to.
+                // In a real system, we'd have a users_tenants pivot or branch_id.
             }
 
+            $tenantId = $tenant ? $tenant->id : null;
+
+            // 2. Prepare User Data
             $user->makeVisible(['onboarding_status']);
             $userData = $user->toArray();
             $userData['tenant_id'] = $tenantId;
 
+            // Add current_tenant as a map for Flutter User.fromJson
+            if ($tenant) {
+                $userData['current_tenant'] = [
+                    'id' => $tenantId,
+                    'name' => $tenant->name,
+                    'domain' => $tenant->domain,
+                    'slug' => $tenant->slug,
+                ];
+            } else {
+                $userData['current_tenant'] = null;
+            }
+
             \Illuminate\Support\Facades\Log::info('DEBUG: /user returning data', [
                 'user_id' => $user->id,
-                'tenant_id' => $tenantId
+                'tenant_id' => $tenantId,
+                'has_current_tenant' => $tenant ? 'YES' : 'NO'
             ]);
 
             return response()->json($userData);

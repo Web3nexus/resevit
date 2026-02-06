@@ -20,6 +20,7 @@ class PlatformAuthController extends Controller
 {
     public function bootstrap()
     {
+        \Illuminate\Support\Facades\Log::info('DEBUG: bootstrap hit');
         $settings = \App\Models\PlatformSetting::current();
 
         // 1. Branding
@@ -47,6 +48,7 @@ class PlatformAuthController extends Controller
         // 4. Pricing Plans (for the "pricing or something" part)
         $plans = \App\Models\PricingPlan::where('is_active', true)->orderBy('order')->get();
 
+        \Illuminate\Support\Facades\Log::info('DEBUG: bootstrap returning response');
         return response()->json([
             'branding' => $branding,
             'tenant' => $tenantInfo,

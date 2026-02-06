@@ -100,9 +100,9 @@ class DashboardController extends Controller
             \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Row 6 Recent Reservations');
             $recentReservations = $reservationsQuery->clone()->latest()->limit(5)->get()->map(fn($r) => [
                 'id' => $r->id,
-                'guest' => $r->customer_name ?? 'Guest',
-                'time' => $r->reservation_time,
-                'guests' => $r->number_of_guests,
+                'guest' => $r->guest_name ?? 'Guest',
+                'time' => $r->reservation_time ? $r->reservation_time->toIso8601String() : null,
+                'guests' => $r->party_size,
                 'status' => $r->status,
             ]);
 
