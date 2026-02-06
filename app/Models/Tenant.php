@@ -42,7 +42,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
 
             if (empty($tenant->domain) && !empty($tenant->slug)) {
                 $previewDomain = config('tenancy.preview_domain');
-                $tenant->domain = $tenant->slug . '.' . $previewDomain;
+                $tenant->domain = $tenant->slug . '-preview.' . $previewDomain;
             }
 
             if (empty($tenant->timezone)) {
@@ -60,7 +60,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             $dashboardBase = parse_url(config('app.url'), PHP_URL_HOST);
 
             $systemDomains = [
-                $tenant->slug . '.' . $previewDomain,
+                $tenant->slug . '-preview.' . $previewDomain,
                 $tenant->slug . '.' . $dashboardBase,
             ];
 

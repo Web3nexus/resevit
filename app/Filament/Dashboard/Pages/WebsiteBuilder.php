@@ -294,7 +294,7 @@ class WebsiteBuilder extends Page implements HasSchemas
                 ->label('Preview Website')
                 ->color('gray')
                 ->icon('heroicon-o-arrow-top-right-on-square')
-                ->url(fn() => 'https://' . tenant('slug') . '.' . config('tenancy.preview_domain'), shouldOpenInNewTab: true)
+                ->url(fn() => 'https://' . tenant('slug') . '-preview.' . config('tenancy.preview_domain'), shouldOpenInNewTab: true)
                 ->visible(fn() => $this->website !== null),
             Action::make('changeTemplate')
                 ->label('Change Template')

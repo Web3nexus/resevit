@@ -24,7 +24,7 @@ class TenantCreatorService
             'name' => $restaurantName,
             'slug' => $subdomain,
             // 'database_name' => ... let package generate it (tenant_UUID)
-            'domain' => $subdomain.'.'.config('tenancy.preview_domain'), // e.g. pizza.resevit-backend.test
+            'domain' => $subdomain . '-preview.' . config('tenancy.preview_domain'), // e.g. pizza-preview.resevit.test
             'owner_user_id' => $user->id,
             'status' => 'active',
             'mobile' => $extraData['mobile'] ?? null,
@@ -42,9 +42,8 @@ class TenantCreatorService
             $tenant->save();
         }
 
-        // 2. Add Domain
         $tenant->domains()->create([
-            'domain' => $subdomain.'.'.config('tenancy.preview_domain'), // e.g. pizza.resevit-backend.test
+            'domain' => $subdomain . '-preview.' . config('tenancy.preview_domain'), // e.g. pizza-preview.resevit.test
         ]);
 
         try {
@@ -59,11 +58,11 @@ class TenantCreatorService
                 // Use the tenant's specific database manager (MySQL/Postgres/etc)
                 try {
                     $manager = $tenant->database()->manager();
-                    if (! $manager->databaseExists($databaseName)) {
+                    if (!$manager->databaseExists($databaseName)) {
                         $manager->createDatabase($tenant);
                     }
                 } catch (\Throwable $e) {
-                    \Log::warning('Manual DB creation check failed: '.$e->getMessage());
+                    \Log::warning('Manual DB creation check failed: ' . $e->getMessage());
                 }
             }
 
@@ -88,7 +87,7 @@ class TenantCreatorService
             ]);
 
             \Log::info('Tenancy Initialized and Setup Complete.');
-            \Log::info('Tenant DB Name: '.$tenant->database_name);
+            \Log::info('Tenant DB Name: ' . $tenant->database_name);
 
             // Create user in tenant DB using TenantUser (tenant connection)
             $tenantUser = \App\Models\TenantUser::create([
@@ -104,9 +103,9 @@ class TenantCreatorService
             if ($role) {
                 // Ensure the user is also recognized on the tenant connection for the role assignment
                 $tenantUser->assignRole($role);
-                \Log::info('Assigned business_owner role to user: '.$tenantUser->email);
+                \Log::info('Assigned business_owner role to user: ' . $tenantUser->email);
             } else {
-                \Log::error('Could not find business_owner role for user: '.$tenantUser->email);
+                \Log::error('Could not find business_owner role for user: ' . $tenantUser->email);
             }
             // 5. Handle Stripe Subscription if plan and payment method provided
             if ($paymentMethodId && $planId) {
@@ -116,7 +115,7 @@ class TenantCreatorService
                     $stripeId = $billingCycle === 'yearly' ? $plan->stripe_yearly_id : $plan->stripe_id;
 
                     if ($stripeId) {
-                        \Log::info('Initiating Stripe Subscription for Tenant: '.$tenant->id.' Plan: '.$plan->slug.' Cycle: '.$billingCycle);
+                        \Log::info('Initiating Stripe Subscription for Tenant: ' . $tenant->id . ' Plan: ' . $plan->slug . ' Cycle: ' . $billingCycle);
 
                         $subscription = $tenant->newSubscription('default', $stripeId);
 
@@ -128,12 +127,12 @@ class TenantCreatorService
 
                         \Log::info('Stripe Subscription Created.');
                     } else {
-                        \Log::error('Stripe Price ID missing for plan '.$plan->name.' and cycle '.$billingCycle);
+                        \Log::error('Stripe Price ID missing for plan ' . $plan->name . ' and cycle ' . $billingCycle);
                     }
                 }
             }
         } catch (\Exception $e) {
-            \Log::error('Tenant Creation Failed: '.$e->getMessage());
+            \Log::error('Tenant Creation Failed: ' . $e->getMessage());
             throw $e;
         } finally {
             tenancy()->end();
@@ -144,7 +143,7 @@ class TenantCreatorService
             app(\App\Services\AiCreditService::class)->addCredits(
                 $tenant,
                 (float) $tenant->plan->monthly_ai_credits,
-                'Initial credits for '.$tenant->plan->name.' plan'
+                'Initial credits for ' . $tenant->plan->name . ' plan'
             );
         }
 
