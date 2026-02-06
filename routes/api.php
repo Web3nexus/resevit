@@ -27,7 +27,17 @@ Route::prefix('v1')->group(function () {
     // Protected User Info
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', function (Request $request) {
-            return $request->user()->load(['currentTenant'])->makeVisible(['onboarding_status']);
+            $user = $request->user()->load(['currentTenant']);
+
+            $tenantId = null;
+            if ($user->currentTenant) {
+                $tenantId = $user->currentTenant->id;
+            }
+
+            $user->setAttribute('tenant_id', $tenantId);
+            $user->makeVisible(['onboarding_status']);
+
+            return $user;
         });
 
         Route::patch('/user', function (Request $request) {
