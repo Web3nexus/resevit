@@ -17,9 +17,9 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($templates as $template)
-                    <div class="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer {{ ($selectedTemplate?->id === $template->id) ? 'ring-2 ring-primary-500' : '' }}"
+                    <div class="group relative bg-white dark:bg-gray-800 rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer h-full flex flex-col {{ ($selectedTemplate?->id === $template->id) ? 'ring-4 ring-primary-500/50' : '' }}"
                         wire:click="selectTemplate({{ $template->id }})">
-                        <div class="aspect-16/10 bg-gray-100 dark:bg-gray-900 relative overflow-hidden">
+                        <div class="aspect-[16/10] bg-gray-100 dark:bg-gray-900 relative overflow-hidden m-2 rounded-2xl border border-gray-100 dark:border-gray-700">
                             @if($template->thumbnail_path)
                                 <img src="{{ \App\Helpers\StorageHelper::getUrl($template->thumbnail_path) }}"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
