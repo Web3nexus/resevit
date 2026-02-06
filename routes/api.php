@@ -85,6 +85,18 @@ Route::prefix('v1')->group(function () {
             // Branches
             Route::apiResource('branches', \App\Http\Controllers\Api\V1\BranchController::class);
 
+            // Debug Tenancy
+            Route::get('/debug-tenancy', function () {
+                $tenant = tenant();
+                return response()->json([
+                    'id' => $tenant ? $tenant->id : 'null',
+                    'db_name' => $tenant ? $tenant->tenancy_db_name : 'null',
+                    'connection' => config('database.default'),
+                    'tenant_connection_db' => config('database.connections.tenant.database'),
+                    'actual_db' => \Illuminate\Support\Facades\DB::connection('tenant')->getDatabaseName(),
+                ]);
+            });
+
             // Chats
             Route::get('/chats', [\App\Http\Controllers\Api\V1\ChatController::class, 'conversations']);
             Route::get('/chats/{chat}/messages', [\App\Http\Controllers\Api\V1\ChatController::class, 'messages']);
