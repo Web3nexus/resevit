@@ -39,6 +39,19 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     }
 
     /**
+     * Helper for mobile app to get the primary tenant.
+     */
+    public function currentTenant()
+    {
+        return $this->hasOne(Tenant::class, 'owner_user_id')->latest();
+    }
+
+    public function getCurrentTenantAttribute()
+    {
+        return $this->tenants->first();
+    }
+
+    /**
      * Filament (and other packages) sometimes call getTenants() on the user.
      * Provide a compatibility method that returns the tenant collection.
      *

@@ -27,7 +27,7 @@ Route::prefix('v1')->group(function () {
     // Protected User Info
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', function (Request $request) {
-            return $request->user()->makeVisible(['onboarding_status']);
+            return $request->user()->load(['currentTenant'])->makeVisible(['onboarding_status']);
         });
 
         Route::patch('/user', function (Request $request) {
@@ -50,5 +50,45 @@ Route::prefix('v1')->group(function () {
         Route::post('/investor/invest', [InvestorController::class, 'invest']);
         Route::get('/investor/portfolio', [InvestorController::class, 'portfolio']);
         Route::get('/investor/wallet', [InvestorController::class, 'wallet']);
+
+        // --------------------------------------------------------------------------
+        // Tenant API Routes (Header-Based for Mobile App)
+        // --------------------------------------------------------------------------
+        Route::middleware([
+            \Stancl\Tenancy\Middleware\InitializeTenancyByRequestData::class,
+        ])->group(function () {
+            // Dashboard
+            Route::get('/dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class, 'getStats']);
+            Route::get('/dashboard/reservations/recent', [\App\Http\Controllers\Api\DashboardController::class, 'getRecentReservations']);
+            Route::get('/dashboard/messages', [\App\Http\Controllers\Api\DashboardController::class, 'getMessages']);
+
+            // Staff
+            Route::apiResource('staff', \App\Http\Controllers\Api\V1\StaffController::class);
+
+            // Bookings / Reservations
+            Route::apiResource('bookings', \App\Http\Controllers\Api\V1\ReservationController::class);
+            Route::get('/reservations', [\App\Http\Controllers\Api\V1\ReservationController::class, 'index']);
+
+            // Orders
+            Route::get('/orders', [\App\Http\Controllers\Api\V1\OrderController::class, 'index']);
+            Route::get('/orders/{order}', [\App\Http\Controllers\Api\V1\OrderController::class, 'show']);
+            Route::patch('/orders/{order}/status', [\App\Http\Controllers\Api\V1\OrderController::class, 'updateStatus']);
+
+            // Finance
+            Route::get('/payments', [\App\Http\Controllers\Api\V1\PaymentController::class, 'index']);
+            Route::get('/payroll', [\App\Http\Controllers\Api\V1\PayrollController::class, 'index']);
+            Route::post('/payroll/staff/{staff}/payout', [\App\Http\Controllers\Api\V1\PayrollController::class, 'processPayout']);
+
+            // Inventory
+            Route::apiResource('inventory', \App\Http\Controllers\Api\V1\InventoryController::class);
+
+            // Branches
+            Route::apiResource('branches', \App\Http\Controllers\Api\V1\BranchController::class);
+
+            // Chats
+            Route::get('/chats', [\App\Http\Controllers\Api\V1\ChatController::class, 'conversations']);
+            Route::get('/chats/{chat}/messages', [\App\Http\Controllers\Api\V1\ChatController::class, 'messages']);
+            Route::post('/chats/messages', [\App\Http\Controllers\Api\V1\ChatController::class, 'sendMessage']);
+        });
     });
 });
