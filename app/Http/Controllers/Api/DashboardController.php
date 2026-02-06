@@ -24,136 +24,149 @@ class DashboardController extends Controller
      */
     public function getStats(Request $request)
     {
-        \Illuminate\Support\Facades\Log::info('DEBUG: DashboardController@getStats hit', ['user_id' => $request->user()->id]);
+        \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Starting');
         $user = $request->user();
         $tenant = tenant();
         $branchId = $user->currentBranchId ?? null;
 
-        // Base queries
-        $reservationsQuery = Reservation::query();
-        $ordersQuery = Order::query();
-        $staffQuery = Staff::query();
-        $tasksQuery = Task::query();
-        $branchesQuery = Branch::query();
+        try {
+            // Base queries
+            $reservationsQuery = Reservation::query();
+            $ordersQuery = Order::query();
+            $staffQuery = Staff::query();
+            $tasksQuery = Task::query();
+            $branchesQuery = Branch::query();
 
-        if ($branchId) {
-            $reservationsQuery->where('branch_id', $branchId);
-            $ordersQuery->where('branch_id', $branchId);
-            $tasksQuery->where('branch_id', $branchId);
-        }
+            if ($branchId) {
+                $reservationsQuery->where('branch_id', $branchId);
+                $ordersQuery->where('branch_id', $branchId);
+                $tasksQuery->where('branch_id', $branchId);
+            }
 
-        // --- Row 1 Stats ---
-        $walletBalance = (float) ($user->wallet_balance ?? 0);
-        $totalPayout = (float) StaffPayout::paid()->sum('amount');
-        $aiCredits = (float) ($tenant->ai_credits ?? 0);
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Row 1');
+            $walletBalance = (float) ($user->wallet_balance ?? 0);
 
-        // --- Row 2 Stats ---
-        $grossEarnings = (float) $ordersQuery->clone()->completed()->sum('total_amount');
-        $platformFeeRate = 0.05; // Mock: 5% platform fee
-        $platformFees = $grossEarnings * $platformFeeRate;
-        $netEarnings = $grossEarnings - $platformFees;
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - StaffPayout query');
+            $totalPayout = (float) StaffPayout::paid()->sum('amount');
 
-        // --- Row 3 Stats ---
-        $totalStaff = $staffQuery->count();
-        $totalTasks = $tasksQuery->count();
-        $branchesCount = $branchesQuery->count();
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - AI Credits');
+            $aiCredits = (float) ($tenant->ai_credits ?? 0);
 
-        // --- Row 4 Stats ---
-        $totalSalesCount = $ordersQuery->clone()->completed()->count();
-        $avgOrderValue = $totalSalesCount > 0 ? $grossEarnings / $totalSalesCount : 0;
-        $onlineOrdersCount = $ordersQuery->clone()->online()->count();
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Row 2 Earnings');
+            $grossEarnings = (float) $ordersQuery->clone()->completed()->sum('total_amount');
+            $platformFeeRate = 0.05;
+            $platformFees = $grossEarnings * $platformFeeRate;
+            $netEarnings = $grossEarnings - $platformFees;
 
-        // --- Row 5 Data (Products & Orders) ---
-        $mostSellingProducts = OrderItem::select('menu_items.name', DB::raw('SUM(order_items.quantity) as total_quantity'))
-            ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
-            ->groupBy('order_items.menu_item_id', 'menu_items.name')
-            ->orderByDesc('total_quantity')
-            ->limit(5)
-            ->get();
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Row 3 Counts');
+            $totalStaff = $staffQuery->count();
+            $totalTasks = $tasksQuery->count();
+            $branchesCount = $branchesQuery->count();
 
-        $recentOrders = $ordersQuery->clone()->latest()->limit(5)->get()->map(fn($o) => [
-            'id' => $o->id,
-            'number' => $o->order_number,
-            'total' => (float) $o->total_amount,
-            'status' => $o->status,
-            'created_at' => $o->created_at->toIso8601String(),
-        ]);
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Row 4 Sales');
+            $totalSalesCount = $ordersQuery->clone()->completed()->count();
+            $avgOrderValue = $totalSalesCount > 0 ? $grossEarnings / $totalSalesCount : 0;
+            $onlineOrdersCount = $ordersQuery->clone()->online()->count();
 
-        // --- Row 6 Data (Messages & Reservations) ---
-        $recentMessages = PlatformMessage::where('sender_id', '!=', $user->id)
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->map(fn($m) => [
-                'id' => $m->id,
-                'sender' => $m->sender_name,
-                'body' => $m->body,
-                'created_at' => $m->created_at->toIso8601String(),
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Row 5 Most Selling');
+            $mostSellingProducts = OrderItem::select('menu_items.name', DB::raw('SUM(order_items.quantity) as total_quantity'))
+                ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
+                ->groupBy('order_items.menu_item_id', 'menu_items.name')
+                ->orderByDesc('total_quantity')
+                ->limit(5)
+                ->get();
+
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Row 5 Recent Orders');
+            $recentOrders = $ordersQuery->clone()->latest()->limit(5)->get()->map(fn($o) => [
+                'id' => $o->id,
+                'number' => $o->order_number,
+                'total' => (float) $o->total_amount,
+                'status' => $o->status,
+                'created_at' => $o->created_at->toIso8601String(),
             ]);
 
-        $recentReservations = $reservationsQuery->clone()->latest()->limit(5)->get()->map(fn($r) => [
-            'id' => $r->id,
-            'guest' => $r->customer_name ?? 'Guest',
-            'time' => $r->reservation_time,
-            'guests' => $r->number_of_guests,
-            'status' => $r->status,
-        ]);
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Row 6 Recent Messages');
+            $recentMessages = PlatformMessage::where('sender_id', '!=', $user->id)
+                ->latest()
+                ->limit(5)
+                ->get()
+                ->map(fn($m) => [
+                    'id' => $m->id,
+                    'sender' => $m->sender_name,
+                    'body' => $m->body,
+                    'created_at' => $m->created_at->toIso8601String(),
+                ]);
 
-        // --- Row 7 Data (Source & AI) ---
-        $reservationSources = Reservation::select('source', DB::raw('count(*) as total'))
-            ->whereNotNull('source')
-            ->groupBy('source')
-            ->get();
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Row 6 Recent Reservations');
+            $recentReservations = $reservationsQuery->clone()->latest()->limit(5)->get()->map(fn($r) => [
+                'id' => $r->id,
+                'guest' => $r->customer_name ?? 'Guest',
+                'time' => $r->reservation_time,
+                'guests' => $r->number_of_guests,
+                'status' => $r->status,
+            ]);
 
-        // --- Calculations for Flutter DashboardStats Model ---
-        $totalRevenue = $grossEarnings;
-        $revenueTrend = 8.5; // Mock trend
-        $activeOrders = $ordersQuery->clone()->where('status', 'preparing')->count();
-        $ordersTrend = 12; // Mock trend
-        $totalReservationsCount = $reservationsQuery->clone()->count();
-        $reservationsTrend = -2.4; // Mock trend
-        $todayReservationsCount = $reservationsQuery->clone()->whereDate('reservation_time', now())->count();
-        $activeStaffCount = Staff::where('status', 'active')->count();
-        $lowStockItemsCount = \App\Models\MenuItem::where('is_available', true)
-            ->where('description', 'like', '%low stock%')
-            ->count();
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Row 7 Reservation Sources');
+            $reservationSources = Reservation::select('source', DB::raw('count(*) as total'))
+                ->whereNotNull('source')
+                ->groupBy('source')
+                ->get();
 
-        return response()->json([
-            'success' => true,
-            'total_revenue' => $totalRevenue,
-            'revenue_trend' => $revenueTrend,
-            'active_orders' => $activeOrders,
-            'orders_trend' => $ordersTrend,
-            'total_reservations' => $totalReservationsCount,
-            'reservations_trend' => $reservationsTrend,
-            'today_reservations' => $todayReservationsCount,
-            'active_staff_count' => $activeStaffCount,
-            'low_stock_items' => $lowStockItemsCount,
-            'stats' => [
-                'wallet_balance' => $walletBalance,
-                'total_payout' => $totalPayout,
-                'ai_credits' => $aiCredits,
-                'gross_earnings' => $grossEarnings,
-                'platform_fees' => $platformFees,
-                'net_earnings' => $netEarnings,
-                'total_staff' => $totalStaff,
-                'total_tasks' => $totalTasks,
-                'branches_count' => $branchesCount,
-                'total_sales' => $totalSalesCount,
-                'avg_order_value' => $avgOrderValue,
-                'online_orders' => $onlineOrdersCount,
-            ],
-            'most_selling_products' => $mostSellingProducts,
-            'recent_orders' => $recentOrders,
-            'recent_messages' => $recentMessages,
-            'recent_reservations' => $recentReservations,
-            'reservation_sources' => $reservationSources,
-            'ai_insights' => [
-                'Your revenue is up 12% compared to last week.',
-                'Saturday 7 PM is your busiest time. Ensure more staff are on duty.',
-                'Popular product "Burger Extra" is low on stock.',
-            ],
-        ]);
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Final Trends');
+            $totalRevenue = $grossEarnings;
+            $activeOrders = $ordersQuery->clone()->where('status', 'preparing')->count();
+            $totalReservationsCount = $reservationsQuery->clone()->count();
+            $todayReservationsCount = $reservationsQuery->clone()->whereDate('reservation_time', now())->count();
+            $activeStaffCount = Staff::where('status', 'active')->count();
+
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Low Stock Items');
+            $lowStockItemsCount = \App\Models\MenuItem::where('is_available', true)
+                ->where('description', 'like', '%low stock%')
+                ->count();
+
+            \Illuminate\Support\Facades\Log::info('DEBUG: getStats - Returning Response');
+            return response()->json([
+                'success' => true,
+                'total_revenue' => $totalRevenue,
+                'revenue_trend' => 8.5,
+                'active_orders' => $activeOrders,
+                'orders_trend' => 12,
+                'total_reservations' => $totalReservationsCount,
+                'reservations_trend' => -2.4,
+                'today_reservations' => $todayReservationsCount,
+                'active_staff_count' => $activeStaffCount,
+                'low_stock_items' => $lowStockItemsCount,
+                'stats' => [
+                    'wallet_balance' => $walletBalance,
+                    'total_payout' => $totalPayout,
+                    'ai_credits' => $aiCredits,
+                    'gross_earnings' => $grossEarnings,
+                    'platform_fees' => $platformFees,
+                    'net_earnings' => $netEarnings,
+                    'total_staff' => $totalStaff,
+                    'total_tasks' => $totalTasks,
+                    'branches_count' => $branchesCount,
+                    'total_sales' => $totalSalesCount,
+                    'avg_order_value' => $avgOrderValue,
+                    'online_orders' => $onlineOrdersCount,
+                ],
+                'most_selling_products' => $mostSellingProducts,
+                'recent_orders' => $recentOrders,
+                'recent_messages' => $recentMessages,
+                'recent_reservations' => $recentReservations,
+                'reservation_sources' => $reservationSources,
+                'ai_insights' => [
+                    'Your revenue is up 12% compared to last week.',
+                    'Saturday 7 PM is your busiest time. Ensure more staff are on duty.',
+                    'Popular product "Burger Extra" is low on stock.',
+                ],
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('DEBUG: getStats CRASHED: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
