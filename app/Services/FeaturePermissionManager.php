@@ -40,9 +40,15 @@ class FeaturePermissionManager
             'staff' => [
                 'view_staff',
                 'manage_staff',
+            ],
+            'staff_payouts' => [
                 'manage_payouts',
                 'manage_staff_bank_details',
+            ],
+            'staff_scheduling' => [
                 'manage_staff_schedules',
+            ],
+            'staff_chat' => [
                 'view_staff_chat',
             ],
             'finance' => [

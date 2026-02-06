@@ -86,7 +86,26 @@ class StaffResource extends Resource
                             'cashier' => 'Cashier',
                             'waiter' => 'Waiter',
                         ])
-                        ->required(),
+                        ->required()
+                        ->live()
+                        ->afterStateUpdated(function ($state, $set) {
+                            if (!$state)
+                                return;
+
+                            // Map positions to role names
+                            $roleName = match ($state) {
+                                'manager' => 'manager',
+                                'accountant' => 'accountant',
+                                'cashier' => 'cashier',
+                                'waiter' => 'waiter',
+                                default => 'staff',
+                            };
+
+                            $role = \Spatie\Permission\Models\Role::where('name', $roleName)->first();
+                            if ($role) {
+                                $set('roles', [$role->id]);
+                            }
+                        }),
                     \Filament\Forms\Components\TextInput::make('phone')
                         ->tel()
                         ->maxLength(255),
