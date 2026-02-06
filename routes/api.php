@@ -55,7 +55,7 @@ Route::prefix('v1')->group(function () {
         // Tenant API Routes (Header-Based for Mobile App)
         // --------------------------------------------------------------------------
         Route::middleware([
-            \Stancl\Tenancy\Middleware\InitializeTenancyByRequestData::class,
+            \App\Http\Middleware\InitializeTenancyByHeader::class,
         ])->group(function () {
             // Dashboard
             Route::get('/dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class, 'getStats']);
