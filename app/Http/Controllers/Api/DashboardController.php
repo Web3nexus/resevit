@@ -24,6 +24,7 @@ class DashboardController extends Controller
      */
     public function getStats(Request $request)
     {
+        \Illuminate\Support\Facades\Log::info('DEBUG: DashboardController@getStats hit', ['user_id' => $request->user()->id]);
         $user = $request->user();
         $tenant = tenant();
         $branchId = $user->currentBranchId ?? null;

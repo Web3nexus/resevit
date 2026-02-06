@@ -108,6 +108,13 @@ class PlatformAuthController extends Controller
                     $tenantId = $userTenant->id;
                 }
 
+                \Illuminate\Support\Facades\Log::info('DEBUG: Login successful', [
+                    'user_id' => $user->id,
+                    'role' => $role,
+                    'tenant_id' => $tenantId,
+                    'onboarding_status' => $onboardingStatus,
+                ]);
+
                 return response()->json([
                     'token' => $token,
                     'user' => $userArray,

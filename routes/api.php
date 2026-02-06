@@ -28,20 +28,38 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', function (Request $request) {
             $user = $request->user();
-            \Illuminate\Support\Facades\Log::info('API /user hit', ['id' => $user->id]);
+            \Illuminate\Support\Facades\Log::info('DEBUG: /user endpoint hit', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'connection' => $user->getConnectionName(),
+            ]);
 
             $tenantId = null;
-            $tenant = \App\Models\Tenant::where('owner_user_id', $user->id)->first();
-            if ($tenant) {
-                $tenantId = $tenant->id;
-                \Illuminate\Support\Facades\Log::info('API /user: found tenant', ['tenant_id' => $tenantId]);
-            } else {
-                \Illuminate\Support\Facades\Log::warning('API /user: no tenant found for user', ['id' => $user->id]);
+            try {
+                // Manually find the tenant where this user is the owner
+                $tenant = \Illuminate\Support\Facades\DB::connection('landlord')
+                    ->table('tenants')
+                    ->where('owner_user_id', $user->id)
+                    ->first();
+
+                if ($tenant) {
+                    $tenantId = $tenant->id;
+                    \Illuminate\Support\Facades\Log::info('DEBUG: /user found tenant by owner_user_id', ['tenant_id' => $tenantId]);
+                } else {
+                    \Illuminate\Support\Facades\Log::info('DEBUG: /user no tenant found by owner_user_id');
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('DEBUG: /user tenant lookup failed: ' . $e->getMessage());
             }
 
             $user->makeVisible(['onboarding_status']);
             $userData = $user->toArray();
             $userData['tenant_id'] = $tenantId;
+
+            \Illuminate\Support\Facades\Log::info('DEBUG: /user returning data', [
+                'user_id' => $user->id,
+                'tenant_id' => $tenantId
+            ]);
 
             return response()->json($userData);
         });
