@@ -28,6 +28,7 @@ use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 Route::middleware([
     'api',
     InitializeTenancyByDomain::class,
+    \App\Http\Middleware\InitializeTenancyByHeader::class,
     PreventAccessFromCentralDomains::class,
 ])->prefix('api/v1')->group(function () {
 
