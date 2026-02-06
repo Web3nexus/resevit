@@ -101,13 +101,21 @@ class PlatformAuthController extends Controller
                 $userArray['onboarding_status'] = $onboardingStatus;
                 $userArray['email_verified_at'] = $user->email_verified_at;
 
+                // Fetch tenant ID for mobile app context
+                $tenantId = null;
+                if ($role === 'business_owner') {
+                    $tenant = Tenant::where('owner_user_id', $user->id)->first();
+                    $tenantId = $tenant?->id;
+                }
+
                 return response()->json([
                     'token' => $token,
                     'user' => $userArray,
                     'role' => $role,
-                    'roles' => $roles,
+                    'roles' => $roles, // Pass roles array
                     'permissions' => $permissions,
                     'onboarding_status' => $onboardingStatus,
+                    'tenant_id' => $tenantId, // Explicitly pass tenant_id
                 ]);
             }
         }
