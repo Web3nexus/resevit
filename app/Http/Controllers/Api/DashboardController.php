@@ -111,7 +111,7 @@ class DashboardController extends Controller
         $ordersTrend = 12; // Mock trend
         $totalReservationsCount = $reservationsQuery->clone()->count();
         $reservationsTrend = -2.4; // Mock trend
-        $todayReservationsCount = $reservationsQuery->clone()->whereDate('reservation_date', now())->count();
+        $todayReservationsCount = $reservationsQuery->clone()->whereDate('reservation_time', now())->count();
         $activeStaffCount = Staff::where('is_active', true)->count();
         $lowStockItemsCount = \App\Models\MenuItem::where('is_available', true)
             ->where('description', 'like', '%low stock%')
@@ -176,7 +176,7 @@ class DashboardController extends Controller
                 'customer_name' => $reservation->customer->name ?? 'Guest',
                 'customer_phone' => $reservation->customer->phone ?? null,
                 'table_name' => $reservation->table->name ?? 'N/A',
-                'reservation_date' => $reservation->reservation_date,
+                'reservation_date' => $reservation->reservation_time ? $reservation->reservation_time->format('Y-m-d') : null,
                 'reservation_time' => $reservation->reservation_time,
                 'guests' => $reservation->number_of_guests,
                 'status' => $reservation->status,
