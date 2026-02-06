@@ -34,10 +34,11 @@ Route::prefix('v1')->group(function () {
                 $tenantId = $user->currentTenant->id;
             }
 
-            $user->setAttribute('tenant_id', $tenantId);
             $user->makeVisible(['onboarding_status']);
+            $userData = $user->toArray();
+            $userData['tenant_id'] = $tenantId;
 
-            return $user;
+            return response()->json($userData);
         });
 
         Route::patch('/user', function (Request $request) {
