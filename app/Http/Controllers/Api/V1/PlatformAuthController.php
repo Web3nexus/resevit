@@ -103,9 +103,9 @@ class PlatformAuthController extends Controller
 
                 // Fetch tenant ID for mobile app context
                 $tenantId = null;
-                if ($role === 'business_owner') {
-                    $tenant = Tenant::where('owner_user_id', $user->id)->first();
-                    $tenantId = $tenant?->id;
+                $userTenant = Tenant::where('owner_user_id', $user->id)->first();
+                if ($userTenant) {
+                    $tenantId = $userTenant->id;
                 }
 
                 return response()->json([
