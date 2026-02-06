@@ -64,6 +64,7 @@ Route::prefix('v1')->group(function () {
             $userData['role'] = $role;
             $userData['roles'] = $user->getRoleNames();
             $userData['permissions'] = $user->getAllPermissions()->pluck('name');
+            $userData['avatar_url'] = \App\Helpers\StorageHelper::getUrl($user->avatar_url);
             $userData['tenant_id'] = $tenantId;
 
             // Add current_tenant as a map for Flutter User.fromJson
@@ -82,7 +83,7 @@ Route::prefix('v1')->group(function () {
                 'user_id' => $user->id,
                 'tenant_id' => $tenantId,
                 'role' => $role,
-                'has_current_tenant' => $tenant ? 'YES' : 'NO'
+                'has_avatar' => $user->avatar_url ? 'YES' : 'NO'
             ]);
 
             return response()->json($userData);
@@ -94,9 +95,43 @@ Route::prefix('v1')->group(function () {
                 'name' => 'nullable|string|max:255',
                 'email' => 'nullable|email|unique:users,email,' . $user->id,
                 'phone' => 'nullable|string',
+                'mobile' => 'nullable|string',
             ]);
             $user->update($validated);
             return response()->json($user);
+        });
+
+        Route::post('/user/avatar', function (Request $request) {
+            $request->validate([
+                'avatar' => 'required|image|max:2048',
+            ]);
+
+            $user = $request->user();
+            $path = $request->file('avatar')->store('avatars', 'public');
+
+            $user->update(['avatar_url' => $path]);
+
+            return response()->json([
+                'success' => true,
+                'avatar_url' => \App\Helpers\StorageHelper::getUrl($path),
+            ]);
+        });
+
+        Route::get('/notifications', function (Request $request) {
+            $notifications = $request->user()->notifications()->latest()->limit(20)->get();
+            $unreadCount = $request->user()->unreadNotifications()->count();
+
+            return response()->json([
+                'notifications' => $notifications,
+                'unread_count' => $unreadCount,
+            ]);
+        });
+
+        Route::post('/notifications/{id}/read', function (Request $request, $id) {
+            $notification = $request->user()->notifications()->findOrFail($id);
+            $notification->markAsRead();
+
+            return response()->json(['success' => true]);
         });
 
         Route::post('/auth/email/resend', [PlatformAuthController::class, 'resendVerificationEmail']);
