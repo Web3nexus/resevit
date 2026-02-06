@@ -1,9 +1,18 @@
-@extends('layouts.landing')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-@section('title', 'Business Not Found')
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Business Not Found - {{ config('app.name', 'Resevit') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
 
-@section('content')
-    <div class="min-h-[75vh] flex flex-col items-center justify-center px-4 py-24 text-center bg-brand-offwhite">
+<body class="font-sans antialiased text-slate-900 bg-brand-offwhite overflow-x-hidden">
+    <div class="min-h-screen flex flex-col items-center justify-center px-4 py-24 text-center">
         <div class="max-w-4xl w-full space-y-12">
             <!-- Illustration -->
             <div class="relative flex justify-center">
@@ -28,8 +37,8 @@
                     Business Not Found
                 </h1>
                 <p class="text-xl text-slate-600 leading-relaxed font-medium">
-                    The business you are looking for does not exist or the link might be incorrect. Please check the URL and
-                    try again.
+                    The business you are looking for does not exist or the link might be incorrect. Please check the URL
+                    and try again.
                 </p>
             </div>
 
@@ -46,4 +55,6 @@
             </div>
         </div>
     </div>
-@endsection
+</body>
+
+</html>
