@@ -20,14 +20,14 @@ return [
         '127.0.0.1',
         'localhost',
         parse_url(config('app.url'), PHP_URL_HOST),
-        env('TENANCY_PREVIEW_DOMAIN', 'preview.resevit-backend.test'),
+        env('TENANCY_PREVIEW_DOMAIN', 'resevit.test'),
     ],
 
     /**
      * The domain suffix used for temporary/preview websites.
      * e.g. [slug].resevit-preview.test
      */
-    'preview_domain' => env('TENANCY_PREVIEW_DOMAIN', 'preview.resevit-backend.test'),
+    'preview_domain' => env('TENANCY_PREVIEW_DOMAIN', 'resevit.test'),
 
     /**
      * Tenancy bootstrappers are executed when tenancy is initialized.
