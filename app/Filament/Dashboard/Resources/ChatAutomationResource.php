@@ -44,6 +44,7 @@ class ChatAutomationResource extends Resource
                                 'keyword' => 'Keyword Match',
                                 'welcome' => 'Welcome Message',
                                 'button' => 'Button Click',
+                                'ai_assistant' => 'AI Assistant (Take charge of chat)',
                             ])
                             ->required(),
                         Forms\Components\Toggle::make('is_active')
@@ -79,7 +80,7 @@ class ChatAutomationResource extends Resource
 
                                 Forms\Components\Textarea::make('content')
                                     ->label('Message Content')
-                                    ->visible(fn ($get) => $get('type') === 'message')
+                                    ->visible(fn($get) => $get('type') === 'message')
                                     ->required(),
 
                                 Forms\Components\Select::make('action')
@@ -87,7 +88,7 @@ class ChatAutomationResource extends Resource
                                         'create_reservation' => 'Create Reservation',
                                         'tag_chat' => 'Tag Conversation',
                                     ])
-                                    ->visible(fn ($get) => $get('type') === 'action')
+                                    ->visible(fn($get) => $get('type') === 'action')
                                     ->required(),
 
                                 Forms\Components\Toggle::make('auto_progress')

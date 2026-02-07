@@ -19,8 +19,9 @@ return [
     'central_domains' => [
         '127.0.0.1',
         'localhost',
+        'resevit.test',
+        'resevit-backend.test',
         parse_url(config('app.url'), PHP_URL_HOST),
-        env('TENANCY_PREVIEW_DOMAIN', 'resevit.test'),
     ],
 
     /**

@@ -7,6 +7,19 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Resevit AI Chat & Social Sync
+
+Resevit features a powerful AI-driven chat assistant that integrates with WhatsApp, Facebook Messenger, and Instagram.
+
+### Core Features
+- **Social Sync**: Automatically sync conversations from your social media platforms into the Resevit Dashboard and Mobile App.
+- **AI Assistant**: Enable a dynamic AI assistant that can take charge of conversations, answer enquiries, and book reservations automatically.
+- **Mixed Mode**: Both business owners and AI can participate in the same conversation. The AI respects manual replies and incorporates them into its context.
+- **Booking Integration**: The AI is directly linked to your reservation system, allowing for seamless, hands-free bookings.
+
+### Setup Instructions
+For detailed setup instructions on connecting your social accounts and configuring the AI assistant, please refer to the [AI Chat Setup Guide](docs/setup_social_connections.md).
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

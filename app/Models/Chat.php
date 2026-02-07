@@ -21,10 +21,21 @@ class Chat extends Model
         'unread_count',
     ];
 
+    protected $appends = ['is_ai_active'];
+
     protected $casts = [
         'last_message_at' => 'datetime',
         'unread_count' => 'integer',
+        'is_ai_active' => 'boolean',
     ];
+
+    public function getIsAiActiveAttribute(): bool
+    {
+        return $this->automationLogs()
+            ->where('status', 'in_progress')
+            ->whereHas('flow', fn($q) => $q->where('trigger_type', 'ai_assistant'))
+            ->exists();
+    }
 
     protected static function boot()
     {

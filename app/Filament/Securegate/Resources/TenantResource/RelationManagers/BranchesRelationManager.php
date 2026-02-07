@@ -29,8 +29,12 @@ class BranchesRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         // Ensure tenancy is initialized for the correct database
-        if (!tenancy()->initialized || tenant('id') !== $this->getOwnerRecord()->id) {
-            tenancy()->initialize($this->getOwnerRecord());
+        $tenant = $this->getOwnerRecord();
+        $dbName = config('tenancy.database.prefix') . $tenant->id . config('tenancy.database.suffix');
+        $dbExists = count(\Illuminate\Support\Facades\DB::select("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?", [$dbName])) > 0;
+
+        if ($dbExists && (!tenancy()->initialized || tenant('id') !== $tenant->id)) {
+            tenancy()->initialize($tenant);
         }
 
         return $schema
@@ -59,8 +63,24 @@ class BranchesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         // Ensure tenancy is initialized for the correct database
-        if (!tenancy()->initialized || tenant('id') !== $this->getOwnerRecord()->id) {
-            tenancy()->initialize($this->getOwnerRecord());
+        $tenant = $this->getOwnerRecord();
+        $dbName = config('tenancy.database.prefix') . $tenant->id . config('tenancy.database.suffix');
+        $dbExists = count(\Illuminate\Support\Facades\DB::select("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?", [$dbName])) > 0;
+
+        if ($dbExists && (!tenancy()->initialized || tenant('id') !== $tenant->id)) {
+            tenancy()->initialize($tenant);
+        }
+
+        if (!$dbExists) {
+            return $table
+                ->columns([
+                    Tables\Columns\TextColumn::make('status')
+                        ->default('Database Missing')
+                        ->badge()
+                        ->color('danger'),
+                ])
+                ->emptyStateHeading('Database Missing')
+                ->emptyStateDescription('The database for this tenant does not exist. Please recreate it from the tenant settings.');
         }
 
         return $table

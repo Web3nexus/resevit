@@ -48,7 +48,7 @@ class FacebookMessengerService
             ]
         );
 
-        ChatMessage::create([
+        $chatMessage = ChatMessage::create([
             'chat_id' => $chat->id,
             'direction' => 'inbound',
             'content' => $text,
@@ -59,6 +59,9 @@ class FacebookMessengerService
 
         $chat->touch('last_message_at');
         $chat->increment('unread_count');
+
+        // Pass to Automation Engine
+        app(AutomationEngineService::class)->processIncoming($chat, $chatMessage);
     }
 
     public function send(Chat $chat, string $content): bool

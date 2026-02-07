@@ -46,19 +46,24 @@ class ConditionalTenancy
         }
 
         // 3. Skip tenant initialization ONLY for central domains
-        // We removed $request->is('/') because tenant sites also have a root path
         $centralDomains = config('tenancy.central_domains', []);
         $host = $request->getHost();
-
-        // DEBUG LOGGING
-        \Illuminate\Support\Facades\Log::info("ConditionalTenancy Debug: Host [$host], Central Domains: " . implode(', ', $centralDomains));
-
         $previewDomain = config('tenancy.preview_domain');
-        if ($host === $previewDomain || in_array($host, $centralDomains)) {
-            \Illuminate\Support\Facades\Log::info('ConditionalTenancy: Central domain detected, skipping tenancy for: ' . $request->path());
 
+        // Robust check for central domains (ignoring case and extra spaces)
+        $isCentral = $host === $previewDomain || in_array(strtolower($host), array_map('strtolower', $centralDomains));
+
+        // Extra check for Herd local dev domains if not already included
+        if (!$isCentral && (str_ends_with($host, '.test') && ($host === 'resevit.test' || $host === 'resevit-backend.test'))) {
+            $isCentral = true;
+        }
+
+        if ($isCentral) {
+            \Illuminate\Support\Facades\Log::info("ConditionalTenancy: Central domain detected [$host], skipping tenancy.");
             return $next($request);
         }
+
+        \Illuminate\Support\Facades\Log::warning("ConditionalTenancy: Non-central domain [$host] - Initializing tenancy. Path: " . $request->path());
 
         \Illuminate\Support\Facades\Log::info('ConditionalTenancy: Initializing tenancy for host: ' . $host . ' path: ' . $request->path());
 

@@ -61,6 +61,19 @@ class ChatController extends Controller
                 'last_message_at' => now(),
             ]);
 
+            // 1. Send the message to the social platform
+            $router = app(\App\Services\Social\SocialMessageRouterService::class);
+            $account = \App\Models\SocialAccount::where('platform', $chat->source)
+                ->where('is_active', true)
+                ->first();
+
+            if ($account) {
+                $service = $router->getService($chat->source, $account);
+                if ($service && method_exists($service, 'send')) {
+                    $service->send($chat, $validated['message']);
+                }
+            }
+
             DB::commit();
 
             return response()->json([

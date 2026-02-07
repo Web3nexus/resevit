@@ -23,8 +23,13 @@ class AutomationEngineService
             ->first();
 
         if ($activeLog) {
-            $this->progressFlow($chat, $message, $activeLog);
+            // Check if the flow is an AI assistant flow
+            if ($activeLog->flow && $activeLog->flow->trigger_type === 'ai_assistant') {
+                $this->handleAiResponse($chat, $message);
+                return;
+            }
 
+            $this->progressFlow($chat, $message, $activeLog);
             return;
         }
 
@@ -39,6 +44,18 @@ class AutomationEngineService
     {
         $content = strtolower(trim($message->content));
 
+        // 1. Check for AI Assistant trigger
+        $aiTrigger = AutomationTrigger::where('trigger_key', 'ai_assistant')
+            ->with('flow')
+            ->first();
+
+        if ($aiTrigger && $aiTrigger->flow && $aiTrigger->flow->is_active) {
+            $this->startFlow($chat, $aiTrigger->flow);
+            $this->handleAiResponse($chat, $message);
+            return;
+        }
+
+        // 2. Fallback to keyword triggers
         $trigger = AutomationTrigger::where('trigger_key', 'keyword')
             ->where('trigger_value', $content)
             ->with('flow')
@@ -47,6 +64,17 @@ class AutomationEngineService
         if ($trigger && $trigger->flow && $trigger->flow->is_active) {
             $this->startFlow($chat, $trigger->flow);
         }
+    }
+
+    /**
+     * Handle response using AI Chat Service.
+     */
+    protected function handleAiResponse(Chat $chat, ChatMessage $message): void
+    {
+        $aiService = app(\App\Services\AI\AiChatService::class);
+        $response = $aiService->getResponse($chat, $message);
+
+        $this->sendMessage($chat, $response);
     }
 
     /**
@@ -88,7 +116,7 @@ class AutomationEngineService
     {
         $step = $flow->steps[$stepIndex] ?? null;
 
-        if (! $step) {
+        if (!$step) {
             $log->update(['status' => 'completed']);
 
             return;
